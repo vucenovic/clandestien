@@ -135,7 +135,6 @@
     <ClCompile Include="src\DDSImage.cpp" />
     <ClCompile Include="src\CameraController.cpp" />
     <ClCompile Include="src\Geometry.cpp" />
-    <ClCompile Include="src\INIReader.cpp" />
     <ClCompile Include="src\LightManager.cpp" />
     <ClCompile Include="src\Lights.cpp" />
     <ClCompile Include="src\Main.cpp" />

@@ -27,7 +27,7 @@ public:
 class ObjectRenderer
 {
 private:
-	std::unordered_map<Material*, std::unordered_map<Mesh*, std::vector<GameObject*>>> renderGroups;//improve grouping sort by shader first fucking somehow
+	std::unordered_map<Material*, std::unordered_map<Mesh*, std::vector<GameObject*>>> renderGroups;//improve grouping, sort by shader first, fucking somehow And sort by "renderLayer"
 public:
 	ObjectRenderer();
 	~ObjectRenderer();

@@ -5,7 +5,6 @@
 
 /*
 	A simple INI reader
-	INI files must not contain leading whitespaces
 */
 class INIReader
 {
@@ -66,4 +65,71 @@ inline T INIReader::Get(const std::string & section, const std::string & name, T
 	auto b = a->second.find(name);
 	if (b == a->second.end()) return default_value;
 	return convert<T>(b->second);
+}
+
+#include "FileUtils.h"
+
+char * INIReader::FindFirstOccurance(char * ptr, char * end, const char & val)
+{
+	while (ptr != end)
+	{
+		if (*ptr == val) { return ptr; }
+		ptr += 1;
+	}
+	return end;
+}
+
+char * INIReader::FindFirstNonOccurance(char * ptr, char * end, const char & val)
+{
+	while (ptr != end)
+	{
+		if (*ptr != val) { return ptr; }
+		ptr += 1;
+	}
+	return end;
+}
+
+INIReader::INIReader(std::string filePath)
+{
+	std::ifstream file(filePath, std::ios::in | std::ios::ate);
+	size_t fileLength = file.tellg();
+	file.seekg(0, std::ios::beg);
+
+	std::map<std::string, std::string> * currentSection = &values[""];
+
+	if (file.is_open()) {
+		lineReader lr = lineReader(512, file, fileLength);
+		char * mid_ptr, * start_ptr;
+		while (lr.getline())
+		{
+			start_ptr = FindFirstNonOccurance(lr.line, lr.LineEnd(), ' ');
+			switch (start_ptr[0])
+			{
+			case '[': //Section
+				mid_ptr = FindFirstOccurance(start_ptr, lr.LineEnd(), ']');
+				currentSection = &values[std::string(lr.line + 1, mid_ptr)];
+				break;
+			default: //Value
+			{
+				char * ptr1;
+				mid_ptr = FindFirstOccurance(start_ptr, lr.LineEnd(), '=');
+				ptr1 = FindFirstOccurance(start_ptr, mid_ptr, ' ');
+				std::string name = std::string(start_ptr, ptr1);
+				mid_ptr = FindFirstNonOccurance(mid_ptr + 1, lr.LineEnd(), ' ');
+				ptr1 = FindFirstOccurance(mid_ptr, lr.LineEnd() - 1, ' ');
+				std::string value = std::string(mid_ptr, ptr1);
+				(*currentSection)[name] = value;
+			}
+			break;
+			case ';': //Comment
+			case '\n'://quickfix
+			case ' ':
+				break;
+			}
+		}
+		file.close();
+	}
+	//Clear empty sections;
+
+
 }
