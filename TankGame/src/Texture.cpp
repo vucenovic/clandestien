@@ -67,7 +67,7 @@ TextureCubemap::TextureCubemap(const std::string & filepath)
 	img = DDSImage::loadDDS((filepath + "posz.dds").c_str());
 	glCompressedTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, img.format, img.width, img.height, 0, img.size, img.data);
 
-	glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+	glGenerateMipmap(GL_TEXTURE_CUBE_MAP); //this is incredibly slow (cubemap mipmap generation seems to be done in software whereas Texture2D is done in hardware)
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);

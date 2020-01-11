@@ -500,7 +500,7 @@ std::unique_ptr<Mesh> OBJLoader::LoadOBJ(const std::string & filePath)
 	std::vector<glm::vec2> textureCoords;
 
 	struct vertDef {
-		GLushort pos, nor, tex;
+		size_t pos, nor, tex;
 		vertDef() : pos(0), nor(0), tex(0) {};
 
 		inline bool operator==(const vertDef & r) const {
@@ -618,15 +618,15 @@ std::unique_ptr<Mesh> OBJLoader::LoadOBJ(const std::string & filePath)
 			case 'f': //face defintion
 			{
 				faceDef face;
-				face.v1.pos = (GLushort)std::strtoul(lr.line + 1, &mid_ptr, 10);
-				face.v1.tex = (GLushort)std::strtoul(mid_ptr + 1, &mid_ptr, 10); //Needs to be written out like this due to the evaluation order
-				face.v1.nor = (GLushort)std::strtoul(mid_ptr + 1, &mid_ptr, 10); //of function arguments being undefined
-				face.v2.pos = (GLushort)std::strtoul(mid_ptr + 1, &mid_ptr, 10);
-				face.v2.tex = (GLushort)std::strtoul(mid_ptr + 1, &mid_ptr, 10);
-				face.v2.nor = (GLushort)std::strtoul(mid_ptr + 1, &mid_ptr, 10);
-				face.v3.pos = (GLushort)std::strtoul(mid_ptr + 1, &mid_ptr, 10);
-				face.v3.tex = (GLushort)std::strtoul(mid_ptr + 1, &mid_ptr, 10);
-				face.v3.nor = (GLushort)std::strtoul(mid_ptr + 1, nullptr, 10);
+				face.v1.pos = std::strtoull(lr.line + 1, &mid_ptr, 10);
+				face.v1.tex = std::strtoull(mid_ptr + 1, &mid_ptr, 10); //Needs to be written out like this due to the evaluation order
+				face.v1.nor = std::strtoull(mid_ptr + 1, &mid_ptr, 10); //of function arguments being undefined
+				face.v2.pos = std::strtoull(mid_ptr + 1, &mid_ptr, 10);
+				face.v2.tex = std::strtoull(mid_ptr + 1, &mid_ptr, 10);
+				face.v2.nor = std::strtoull(mid_ptr + 1, &mid_ptr, 10);
+				face.v3.pos = std::strtoull(mid_ptr + 1, &mid_ptr, 10);
+				face.v3.tex = std::strtoull(mid_ptr + 1, &mid_ptr, 10);
+				face.v3.nor = std::strtoull(mid_ptr + 1, nullptr, 10);
 				faces.push_back(face);
 				break;
 			}
@@ -639,9 +639,14 @@ std::unique_ptr<Mesh> OBJLoader::LoadOBJ(const std::string & filePath)
 	}
 
 	struct VertexManager {
-		std::unordered_map <vertDef, GLushort, vertDefHasher> vertexDefs;
-		std::vector<GLfloat> vertexData;
-		GLushort runningCounter = 0;
+		struct Vertex {
+			GLfloat px, py, pz, nx, ny, nz, tcu, tcv;
+			Vertex(GLfloat px, GLfloat py, GLfloat pz, GLfloat nx, GLfloat ny, GLfloat nz, GLfloat tcu, GLfloat tcv) : px(px), py(py), pz(pz), nx(nx), ny(ny), nz(nz), tcu(tcu), tcv(tcv) {};
+		};
+
+		std::unordered_map <vertDef, size_t, vertDefHasher> vertexDefs;
+		std::vector<Vertex> vertexData;
+		size_t runningCounter = 0;
 
 		const std::vector<glm::vec3> & positions;
 		const std::vector<glm::vec3> & normals;
@@ -649,15 +654,15 @@ std::unique_ptr<Mesh> OBJLoader::LoadOBJ(const std::string & filePath)
 
 		VertexManager(const std::vector<glm::vec3> & p, const std::vector<glm::vec3> & n, const std::vector<glm::vec2> & t) : positions(p), normals(n), textureCoords(t) { vertexData.reserve(p.size()); };
 
-		GLushort getIndex(vertDef v) {
+		//TODO: somehow calculate Tangents
+		//leave space in the interleaved buffer and fill it later or add a second buffer object?
+		size_t getIndex(vertDef v) {
 			if (vertexDefs.find(v) == vertexDefs.end()) {
 				glm::vec3 pos = positions[v.pos - 1];
 				glm::vec3 nor = normals[v.nor - 1];
 				glm::vec2 tex = textureCoords[v.tex - 1];
-				vertexData.push_back(pos.x); vertexData.push_back(pos.y); vertexData.push_back(pos.z);
-				vertexData.push_back(nor.x); vertexData.push_back(nor.y); vertexData.push_back(nor.z);
-				vertexData.push_back(tex.x); vertexData.push_back(tex.y);
-				vertexDefs[v] = runningCounter++;
+				vertexData.push_back(Vertex(pos.x,pos.y,pos.z,nor.x,nor.y,nor.z,tex.x,tex.y));
+				vertexDefs[v] = runningCounter++; 
 				return runningCounter - 1;
 			}else{
 				return vertexDefs[v];
@@ -675,5 +680,5 @@ std::unique_ptr<Mesh> OBJLoader::LoadOBJ(const std::string & filePath)
 		indizes.push_back(VM.getIndex(face.v3));
 	}
 
-	return Mesh::InterleavedPNT(VM.runningCounter, VM.vertexData.data(), faces.size(), indizes.data());
+	return Mesh::InterleavedPNT(VM.runningCounter, (GLfloat *)VM.vertexData.data(), faces.size(), indizes.data());
 }
