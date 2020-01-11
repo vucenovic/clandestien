@@ -30,12 +30,12 @@ int main(int argc, char** argv)
 {
 	INIReader reader("res/settings.ini");
 
-	int width = reader.GetInteger("window", "width", 800);
-	int height = reader.GetInteger("window", "height", 800);
-	std::string window_title = reader.Get("window", "title", "Tank Game");
-	float FOV = (float)reader.GetReal("camera", "fov", 60.0);
-	float nearPlane = (float)reader.GetReal("camera", "near", 0.1);
-	float farPlane = (float)reader.GetReal("camera", "far", 100.0);
+	int width = reader.Get<int>("window", "width", 800);
+	int height = reader.Get<int>("window", "height", 800);
+	std::string window_title = reader.Get<std::string>("window", "title", "Tank Game");
+	float FOV = reader.Get<float>("camera", "fov", 60.0);
+	float nearPlane = reader.Get<float>("camera", "near", 0.1);
+	float farPlane = reader.Get<float>("camera", "far", 100.0);
 
 	if (!glfwInit()) {
 		std::cerr << "Failed to initialize GLFW";

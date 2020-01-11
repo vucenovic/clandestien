@@ -3,6 +3,7 @@
 #include <fstream>
 #include <string>
 #include <unordered_map>
+#include "FileUtils.h"
 
 Mesh::Mesh()
 {
@@ -519,65 +520,45 @@ std::unique_ptr<Mesh> OBJLoader::LoadOBJ(const std::string & filePath)
 		vertDef v1, v2, v3;
 	};
 
-	struct lineReader { // TODO: generalize and keep as a faster (yet less safe) alternative to std::getline()
-	public:
-		char * lineBuffer;
-		char * line;
-		size_t bufferLength;
-		size_t bufferOffset = 0;
-		size_t bufferNext = 0;
-		std::ifstream & file;
-
-		size_t fileLength;
-		bool last = true;
-
-		//Bufferlength must be sufficient to contain the line TODO: make it resize when necessary
-		lineReader(size_t bufferLength, std::ifstream & file, size_t fileLength) : bufferLength(bufferLength), lineBuffer(new char[bufferLength]), file(file),line(nullptr),fileLength(fileLength){
-			file.read(lineBuffer, bufferLength);
+	struct VertexManager {
+		struct Vertex {
+			GLfloat px, py, pz, nx, ny, nz, tcu, tcv;
+			Vertex(GLfloat px, GLfloat py, GLfloat pz, GLfloat nx, GLfloat ny, GLfloat nz, GLfloat tcu, GLfloat tcv) : px(px), py(py), pz(pz), nx(nx), ny(ny), nz(nz), tcu(tcu), tcv(tcv) {};
 		};
-		~lineReader() { delete[] lineBuffer; };
 
-		bool getline() {
-			line = lineBuffer + bufferOffset;
+		std::unordered_map <vertDef, size_t, vertDefHasher> vertexDefs;
+		std::vector<Vertex> vertexData;
+		size_t runningCounter = 0;
 
-			size_t nextBreak = bufferOffset;
-			for (int i = bufferOffset; i < bufferLength; i++) {
-				if (lineBuffer[i] == '\n') {
-					nextBreak = i;
-					break;
-				}
-			}
-			if (nextBreak == bufferOffset) { //no endl found
-				if (file.eof()) {
-					bool ret = last;
-					last = false;
-					return ret;
-				}
-				else {
-					size_t remLen = bufferLength - bufferOffset;
-					memmove(lineBuffer, line, remLen);
-					size_t before = file.tellg();
-					file.read(lineBuffer+remLen, bufferOffset);
-					if (file.eof()) {
-						bufferLength = fileLength - before + remLen;
-					}
-					bufferOffset = 0;
-					return getline(); //easiest way of doing this
-				}
+		const std::vector<glm::vec3> & positions;
+		const std::vector<glm::vec3> & normals;
+		const std::vector<glm::vec2> & textureCoords;
+
+		VertexManager(const std::vector<glm::vec3> & p, const std::vector<glm::vec3> & n, const std::vector<glm::vec2> & t) : positions(p), normals(n), textureCoords(t) { vertexData.reserve(p.size()); };
+
+		//TODO: somehow calculate Tangents
+		//leave space in the interleaved buffer and fill it later or add a second buffer object?
+		size_t getIndex(vertDef v) {
+			if (vertexDefs.find(v) == vertexDefs.end()) {
+				glm::vec3 pos = positions[v.pos - 1];
+				glm::vec3 nor = normals[v.nor - 1];
+				glm::vec2 tex = textureCoords[v.tex - 1];
+				vertexData.push_back(Vertex(pos.x, pos.y, pos.z, nor.x, nor.y, nor.z, tex.x, tex.y));
+				vertexDefs[v] = runningCounter++;
+				return runningCounter - 1;
 			}
 			else {
-				bufferOffset = nextBreak + 1;
-				return true;
+				return vertexDefs[v];
 			}
 		}
 	};
 
 	std::vector<faceDef> faces;
 
-	std::ios::sync_with_stdio(false);
 	std::ifstream file(filePath, std::ios::in | std::ios::ate);
 	size_t fileLength = file.tellg();
 	file.seekg(0, std::ios::beg);
+
 	if (file.is_open()) {
 		lineReader lr = lineReader(1024, file,fileLength);
 		char * mid_ptr;
@@ -637,38 +618,6 @@ std::unique_ptr<Mesh> OBJLoader::LoadOBJ(const std::string & filePath)
 		}
 		file.close();
 	}
-
-	struct VertexManager {
-		struct Vertex {
-			GLfloat px, py, pz, nx, ny, nz, tcu, tcv;
-			Vertex(GLfloat px, GLfloat py, GLfloat pz, GLfloat nx, GLfloat ny, GLfloat nz, GLfloat tcu, GLfloat tcv) : px(px), py(py), pz(pz), nx(nx), ny(ny), nz(nz), tcu(tcu), tcv(tcv) {};
-		};
-
-		std::unordered_map <vertDef, size_t, vertDefHasher> vertexDefs;
-		std::vector<Vertex> vertexData;
-		size_t runningCounter = 0;
-
-		const std::vector<glm::vec3> & positions;
-		const std::vector<glm::vec3> & normals;
-		const std::vector<glm::vec2> & textureCoords;
-
-		VertexManager(const std::vector<glm::vec3> & p, const std::vector<glm::vec3> & n, const std::vector<glm::vec2> & t) : positions(p), normals(n), textureCoords(t) { vertexData.reserve(p.size()); };
-
-		//TODO: somehow calculate Tangents
-		//leave space in the interleaved buffer and fill it later or add a second buffer object?
-		size_t getIndex(vertDef v) {
-			if (vertexDefs.find(v) == vertexDefs.end()) {
-				glm::vec3 pos = positions[v.pos - 1];
-				glm::vec3 nor = normals[v.nor - 1];
-				glm::vec2 tex = textureCoords[v.tex - 1];
-				vertexData.push_back(Vertex(pos.x,pos.y,pos.z,nor.x,nor.y,nor.z,tex.x,tex.y));
-				vertexDefs[v] = runningCounter++; 
-				return runningCounter - 1;
-			}else{
-				return vertexDefs[v];
-			}
-		}
-	};
 
 	std::vector<GLushort> indizes = std::vector<GLushort>();
 	indizes.reserve(faces.size()*3);

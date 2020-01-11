@@ -135,6 +135,7 @@
     <ClCompile Include="src\DDSImage.cpp" />
     <ClCompile Include="src\CameraController.cpp" />
     <ClCompile Include="src\Geometry.cpp" />
+    <ClCompile Include="src\INIReader.cpp" />
     <ClCompile Include="src\LightManager.cpp" />
     <ClCompile Include="src\Lights.cpp" />
     <ClCompile Include="src\Main.cpp" />
@@ -147,11 +148,12 @@
     <ClCompile Include="src\UniformBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\FileUtils.h" />
+    <ClInclude Include="src\INIReader.h" />
     <ClInclude Include="src\Main.h" />
     <ClInclude Include="src\DDSImage.h" />
     <ClInclude Include="src\CameraController.h" />
     <ClInclude Include="src\Geometry.h" />
-    <ClInclude Include="src\INIReader.h" />
     <ClInclude Include="src\LightManager.h" />
     <ClInclude Include="src\Lights.h" />
     <ClInclude Include="src\Material.h" />
