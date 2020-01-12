@@ -1,12 +1,26 @@
 #include "Material.h"
 
+Material::Material(std::shared_ptr<ShaderProgram> shaderProg) : shader(shaderProg) {
+
+}
+
 Material::~Material()
 {
 }
 
 void Material::Use()
 {
+	SetShader();
+	SetProperties();
+}
+
+void Material::SetShader()
+{
 	shader->UseProgram();
+}
+
+void Material::SetProperties()
+{
 	for (std::pair<GLuint, std::shared_ptr<Texture>> tex : textures) {
 		tex.second->Bind(tex.first);
 	}

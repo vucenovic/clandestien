@@ -44,10 +44,12 @@ public:
 	std::unordered_map<GLuint, std::shared_ptr<Texture>> textures;
 	std::unordered_map<GLuint, std::unique_ptr<MaterialProperty>> properties;
 
-	Material(std::shared_ptr<ShaderProgram> shaderProg) : shader(shaderProg){};
+	Material(std::shared_ptr<ShaderProgram> shaderProg);
 	~Material();
 
-	virtual void Use();
+	void Use();
+	void SetShader();
+	void SetProperties();
 
 	void SetPropertyf(const std::string & name, GLfloat val);
 	void SetProperty3f(const std::string & name, glm::vec3 val);
