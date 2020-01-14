@@ -1,4 +1,4 @@
-#include "Geometry.h"
+#include "Mesh.h"
 #include <glm\gtc\matrix_transform.hpp>
 #include <fstream>
 #include <string>
@@ -167,13 +167,62 @@ std::unique_ptr<Mesh> Mesh::SimpleIndexed(unsigned int vertexCount, const GLfloa
 	return mesh;
 }
 
+std::unique_ptr<Mesh> Mesh::SimpleIndexed(unsigned int vertexCount, const GLfloat vertices[], const GLfloat normals[], const GLfloat textureCoords[], const GLfloat tangents[], unsigned int faceCount, const GLushort indices[])
+{
+	std::unique_ptr<Mesh> mesh = std::make_unique<Mesh>();
+
+	mesh->Bind();
+	GLuint vbos[5];
+	glGenBuffers(5, vbos);
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbos[0]);
+
+	glBufferData(GL_ARRAY_BUFFER, vertexCount * 3 * sizeof(GLfloat), vertices, GL_STATIC_DRAW);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbos[1]);
+
+	glBufferData(GL_ARRAY_BUFFER, vertexCount * 3 * sizeof(GLfloat), normals, GL_STATIC_DRAW);
+
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(1);
+
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbos[2]);
+
+	glBufferData(GL_ARRAY_BUFFER, vertexCount * 2 * sizeof(GLfloat), textureCoords, GL_STATIC_DRAW);
+
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(2);
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbos[3]);
+
+	glBufferData(GL_ARRAY_BUFFER, vertexCount * 4 * sizeof(GLfloat), tangents, GL_STATIC_DRAW);
+
+	glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(3);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbos[4]);
+
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, faceCount * 3 * sizeof(GLushort), indices, GL_STATIC_DRAW);
+	mesh->indicesCount = faceCount * 3;
+
+	glBindVertexArray(0);
+	glDeleteBuffers(5, vbos);
+
+	return mesh;
+}
+
 std::unique_ptr<Mesh> MeshBuilder::Quad()
 {
 	static const GLfloat verts[4*3] = {1,1,0,1,-1,0,-1,-1,0,-1,1,0};
 	static const GLfloat norms[4 * 3] = { 0,0,1,0,0,1,0,0,1,0,0,1 };
 	static const GLfloat texcoords[4 * 2] = { 1,1,1,0,0,0,0,1 };
+	static const GLfloat tangents[4 * 4] = { 1,0,0,1, 1,0,0,1, 1,0,0,1, 1,0,0,1};
 	static const GLushort inds[2*3] = {2,1,0,0,3,2};
-	return Mesh::SimpleIndexed(4, verts, norms, texcoords, 2, inds);
+	return Mesh::SimpleIndexed(4, verts, norms, texcoords, tangents, 2, inds);
 }
 
 std::unique_ptr<Mesh> MeshBuilder::BoxFlatShaded(float x, float y, float z)
@@ -203,6 +252,14 @@ std::unique_ptr<Mesh> MeshBuilder::BoxFlatShaded(float x, float y, float z)
 		0,1,1,1,0,0,1,0,
 		1,1,0,1,1,0,0,0,
 	};
+	static const GLfloat tangents[4 * 6 * 4] = {
+		-1,0,0,-1, -1,0,0,-1, -1,0,0,-1, -1,0,0,-1,
+		1,0,0,1, 1,0,0,1, 1,0,0,1, 1,0,0,1,
+		1,0,0,1, 1,0,0,1, 1,0,0,1, 1,0,0,1,
+		1,0,0,1, 1,0,0,1, 1,0,0,1, 1,0,0,1,
+		0,0,1,1, 0,0,1,1, 0,0,1,1, 0,0,1,1,
+		0,0,-1,1, 0,0,-1,1, 0,0,-1,1, 0,0,-1,1
+	};
 	static const GLushort inds[12 * 3] = {
 		2,1,0,3,2,0, //+z
 		4,5,6,4,6,7, //-z
@@ -211,7 +268,7 @@ std::unique_ptr<Mesh> MeshBuilder::BoxFlatShaded(float x, float y, float z)
 		16,18,17,17,18,19, //+x
 		20,21,22,21,23,22//-x
 	};
-	return Mesh::SimpleIndexed(4 * 6, verts, norms, texcoords, 12, inds);
+	return Mesh::SimpleIndexed(4 * 6, verts, norms, texcoords, tangents, 12, inds);
 }
 
 std::unique_ptr<Mesh> MeshBuilder::CylinderSplitShaded(float h, float r, unsigned int n)

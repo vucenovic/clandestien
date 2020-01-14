@@ -13,7 +13,7 @@
 
 #include "ShaderProgram.h"
 #include "CameraController.h"
-#include "Geometry.h"
+#include "Mesh.h"
 #include "UniformBuffer.h"
 #include "Lights.h"
 #include "LightManager.h"
@@ -85,13 +85,12 @@ int main(int argc, char** argv)
 	glfwSetScrollCallback(window, scroll_callback);
 
 	{
-		std::shared_ptr<ShaderProgram> vertexLitPhong,fragLitPhong,LitCookTorrance, myShaderProgram, debugShader;
+		std::shared_ptr<ShaderProgram> standardShader,LitCookTorrance, myShaderProgram, debugShader;
 		try
 		{
-			vertexLitPhong = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/VertexLitPhong"));
-			fragLitPhong = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/common.vert", "res/shaders/LitPhong.frag"));
-			LitCookTorrance = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/common.vert", "res/shaders/LitCookTorrance.frag"));
-			myShaderProgram = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/common.vert", "res/shaders/TexturedLitPhong.frag"));
+			myShaderProgram = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/common.vert", "res/shaders/LitPhong.frag"));
+			//LitCookTorrance = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/common.vert", "res/shaders/LitCookTorrance.frag"));
+			standardShader = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/common.vert", "res/shaders/TexturedLitPhong.frag"));
 			debugShader = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/common.vert", "res/shaders/NormalDebug.frag"));
 		}
 		catch (const std::invalid_argument&)
@@ -101,10 +100,12 @@ int main(int argc, char** argv)
 		}
 		std::shared_ptr<Texture2D> tilesDiff = std::make_shared<Texture2D>("res/textures/tiles_diffuse");
 		std::shared_ptr<Texture2D> tilesSpec = std::make_shared<Texture2D>("res/textures/tiles_specular");
+		std::shared_ptr<Texture2D> tilesNorm = std::make_shared<Texture2D>("res/textures/tiles_normal");
 		std::shared_ptr<Texture2D> woodDiff = std::make_shared<Texture2D>("res/textures/wood_texture");
 		std::shared_ptr<TextureCubemap> cubeMap = std::make_shared<TextureCubemap>("res/textures/cubemap/");
 		std::shared_ptr<Texture2D> whiteTex = std::make_shared<Texture2D>(glm::vec3(1));
 		std::shared_ptr<Texture2D> blackTex = std::make_shared<Texture2D>(glm::vec3(0));
+		std::shared_ptr<Texture2D> purpleTex = std::make_shared<Texture2D>(glm::vec3(0.5f,0.5f,1));
 
 		//--------Camera
 
@@ -120,25 +121,28 @@ int main(int argc, char** argv)
 		std::shared_ptr<Mesh> myCubeMesh = MeshBuilder::BoxFlatShaded(1.5f, 1.5f, 1.5f);
 		std::shared_ptr<Mesh> myCylinderMesh = MeshBuilder::CylinderSplitShaded(1.3f, 1, 32);
 		std::shared_ptr<Mesh> mySphereMesh = MeshBuilder::Sphere(1, 64, 32);
-		std::shared_ptr<Mesh> myBoxMesh = OBJLoader::LoadOBJ("res/models/monkey.obj");
+		//std::shared_ptr<Mesh> myBoxMesh = OBJLoader::LoadOBJ("res/models/monkey.obj");
+		std::shared_ptr<Mesh> myBoxMesh = MeshBuilder::BoxFlatShaded(1.5f, 1.5f, 1.5f);
 
-		Material debugMaterial = Material(fragLitPhong);
+		Material debugMaterial = Material(debugShader);
 		debugMaterial.SetProperty4f("material", glm::vec4(0.1f, 0.7f, 1, 8));
 		debugMaterial.SetProperty3f("flatColor", glm::vec3(1, 1, 1));
 
-		Material tilesMaterial = Material(myShaderProgram);
+		Material tilesMaterial = Material(standardShader);
 		tilesMaterial.SetProperty4f("material", glm::vec4(0.1f,0.7f,1,8));
 		tilesMaterial.SetProperty4f("flatColor", glm::vec4(1, 1, 1, 0.15f));
 		tilesMaterial.SetTexture(tilesDiff, 0);
 		tilesMaterial.SetTexture(tilesSpec, 1);
-		tilesMaterial.SetTexture(cubeMap, 2);
+		tilesMaterial.SetTexture(tilesNorm, 2);
+		tilesMaterial.SetTexture(cubeMap, 3);
 
-		Material woodMaterial = Material(myShaderProgram);
+		Material woodMaterial = Material(standardShader);
 		woodMaterial.SetProperty4f("material", glm::vec4(0.1f, 0.7f, 0.1f, 2));
 		woodMaterial.SetProperty4f("flatColor", glm::vec4(1, 1, 1, 0.15f));
 		woodMaterial.SetTexture(woodDiff, 0);
 		woodMaterial.SetTexture(whiteTex, 1);
-		woodMaterial.SetTexture(blackTex, 2);
+		woodMaterial.SetTexture(purpleTex, 2);
+		woodMaterial.SetTexture(blackTex, 3);
 
 		//--------Objects
 
@@ -164,10 +168,10 @@ int main(int argc, char** argv)
 
 		//--------Uniform Buffers
 
-		UniformBuffer viewDataBuffer = UniformBuffer(*vertexLitPhong, std::string("viewData"), { "viewProjection","eyePos" }, 2);
+		UniformBuffer viewDataBuffer = UniformBuffer(*standardShader, std::string("viewData"), { "viewProjection","eyePos" }, 2);
 		viewDataBuffer.BindToPort(0);
 
-		LightManager myLightManager = LightManager(*vertexLitPhong);
+		LightManager myLightManager = LightManager(*standardShader);
 		myLightManager.BindToPort(1);
 
 		{
@@ -214,7 +218,10 @@ int main(int argc, char** argv)
 			glfwPollEvents();
 
 			myCameraController.HandleInputs(scrollOffset);
-			scrollOffset = 0;
+			
+			//box.GetTransform().rotation.y += 0.01f;
+			//box.GetTransform().rotation.x += 0.02f;
+			box.GetTransform().rotation.z += 0.005f;
 
 			//Clear
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -234,6 +241,7 @@ int main(int argc, char** argv)
 
 			//Flip Buffers
 			glfwSwapBuffers(window);
+			scrollOffset = 0;
 		}
 
 		

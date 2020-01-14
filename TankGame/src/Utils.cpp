@@ -1,4 +1,4 @@
-#include "MyUtils.h"
+#include "Utils.h"
 #include <sstream>
 #include <fstream>
 #include <glm/gtc/type_ptr.hpp>
@@ -38,12 +38,10 @@ glm::mat4 Transform::BuildRotationMatrix(const glm::vec3 rot)
 	float sy = glm::sin(-rot.y);
 	float cz = glm::cos(rot.z);
 	float sz = glm::sin(rot.z);
-	float szx = sx * sz;
-	float czsx = cz * sx;
 	return glm::mat4(
-		cz*cy - szx * sy, sz*cx, szx*cy + cz * sy, 0,
-		-szx - czsx * sy, cz*cx, czsx*cy - sz * sy, 0,
-		-cx * sy, -sx, cx*cy, 0,
+		cz * cy + sx * sz * sy, -sz * cx, cz * sy - sx * sz * cy, 0,
+		cy * sz - sy * sx * cz, cz*cx, (cz * sx * cy + sz * sy), 0,
+		-cx * sy, -sx, cx * cy, 0,
 		0, 0, 0, 1
 	);
 }
@@ -56,12 +54,10 @@ glm::mat4 Transform::ToMatrix() const
 	float sy = glm::sin(-rotation.y);
 	float cz = glm::cos(rotation.z);
 	float sz = glm::sin(rotation.z);
-	float szx = sx * sz;
-	float czsx = cz * sx;
 	glm::mat4 ret = glm::mat4(
-		(cz*cy - szx * sy) * scale.x, sz*cx * scale.x, (szx*cy + cz * sy) * scale.x, 0,
-		(-szx - czsx * sy) * scale.y, cz*cx * scale.y, (czsx*cy - sz * sy) * scale.y, 0,
-		-cx * sy * scale.z, -sx * scale.z, cx * cy * scale.z, 0,
+		(cz*cy + sx * sz * sy) * scale.x,		-sz * cx * scale.x,		(cz * sy - sx * sz * cy) * scale.x, 0,
+		(cy * sz - sy * sx * cz) * scale.y,		cz*cx * scale.y,		(cz * sx * cy + sz * sy) * scale.y, 0,
+		-cx * sy * scale.z,						-sx * scale.z,			cx * cy * scale.z, 0,
 		position.x, position.y, position.z, 1
 	);
 	if (parent == nullptr) {

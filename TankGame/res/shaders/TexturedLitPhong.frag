@@ -25,7 +25,8 @@ uniform vec4 material;
 
 layout (binding = 0 ) uniform sampler2D albedoTex;
 layout (binding = 1 ) uniform sampler2D materialTex;
-layout (binding = 2 ) uniform samplerCube cubemapTex;
+layout (binding = 2 ) uniform sampler2D normalTex;
+layout (binding = 3 ) uniform samplerCube cubemapTex;
 
 layout (binding = 1, std140) uniform LightData{
 	vec4 ambientColor;
@@ -42,17 +43,15 @@ in VertexData
 {
 	vec3 eyeDir;
 	vec3 worldPos;
-	vec3 worldNormal;
 	vec2 texCoord;
-} vData;
+	mat3 TBN;
+} vertex;
 
 vec3 reflectDir;
 vec3 lightDiffuse;
 vec3 lightSpecular;
 vec3 eyeDir;
 vec3 worldNormal;
-
-float specularFactor;
 
 //Declarations
 void doPointLight(PointLight light);
@@ -61,9 +60,11 @@ void doSpotLight(SpotLight light);
 
 void main()
 {
-	eyeDir = normalize(vData.eyeDir);
-	worldNormal = normalize(vData.worldNormal);
+	eyeDir = normalize(vertex.eyeDir);
+	worldNormal = normalize(vertex.TBN[2]);
 	reflectDir = reflect(eyeDir,worldNormal);
+
+	vec3 localNormal = normalize(texture( normalTex, vertex.texCoord ).rgb * 2.0 - 1.0);
 
 	lightDiffuse = vec3(0);
 	lightSpecular = vec3(0);
@@ -80,11 +81,11 @@ void main()
 		doSpotLight(lights.spotLights[i]);
 	}
 	
-	color = flatColor.xyz * texture(albedoTex, vData.texCoord).xyz * (lights.ambientColor.xyz * material.x + lightDiffuse * material.y) + (lightSpecular + texture(cubemapTex, -reflectDir).xyz * flatColor.w) * material.z * texture(materialTex,vData.texCoord).x;
+	color = flatColor.xyz * texture(albedoTex, vertex.texCoord).xyz * (lights.ambientColor.xyz * material.x + lightDiffuse * material.y) + (lightSpecular + texture(cubemapTex, -reflectDir).xyz * flatColor.w) * material.z * texture(materialTex,vertex.texCoord).x;
 }
 
 void doPointLight(PointLight light){
-	vec3 lightDir = light.position.xyz - vData.worldPos;
+	vec3 lightDir = light.position.xyz - vertex.worldPos;
 	float dist = length(lightDir);
 	if(dist > light.falloff.w) return;
 	lightDir /= dist;
@@ -107,7 +108,7 @@ void doDirectionalLight(DirectionalLight light){
 }
 
 void doSpotLight(SpotLight light){
-	vec3 lightDir = light.position.xyz - vData.worldPos;
+	vec3 lightDir = light.position.xyz - vertex.worldPos;
 	float dist = length(lightDir);
 	if(dist > light.falloff.w) return;
 	lightDir /= dist;

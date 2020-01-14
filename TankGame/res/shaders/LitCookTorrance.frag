@@ -40,9 +40,9 @@ in VertexData
 {
 	vec3 eyeDir;
 	vec3 worldPos;
-	vec3 worldNormal;
 	vec2 texCoord;
-} vData;
+	mat3 TBN;
+} vertex;
 
 vec3 reflectDir;
 vec3 lightDiffuse;
@@ -62,8 +62,8 @@ float beckmannFactor(float cosAlpha, float roughness);
 
 void main()
 {
-	eyeDir = normalize(vData.eyeDir);
-	worldNormal = normalize(vData.worldNormal);
+	eyeDir = normalize(vertex.eyeDir);
+	worldNormal = normalize(TBN[2]);
 
 	lightDiffuse = vec3(0);
 	lightSpecular = vec3(0);
@@ -84,7 +84,7 @@ void main()
 }
 
 void doPointLight(PointLight light){
-	vec3 lightDir = light.position.xyz - vData.worldPos;
+	vec3 lightDir = light.position.xyz - vertex.worldPos;
 	float dotNL = max(0,dot(worldNormal,lightDir));
 	if(dotNL > 0){
 		float dist = length(lightDir);
@@ -112,7 +112,7 @@ void doDirectionalLight(DirectionalLight light){
 }
 
 void doSpotLight(SpotLight light){
-	vec3 lightDir = light.position.xyz - vData.worldPos;
+	vec3 lightDir = light.position.xyz - vertex.worldPos;
 	float dotNL = max(0,dot(worldNormal,lightDir));
 	if(dotNL > 0){
 		float dist = length(lightDir);

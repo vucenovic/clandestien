@@ -5,8 +5,8 @@
 
 #include "ShaderProgram.h"
 #include "Material.h"
-#include "Geometry.h"
-#include "MyUtils.h"
+#include "Mesh.h"
+#include "Utils.h"
 
 class GameObject
 {
@@ -27,7 +27,7 @@ public:
 class ObjectRenderer
 {
 private:
-	std::unordered_map<ShaderProgram *, std::unordered_map<Material*, std::unordered_map<Mesh*, std::vector<GameObject*>>>> renderGroups;//improve grouping, sort by shader first, fucking somehow And sort by "renderLayer"
+	std::unordered_map<ShaderProgram *, std::unordered_map<Material*, std::unordered_map<Mesh*, std::vector<GameObject*>>>> renderGroups;//Improve sort by render pass
 public:
 	ObjectRenderer();
 	~ObjectRenderer();

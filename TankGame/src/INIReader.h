@@ -92,12 +92,13 @@ char * INIReader::FindFirstNonOccurance(char * ptr, char * end, const char & val
 INIReader::INIReader(std::string filePath)
 {
 	std::ifstream file(filePath, std::ios::in | std::ios::ate);
-	size_t fileLength = file.tellg();
-	file.seekg(0, std::ios::beg);
 
 	std::map<std::string, std::string> * currentSection = &values[""];
 
 	if (file.is_open()) {
+		size_t fileLength = file.tellg();
+		file.seekg(0, std::ios::beg);
+
 		lineReader lr = lineReader(512, file, fileLength);
 		char * mid_ptr, * start_ptr;
 		while (lr.getline())

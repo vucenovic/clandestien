@@ -3,6 +3,7 @@
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
 layout (location = 2) in vec2 texCoord;
+layout (location = 3) in vec4 tangent;
 
 layout (binding = 0, std140) uniform viewData
 {
@@ -17,19 +18,24 @@ out VertexData
 {
 	vec3 eyeDir;
 	vec3 worldPos;
-	vec3 worldNormal;
 	vec2 texCoord;
-} vData;
+	mat3 TBN;
+} vertex;
 
 //Definitions
 void main()
 {
 	vec4 worldPos = modelMatrix*vec4(position,1);
 
-	vData.worldNormal = (modelNormalMatrix*vec4(normal,0)).xyz;
-	vData.eyeDir = (eyePos - worldPos).xyz;
-	vData.worldPos = worldPos.xyz;
+	vec3 worldNormal = (modelNormalMatrix*vec4(normal,0)).xyz;
+	//vertex.worldNormal = (modelNormalMatrix*vec4(normal,0)).xyz;
+	
+	//vec3 tangent = cross(worldNormal,tangent.xyz);
+	vertex.TBN = mat3(tangent.xyz,cross(tangent.xyz,worldNormal) * tangent.w ,normalize(worldNormal));
+
+	vertex.eyeDir = (eyePos - worldPos).xyz;
+	vertex.worldPos = worldPos.xyz;
 
 	gl_Position = viewProjection*worldPos;
-	vData.texCoord = texCoord;
+	vertex.texCoord = texCoord;
 }

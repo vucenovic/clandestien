@@ -7,7 +7,7 @@
 class Mesh {
 private:
 	GLuint vaoID;
-	size_t indicesCount;
+	size_t indicesCount; //add boundingbox
 public:
 	Mesh();
 	~Mesh();
@@ -22,6 +22,8 @@ public:
 	static std::unique_ptr<Mesh> SimpleIndexed(unsigned int vertexCount, const GLfloat vertices[], unsigned int faceCount, const GLushort indices[]);
 	static std::unique_ptr<Mesh> SimpleIndexed(unsigned int vertexCount, const GLfloat vertices[], const GLfloat normals[], unsigned int faceCount, const GLushort indices[]);
 	static std::unique_ptr<Mesh> SimpleIndexed(unsigned int vertexCount, const GLfloat vertices[], const GLfloat normals[], const GLfloat textureCoords[], unsigned int faceCount, const GLushort indices[]);
+	static std::unique_ptr<Mesh> SimpleIndexed(unsigned int vertexCount, const GLfloat vertices[], const GLfloat normals[], const GLfloat textureCoords[], const GLfloat tangents[], unsigned int faceCount, const GLushort indices[]);
+
 };
 
 class OBJLoader {

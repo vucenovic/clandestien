@@ -38,9 +38,9 @@ in VertexData
 {
 	vec3 eyeDir;
 	vec3 worldPos;
-	vec3 worldNormal;
 	vec2 texCoord;
-} vData;
+	mat3 TBN;
+} vertex;
 
 vec3 reflectDir;
 vec3 lightDiffuse;
@@ -55,8 +55,8 @@ void doSpotLight(SpotLight light);
 
 void main()
 {
-	eyeDir = normalize(vData.eyeDir);
-	worldNormal = normalize(vData.worldNormal);
+	eyeDir = normalize(vertex.eyeDir);
+	worldNormal = normalize(vertex.TBN[2]);
 	reflectDir = reflect(eyeDir,worldNormal);
 
 	lightDiffuse = vec3(0);
@@ -78,7 +78,7 @@ void main()
 }
 
 void doPointLight(PointLight light){
-	vec3 lightDir = light.position.xyz - vData.worldPos;
+	vec3 lightDir = light.position.xyz - vertex.worldPos;
 	float dist = length(lightDir);
 	if(dist > light.falloff.w) return;
 	lightDir /= dist;
@@ -101,7 +101,7 @@ void doDirectionalLight(DirectionalLight light){
 }
 
 void doSpotLight(SpotLight light){
-	vec3 lightDir = light.position.xyz - vData.worldPos;
+	vec3 lightDir = light.position.xyz - vertex.worldPos;
 	float dist = length(lightDir);
 	if(dist > light.falloff.w) return;
 	lightDir /= dist;

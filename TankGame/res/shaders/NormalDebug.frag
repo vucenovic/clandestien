@@ -6,11 +6,12 @@ in VertexData
 {
 	vec3 eyeDir;
 	vec3 worldPos;
-	vec3 worldNormal;
 	vec2 texCoord;
+	mat3 TBN;
 };
 
 void main()
 {
-	color = normalize(worldNormal);
+	color = transpose(TBN) * vec3(0,0,1); //worldspace Normal
+	//color = TBN[0]; //objectspace Normal
 }

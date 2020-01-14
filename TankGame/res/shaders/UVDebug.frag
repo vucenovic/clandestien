@@ -6,8 +6,8 @@ in VertexData
 {
 	vec3 eyeDir;
 	vec3 worldPos;
-	vec3 worldNormal;
 	vec2 texCoord;
+	mat3 TBN;
 };
 
 void main()
