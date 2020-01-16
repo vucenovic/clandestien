@@ -62,10 +62,12 @@ void main()
 {
 	eyeDir = normalize(vertex.eyeDir);
 	worldNormal = normalize(vertex.TBN[2]);
+
+	vec3 textureNormal = normalize(texture( normalTex, vertex.texCoord ).rgb * 2.0 - 1.0);
+	worldNormal = vertex.TBN * textureNormal;
+
 	reflectDir = reflect(eyeDir,worldNormal);
-
-	vec3 localNormal = normalize(texture( normalTex, vertex.texCoord ).rgb * 2.0 - 1.0);
-
+	
 	lightDiffuse = vec3(0);
 	lightSpecular = vec3(0);
 

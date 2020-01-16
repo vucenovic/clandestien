@@ -23,6 +23,14 @@ public:
 	virtual void Set(GLuint location) override;
 };
 
+class MaterialPropertyi : public MaterialProperty {
+	GLint val;
+public:
+	MaterialPropertyi(GLint v) : val(v) {};
+
+	virtual void Set(GLuint location) override;
+};
+
 class MaterialProperty3f : public MaterialProperty {
 	glm::vec3 val;
 public:
@@ -54,6 +62,7 @@ public:
 	void SetPropertyf(const std::string & name, GLfloat val);
 	void SetProperty3f(const std::string & name, glm::vec3 val);
 	void SetProperty4f(const std::string & name, glm::vec4 val);
+	void SetPropertyi(const std::string & name, GLint val);
 
 	void SetTexture(std::shared_ptr<Texture> texture, GLuint textureUnit);
 };

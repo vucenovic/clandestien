@@ -28,10 +28,9 @@ void main()
 	vec4 worldPos = modelMatrix*vec4(position,1);
 
 	vec3 worldNormal = (modelNormalMatrix*vec4(normal,0)).xyz;
-	//vertex.worldNormal = (modelNormalMatrix*vec4(normal,0)).xyz;
+	vec3 worldTangent = (modelNormalMatrix*tangent).xyz;
 	
-	//vec3 tangent = cross(worldNormal,tangent.xyz);
-	vertex.TBN = mat3(tangent.xyz,cross(tangent.xyz,worldNormal) * tangent.w ,normalize(worldNormal));
+	vertex.TBN = mat3(worldTangent,cross(worldTangent,worldNormal) * tangent.w ,normalize(worldNormal));
 
 	vertex.eyeDir = (eyePos - worldPos).xyz;
 	vertex.worldPos = worldPos.xyz;

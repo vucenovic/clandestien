@@ -64,6 +64,45 @@ std::unique_ptr<Mesh> Mesh::InterleavedPNT(unsigned int vertexCount, const GLflo
 	glBindVertexArray(0);
 	glDeleteBuffers(2, buffers);
 
+	mesh->bounds = BoundingBox(data,vertexCount,8);
+
+	return mesh;
+}
+
+std::unique_ptr<Mesh> Mesh::InterleavedPNTT(unsigned int vertexCount, const GLfloat data[], unsigned int faceCount, const GLushort indices[])
+{
+	std::unique_ptr<Mesh> mesh = std::make_unique<Mesh>();
+
+	constexpr int vertexSize = 3 + 3 + 2 + 4; //pos,norm,tex,tangent
+
+	mesh->Bind();
+	GLuint buffers[2];
+	glGenBuffers(2, buffers);
+
+	glBindBuffer(GL_ARRAY_BUFFER, buffers[0]);
+	glBufferData(GL_ARRAY_BUFFER, vertexCount * vertexSize * sizeof(GLfloat), data, GL_STATIC_DRAW);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, vertexSize * sizeof(GLfloat), 0);
+	glEnableVertexAttribArray(0);
+
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, vertexSize * sizeof(GLfloat), (const void*)(3 * sizeof(GLfloat)));
+	glEnableVertexAttribArray(1);
+
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, vertexSize * sizeof(GLfloat), (const void*)(6 * sizeof(GLfloat)));
+	glEnableVertexAttribArray(2);
+
+	glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, vertexSize * sizeof(GLfloat), (const void*)(8 * sizeof(GLfloat)));
+	glEnableVertexAttribArray(3);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers[1]);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, faceCount * 3 * sizeof(GLushort), indices, GL_STATIC_DRAW);
+	mesh->indicesCount = faceCount * 3;
+
+	glBindVertexArray(0);
+	glDeleteBuffers(2, buffers);
+
+	mesh->bounds = BoundingBox(data, vertexCount, vertexSize);
+
 	return mesh;
 }
 
@@ -89,6 +128,8 @@ std::unique_ptr<Mesh> Mesh::SimpleIndexed(unsigned int vertexCount, const GLfloa
 
 	glBindVertexArray(0);
 	glDeleteBuffers(2, vbos);
+
+	mesh->bounds = BoundingBox(vertices, vertexCount);
 
 	return mesh;
 }
@@ -122,6 +163,8 @@ std::unique_ptr<Mesh> Mesh::SimpleIndexed(unsigned int vertexCount, const GLfloa
 
 	glBindVertexArray(0);
 	glDeleteBuffers(3, vbos);
+
+	mesh->bounds = BoundingBox(vertices, vertexCount);
 
 	return mesh;
 }
@@ -163,6 +206,8 @@ std::unique_ptr<Mesh> Mesh::SimpleIndexed(unsigned int vertexCount, const GLfloa
 
 	glBindVertexArray(0);
 	glDeleteBuffers(4, vbos);
+
+	mesh->bounds = BoundingBox(vertices, vertexCount);
 
 	return mesh;
 }
@@ -212,6 +257,8 @@ std::unique_ptr<Mesh> Mesh::SimpleIndexed(unsigned int vertexCount, const GLfloa
 	glBindVertexArray(0);
 	glDeleteBuffers(5, vbos);
 
+	mesh->bounds = BoundingBox(vertices, vertexCount);
+
 	return mesh;
 }
 
@@ -253,12 +300,12 @@ std::unique_ptr<Mesh> MeshBuilder::BoxFlatShaded(float x, float y, float z)
 		1,1,0,1,1,0,0,0,
 	};
 	static const GLfloat tangents[4 * 6 * 4] = {
+		1,0,0,-1, 1,0,0,-1, 1,0,0,-1, 1,0,0,-1,
 		-1,0,0,-1, -1,0,0,-1, -1,0,0,-1, -1,0,0,-1,
-		1,0,0,1, 1,0,0,1, 1,0,0,1, 1,0,0,1,
-		1,0,0,1, 1,0,0,1, 1,0,0,1, 1,0,0,1,
-		1,0,0,1, 1,0,0,1, 1,0,0,1, 1,0,0,1,
-		0,0,1,1, 0,0,1,1, 0,0,1,1, 0,0,1,1,
-		0,0,-1,1, 0,0,-1,1, 0,0,-1,1, 0,0,-1,1
+		1,0,0,-1, 1,0,0,-1, 1,0,0,-1, 1,0,0,-1,
+		-1,0,0,-1, -1,0,0,-1, -1,0,0,-1, -1,0,0,-1,
+		0,0,-1,-1, 0,0,-1,-1, 0,0,-1,-1, 0,0,-1,-1,
+		0,0,1,-1, 0,0,1,-1, 0,0,1,-1, 0,0,1,-1
 	};
 	static const GLushort inds[12 * 3] = {
 		2,1,0,3,2,0, //+z
@@ -280,20 +327,26 @@ std::unique_ptr<Mesh> MeshBuilder::CylinderSplitShaded(float h, float r, unsigne
 	GLushort* inds = new GLushort[(4 * n) * 3];
 	GLfloat* normals = new GLfloat[vertexCount * 3];
 	GLfloat* texcoords = new GLfloat[vertexCount * 2];
+	GLfloat* tangents = new GLfloat[vertexCount * 4];
 
 	//Generate Vertices and Normals
 	size_t ai = 0;
 	size_t ai2 = 0;
+	size_t ai3 = 0;
+
 	//centers
 	normals[ai] = 0; verts[ai++] = 0;
 	normals[ai] = 1; verts[ai++] = hh;
 	normals[ai] = 0; verts[ai++] = 0;
 	texcoords[ai2++] = 0.5; texcoords[ai2++] = 0.5;
+	tangents[ai3++] = 1; tangents[ai3++] = 0; tangents[ai3++] = 0; tangents[ai3++] = 1;
 
 	normals[ai] = 0; verts[ai++] = 0;
 	normals[ai] = -1; verts[ai++] = -hh;
 	normals[ai] = 0; verts[ai++] = 0;
 	texcoords[ai2++] = 0.5; texcoords[ai2++] = 0.5;
+	tangents[ai3++] = 1; tangents[ai3++] = 0; tangents[ai3++] = 0; tangents[ai3++] = -1;
+
 	//Sides
 	float angleStep = glm::two_pi<float>() / (float)n;
 	float uvStep = 1 / (float)n;
@@ -307,32 +360,38 @@ std::unique_ptr<Mesh> MeshBuilder::CylinderSplitShaded(float h, float r, unsigne
 		normals[ai] = 1; verts[ai++] = hh;
 		normals[ai] = 0; verts[ai++] = s * r;
 		texcoords[ai2++] = 0.5f + c * 0.5f; texcoords[ai2++] = 0.5f + s * 0.5f;
+		tangents[ai3++] = 1; tangents[ai3++] = 0; tangents[ai3++] = 0; tangents[ai3++] = 1;
 
 		normals[ai] = c; verts[ai++] = c * r;
 		normals[ai] = 0; verts[ai++] = hh;
 		normals[ai] = s; verts[ai++] = s * r;
 		texcoords[ai2++] = i * uvStep; texcoords[ai2++] = 1;
+		tangents[ai3++] = s; tangents[ai3++] = 0; tangents[ai3++] = -c; tangents[ai3++] = -1;
 
 		normals[ai] = c; verts[ai++] = c * r;
 		normals[ai] = 0; verts[ai++] = -hh;
 		normals[ai] = s; verts[ai++] = s * r;
 		texcoords[ai2++] = i * uvStep; texcoords[ai2++] = 0;
+		tangents[ai3++] = s; tangents[ai3++] = 0; tangents[ai3++] = -c; tangents[ai3++] = -1;
 
 		normals[ai] = 0; verts[ai++] = c * r;
 		normals[ai] = -1; verts[ai++] = -hh;
 		normals[ai] = 0; verts[ai++] = s * r;
 		texcoords[ai2++] = 0.5f + c * 0.5f; texcoords[ai2++] = 0.5f + s * 0.5f;
+		tangents[ai3++] = 1; tangents[ai3++] = 0; tangents[ai3++] = 0; tangents[ai3++] = -1;
 	}
 	//Add final overlap
 	normals[ai] = 1; verts[ai++] = r;
 	normals[ai] = 0; verts[ai++] = hh;
 	normals[ai] = 0; verts[ai++] = 0;
 	texcoords[ai2++] = 1; texcoords[ai2++] = 1;
+	tangents[ai3++] = 0; tangents[ai3++] = 0; tangents[ai3++] = -1; tangents[ai3++] = -1;
 
 	normals[ai] = 1; verts[ai++] = r;
 	normals[ai] = 0; verts[ai++] = -hh;
 	normals[ai] = 0; verts[ai++] = 0;
 	texcoords[ai2++] = 1; texcoords[ai2++] = 0;
+	tangents[ai3++] = 0; tangents[ai3++] = 0; tangents[ai3++] = -1; tangents[ai3++] = -1;
 
 	ai = 0;
 	//Generate side Indices
@@ -376,11 +435,12 @@ std::unique_ptr<Mesh> MeshBuilder::CylinderSplitShaded(float h, float r, unsigne
 		inds[ai++] = 5;
 	}
 
-	std::unique_ptr<Mesh> mesh = Mesh::SimpleIndexed(vertexCount, verts, normals, texcoords, (4 * n), inds);
+	std::unique_ptr<Mesh> mesh = Mesh::SimpleIndexed(vertexCount, verts, normals, texcoords, tangents, (4 * n), inds);
 	delete[] verts;
 	delete[] inds;
 	delete[] normals;
 	delete[] texcoords;
+	delete[] tangents;
 	return mesh;
 }
 
@@ -392,11 +452,13 @@ std::unique_ptr<Mesh> MeshBuilder::Sphere(float r, unsigned int nh, unsigned int
 	GLfloat* verts = new GLfloat[vertCount * 3];
 	GLfloat* normals = new GLfloat[vertCount * 3];
 	GLfloat* texcoords = new GLfloat[vertCount * 2];
+	GLfloat* tangents = new GLfloat[vertCount * 4];
 	GLushort* inds = new GLushort[faceCount * 3];
 
 	//Generate Vertices and Normals
 	size_t ai = 0;
 	size_t ai2 = 0;
+	size_t ai3 = 0;
 	//Sides
 	float angleStepH = glm::two_pi<float>() / (float)nh;
 	float angleStepV = glm::pi<float>() / (float)nv;
@@ -418,6 +480,7 @@ std::unique_ptr<Mesh> MeshBuilder::Sphere(float r, unsigned int nh, unsigned int
 			normals[ai] = sv;		verts[ai++] = sv * r;
 			normals[ai] = sh * cv;	verts[ai++] = sh * cv * r;
 			texcoords[ai2++] = UVStepH * j; texcoords[ai2++] = UVStepV * i;
+			tangents[ai3++] = sh; tangents[ai3++] = 0; tangents[ai3++] = -ch; tangents[ai3++] = -1;
 		}
 	}
 
@@ -456,11 +519,12 @@ std::unique_ptr<Mesh> MeshBuilder::Sphere(float r, unsigned int nh, unsigned int
 
 	//There are two vertices that remain unused (but I am unwilling to increase the complexity of this just to remove two vertices)
 
-	std::unique_ptr<Mesh> mesh = Mesh::SimpleIndexed(vertCount, verts, normals, texcoords, faceCount, inds);
+	std::unique_ptr<Mesh> mesh = Mesh::SimpleIndexed(vertCount, verts, normals, texcoords, tangents, faceCount, inds);
 	delete[] verts;
 	delete[] inds;
 	delete[] normals;
 	delete[] texcoords;
+	delete[] tangents;
 	return mesh;
 }
 
@@ -577,12 +641,21 @@ std::unique_ptr<Mesh> OBJLoader::LoadOBJ(const std::string & filePath)
 		vertDef v1, v2, v3;
 	};
 
-	struct VertexManager {
-		struct Vertex {
-			GLfloat px, py, pz, nx, ny, nz, tcu, tcv;
-			Vertex(GLfloat px, GLfloat py, GLfloat pz, GLfloat nx, GLfloat ny, GLfloat nz, GLfloat tcu, GLfloat tcv) : px(px), py(py), pz(pz), nx(nx), ny(ny), nz(nz), tcu(tcu), tcv(tcv) {};
+	struct Vertex {
+		union {
+			struct {
+				GLfloat px, py, pz, nx, ny, nz, tcu, tcv, tx,ty,tz,ts;
+			};
+			struct {
+				glm::vec3 pos, normal;
+				glm::vec2 tex;
+				glm::vec3 tangent;
+			};
 		};
+		Vertex(GLfloat px, GLfloat py, GLfloat pz, GLfloat nx, GLfloat ny, GLfloat nz, GLfloat tcu, GLfloat tcv) : px(px), py(py), pz(pz), nx(nx), ny(ny), nz(nz), tcu(tcu), tcv(tcv) {};
+	};
 
+	struct VertexManager {
 		std::unordered_map <vertDef, size_t, vertDefHasher> vertexDefs;
 		std::vector<Vertex> vertexData;
 		size_t runningCounter = 0;
@@ -593,8 +666,6 @@ std::unique_ptr<Mesh> OBJLoader::LoadOBJ(const std::string & filePath)
 
 		VertexManager(const std::vector<glm::vec3> & p, const std::vector<glm::vec3> & n, const std::vector<glm::vec2> & t) : positions(p), normals(n), textureCoords(t) { vertexData.reserve(p.size()); };
 
-		//TODO: somehow calculate Tangents
-		//leave space in the interleaved buffer and fill it later or add a second buffer object?
 		size_t getIndex(vertDef v) {
 			if (vertexDefs.find(v) == vertexDefs.end()) {
 				glm::vec3 pos = positions[v.pos - 1];
@@ -676,15 +747,38 @@ std::unique_ptr<Mesh> OBJLoader::LoadOBJ(const std::string & filePath)
 		file.close();
 	}
 
-	std::vector<GLushort> indizes = std::vector<GLushort>();
-	indizes.reserve(faces.size()*3);
+	std::vector<GLushort> indizes = std::vector<GLushort>(faces.size() * 3);
 	VertexManager VM = VertexManager(positions,normals,textureCoords);
+	size_t ai = 0;
 
 	for (faceDef face : faces) {
-		indizes.push_back(VM.getIndex(face.v1));
-		indizes.push_back(VM.getIndex(face.v2));
-		indizes.push_back(VM.getIndex(face.v3));
+		size_t vi1 = VM.getIndex(face.v1);
+		size_t vi2 = VM.getIndex(face.v2);
+		size_t vi3 = VM.getIndex(face.v3);
+		indizes[ai++] = vi1;
+		indizes[ai++] = vi2;
+		indizes[ai++] = vi3;
+		//Calculate tangents
+
+		Vertex & v1 = VM.vertexData[vi1];
+		Vertex & v2 = VM.vertexData[vi2];
+		Vertex & v3 = VM.vertexData[vi3];
+
+		glm::vec3 e1 = v2.pos - v1.pos;
+		glm::vec3 e2 = v3.pos - v1.pos;
+
+		glm::vec2 euv1 = v2.tex - v1.tex;
+		glm::vec2 euv2 = v3.tex - v1.tex;
+
+		glm::vec3 tangent = glm::normalize((e1 * euv2.y - e2 * euv1.y) / (euv1.x * euv2.y - euv1.y * euv2.x));
+
+		v1.tangent = tangent; //TODO average tangents on shared vertices
+		v2.tangent = tangent;
+		v3.tangent = tangent;
+		v1.ts = 1; //TODO calculate sign of the bitangent
+		v2.ts = 1;
+		v3.ts = 1;
 	}
 
-	return Mesh::InterleavedPNT(VM.runningCounter, (GLfloat *)VM.vertexData.data(), faces.size(), indizes.data());
+	return Mesh::InterleavedPNTT(VM.runningCounter, (GLfloat *)VM.vertexData.data(), faces.size(), indizes.data());
 }

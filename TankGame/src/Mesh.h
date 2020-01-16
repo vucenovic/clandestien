@@ -3,11 +3,13 @@
 #include <glm\glm.hpp>
 #include <vector>
 #include <memory>
+#include "Utils.h"
 
 class Mesh {
 private:
 	GLuint vaoID;
-	size_t indicesCount; //add boundingbox
+	size_t indicesCount;
+	BoundingBox bounds;
 public:
 	Mesh();
 	~Mesh();
@@ -18,12 +20,12 @@ public:
 	void BindAndDraw();
 	void Draw();
 
-	static std::unique_ptr<Mesh> InterleavedPNT(unsigned int vertexCount, const GLfloat data[], unsigned int faceCount, const GLushort indices[]);
+	static std::unique_ptr<Mesh> InterleavedPNT(unsigned int vertexCount, const GLfloat data[], unsigned int faceCount, const GLushort indices[]);//pos,norm,tex
+	static std::unique_ptr<Mesh> InterleavedPNTT(unsigned int vertexCount, const GLfloat data[], unsigned int faceCount, const GLushort indices[]);//pos,norm,tex,tangent
 	static std::unique_ptr<Mesh> SimpleIndexed(unsigned int vertexCount, const GLfloat vertices[], unsigned int faceCount, const GLushort indices[]);
 	static std::unique_ptr<Mesh> SimpleIndexed(unsigned int vertexCount, const GLfloat vertices[], const GLfloat normals[], unsigned int faceCount, const GLushort indices[]);
 	static std::unique_ptr<Mesh> SimpleIndexed(unsigned int vertexCount, const GLfloat vertices[], const GLfloat normals[], const GLfloat textureCoords[], unsigned int faceCount, const GLushort indices[]);
 	static std::unique_ptr<Mesh> SimpleIndexed(unsigned int vertexCount, const GLfloat vertices[], const GLfloat normals[], const GLfloat textureCoords[], const GLfloat tangents[], unsigned int faceCount, const GLushort indices[]);
-
 };
 
 class OBJLoader {

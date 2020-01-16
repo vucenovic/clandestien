@@ -91,7 +91,7 @@ int main(int argc, char** argv)
 			myShaderProgram = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/common.vert", "res/shaders/LitPhong.frag"));
 			//LitCookTorrance = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/common.vert", "res/shaders/LitCookTorrance.frag"));
 			standardShader = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/common.vert", "res/shaders/TexturedLitPhong.frag"));
-			debugShader = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/common.vert", "res/shaders/NormalDebug.frag"));
+			debugShader = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/common.vert", "res/shaders/Debug.frag"));
 		}
 		catch (const std::invalid_argument&)
 		{
@@ -121,12 +121,10 @@ int main(int argc, char** argv)
 		std::shared_ptr<Mesh> myCubeMesh = MeshBuilder::BoxFlatShaded(1.5f, 1.5f, 1.5f);
 		std::shared_ptr<Mesh> myCylinderMesh = MeshBuilder::CylinderSplitShaded(1.3f, 1, 32);
 		std::shared_ptr<Mesh> mySphereMesh = MeshBuilder::Sphere(1, 64, 32);
-		//std::shared_ptr<Mesh> myBoxMesh = OBJLoader::LoadOBJ("res/models/monkey.obj");
-		std::shared_ptr<Mesh> myBoxMesh = MeshBuilder::BoxFlatShaded(1.5f, 1.5f, 1.5f);
+		std::shared_ptr<Mesh> myTestMesh = OBJLoader::LoadOBJ("res/models/monkey.obj");
 
 		Material debugMaterial = Material(debugShader);
-		debugMaterial.SetProperty4f("material", glm::vec4(0.1f, 0.7f, 1, 8));
-		debugMaterial.SetProperty3f("flatColor", glm::vec3(1, 1, 1));
+		debugMaterial.SetPropertyi("mode",2);
 
 		Material tilesMaterial = Material(standardShader);
 		tilesMaterial.SetProperty4f("material", glm::vec4(0.1f,0.7f,1,8));
@@ -146,10 +144,10 @@ int main(int argc, char** argv)
 
 		//--------Objects
 
-		GameObject box = GameObject();
-		box.mesh = myBoxMesh.get();
-		box.material = &debugMaterial;
-		box.GetTransform().position = glm::vec3(3, 1.5f, 0);
+		GameObject testobject = GameObject();
+		testobject.mesh = myTestMesh.get();
+		testobject.material = &tilesMaterial;
+		testobject.GetTransform().position = glm::vec3(3, 1.5f, 0);
 
 		GameObject sphere = GameObject();
 		sphere.mesh = mySphereMesh.get();
@@ -209,7 +207,10 @@ int main(int argc, char** argv)
 		myObjectRenderer.AddObject(&sphere);
 		myObjectRenderer.AddObject(&cube);
 		myObjectRenderer.AddObject(&cylinder);
-		myObjectRenderer.AddObject(&box);
+		myObjectRenderer.AddObject(&testobject);
+
+		int debugmode = -1;
+		bool debugpressedLastFrame = false;
 
 		//Render Loop
 		while (!glfwWindowShouldClose(window))
@@ -218,10 +219,21 @@ int main(int argc, char** argv)
 			glfwPollEvents();
 
 			myCameraController.HandleInputs(scrollOffset);
-			
-			//box.GetTransform().rotation.y += 0.01f;
-			//box.GetTransform().rotation.x += 0.02f;
-			box.GetTransform().rotation.z += 0.005f;
+			if(glfwGetKey(window,GLFW_KEY_J) == GLFW_PRESS)
+				testobject.GetTransform().rotation.y += 0.01f;
+			if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS)
+				testobject.GetTransform().rotation.x += 0.01f;
+			if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS)
+				testobject.GetTransform().rotation.z += 0.01f;
+			if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
+				testobject.GetTransform().rotation = glm::vec3();
+
+			bool debugPressed = glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS; //getto solution for now
+			if (debugPressed && !debugpressedLastFrame) {
+				debugmode = (debugmode + 1) % 7;
+				debugMaterial.SetPropertyi("mode", debugmode);
+			}
+			debugpressedLastFrame = debugPressed;
 
 			//Clear
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -243,8 +255,6 @@ int main(int argc, char** argv)
 			glfwSwapBuffers(window);
 			scrollOffset = 0;
 		}
-
-		
 
 		//clean up before leaving scope
 		glUseProgram(0);

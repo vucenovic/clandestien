@@ -2,6 +2,7 @@
 #include <sstream>
 #include <fstream>
 #include <glm/gtc/type_ptr.hpp>
+#include <limits>
 
 std::string loadFileAsString(std::string filepath)
 {
@@ -70,15 +71,38 @@ glm::mat4 Transform::ToMatrix() const
 
 glm::mat4 Transform::ToInverseMatrix() const
 {
-	return glm::inverse(ToMatrix()); //TODO: Replace with algebraic solution
+	return glm::inverse(ToMatrix());
 }
 
 glm::mat4 Transform::ToNormalMatrix() const
 {
-	return glm::transpose(ToInverseMatrix()); //TODO: Replace with algebraic solution
+	return glm::transpose(ToInverseMatrix());
 }
 
-const GLfloat * Transform::ToMatrixBuffer()
+BoundingBox::BoundingBox(const GLfloat * points, const size_t & count, size_t stride) : min(std::numeric_limits<float>::max()), max(std::numeric_limits<float>::lowest())
 {
-	return glm::value_ptr(ToMatrix());
+	size_t len = count * stride;
+	for (size_t i = 0; i < len; i += stride) {
+		glm::vec3 * p = (glm::vec3*)(points + i);
+		min.x = min.x > p->x ? p->x : min.x;
+		min.y = min.y > p->y ? p->y : min.y;
+		min.z = min.z > p->z ? p->z : min.z;
+
+		max.x = max.x < p->x ? p->x : max.x;
+		max.y = max.y < p->y ? p->y : max.y;
+		max.z = max.z < p->z ? p->z : max.z;
+	}
+}
+
+std::pair<glm::vec3, glm::vec3> BoundingBox::AlongAxis(glm::vec3 axis)
+{
+	glm::vec3 low, high;
+	low.x = axis.x >= 0 ? max.x : min.x;
+	low.y = axis.y >= 0 ? max.y : min.y;
+	low.z = axis.z >= 0 ? max.z : min.z;
+
+	high.x = axis.x < 0 ? max.x : min.x;
+	high.y = axis.y < 0 ? max.y : min.y;
+	high.z = axis.z < 0 ? max.z : min.z;
+	return std::pair<glm::vec3, glm::vec3>(low,high);
 }
