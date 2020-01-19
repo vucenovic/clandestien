@@ -13,7 +13,10 @@ out ParticleData
     vec2 textureCoord;
 } pOut;
 
-void generateBillboard(vec4 position, float size) {    
+vec4 position;
+float size;
+
+void generateBillboard() {    
     gl_Position = position + vec4( -size, -size, 0.0, 0.0); 
     pOut.textureCoord = vec2(0,0);
     EmitVertex();
@@ -33,6 +36,8 @@ void generateBillboard(vec4 position, float size) {
     EndPrimitive();
 }
 
-void main() {    
-    generateBillboard(gl_in[0].gl_Position,particle[0].size);
+void main() {
+    position = gl_in[0].gl_Position;
+    size = particle[0].size;
+    generateBillboard();
 }

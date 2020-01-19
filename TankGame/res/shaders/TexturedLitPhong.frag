@@ -1,6 +1,6 @@
 #version 450 core
 
-layout (location = 0) out vec3 color;
+layout (location = 0) out vec4 color;
 
 struct PointLight{
 	vec4 position;
@@ -83,7 +83,7 @@ void main()
 		doSpotLight(lights.spotLights[i]);
 	}
 	
-	color = flatColor.xyz * texture(albedoTex, vertex.texCoord).xyz * (lights.ambientColor.xyz * material.x + lightDiffuse * material.y) + (lightSpecular + texture(cubemapTex, -reflectDir).xyz * flatColor.w) * material.z * texture(materialTex,vertex.texCoord).x;
+	color = vec4(flatColor.xyz * texture(albedoTex, vertex.texCoord).xyz * (lights.ambientColor.xyz * material.x + lightDiffuse * material.y) + (lightSpecular + texture(cubemapTex, -reflectDir).xyz * flatColor.w) * material.z * texture(materialTex,vertex.texCoord).x,1);
 }
 
 void doPointLight(PointLight light){

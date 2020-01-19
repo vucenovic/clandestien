@@ -2,7 +2,7 @@
 
 #define PI 3.1415926535897932384626433832795
 
-layout (location = 0) out vec3 color;
+layout (location = 0) out vec4 color;
 
 struct PointLight{
 	vec4 position;
@@ -80,7 +80,7 @@ void main()
 		doSpotLight(lights.spotLights[i]);
 	}
 	
-	color = flatColor * lightDiffuse*(1-material.y) + lightSpecular * mix(vec3(1,1,1), flatColor, material.y);
+	color = vec4(flatColor * lightDiffuse*(1-material.y) + lightSpecular * mix(vec3(1,1,1), flatColor, material.y),1);
 }
 
 void doPointLight(PointLight light){

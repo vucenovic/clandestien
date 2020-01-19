@@ -1,10 +1,10 @@
 #version 450 core
 
-layout (location = 0) out vec3 color;
+layout (location = 0) out vec4 color;
 
 uniform vec3 flatColor;
 
 void main()
 {
-	color = flatColor;
+	color = vec4(flatColor,1);
 }

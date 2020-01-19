@@ -45,7 +45,7 @@ void ObjectRenderer::Draw()
 		GLuint normalMatrixLocation = shaderGroup.first->GetUniformLocation("modelNormalMatrix");
 
 		for (std::pair<Material*, std::unordered_map<Mesh*, std::vector<GameObject*>>> meshGroup : shaderGroup.second) {
-			meshGroup.first->SetProperties();
+			meshGroup.first->ApplyProperties();
 			
 			for (std::pair<Mesh*, std::vector<GameObject*>> GameObjects : meshGroup.second)
 			{
@@ -61,12 +61,11 @@ void ObjectRenderer::Draw()
 	}
 }
 
-void ObjectRenderer::DrawOverrideMaterial(std::weak_ptr<Material> material)
+void ObjectRenderer::DrawOverrideMaterial(Material& material)
 {
-	std::shared_ptr<Material> mat = material.lock();
-	GLuint modelMatrixLocation = mat->shader->GetUniformLocation("modelMatrix");
-	GLuint normalMatrixLocation = mat->shader->GetUniformLocation("modelNormalMatrix");
-	mat->SetProperties();
+	material.Use();
+	GLuint modelMatrixLocation = material.shader->GetUniformLocation("modelMatrix");
+	GLuint normalMatrixLocation = material.shader->GetUniformLocation("modelNormalMatrix");
 
 	for (std::pair<ShaderProgram*, std::unordered_map<Material*, std::unordered_map<Mesh*, std::vector<GameObject*>>>> shaderGroup : renderGroups)
 	{

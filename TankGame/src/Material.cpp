@@ -10,16 +10,16 @@ Material::~Material()
 
 void Material::Use()
 {
-	SetShader();
-	SetProperties();
+	UseShader();
+	ApplyProperties();
 }
 
-void Material::SetShader()
+void Material::UseShader()
 {
 	shader->UseProgram();
 }
 
-void Material::SetProperties()
+void Material::ApplyProperties()
 {
 	for (std::pair<GLuint, std::shared_ptr<Texture>> tex : textures) {
 		tex.second->Bind(tex.first);

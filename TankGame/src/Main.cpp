@@ -85,7 +85,7 @@ int main(int argc, char** argv)
 	glfwSetScrollCallback(window, scroll_callback);
 
 	{
-		std::shared_ptr<ShaderProgram> standardShader,LitCookTorrance, myShaderProgram, debugShader, particleShader;
+		std::shared_ptr<ShaderProgram> standardShader,LitCookTorrance, myShaderProgram, debugShader, particleShader, pp_demultAlpha;
 		try
 		{
 			myShaderProgram = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/common.vert", "res/shaders/LitPhong.frag"));
@@ -93,6 +93,7 @@ int main(int argc, char** argv)
 			particleShader = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/particle.vert", "res/shaders/particle.geom", "res/shaders/particle.frag"));
 			standardShader = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/common.vert", "res/shaders/TexturedLitPhong.frag"));
 			debugShader = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/common.vert", "res/shaders/Debug.frag"));
+			pp_demultAlpha = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/screenspace.vert", "res/shaders/DemultAlpha.frag"));
 		}
 		catch (const std::invalid_argument&)
 		{
@@ -213,9 +214,80 @@ int main(int argc, char** argv)
 		int debugmode = -1;
 		bool debugpressedLastFrame = false;
 
+		Texture2D particleTex = Texture2D("res/textures/particle");
+		GLuint particleVAO;
+		glGenVertexArrays(1, &particleVAO);
+		{
+			glBindVertexArray(particleVAO);
+			GLuint buffers[1];
+			glGenBuffers(1, buffers);
+
+			const GLfloat data[4 * 4] = {3,3,3,1, 2,2,3,1, 4,3,2,0.5f, 2,3,2,1.5f};
+
+			glBindBuffer(GL_ARRAY_BUFFER, buffers[0]);
+			glBufferData(GL_ARRAY_BUFFER, 16 * sizeof(GLfloat), data, GL_STATIC_DRAW);
+
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 4, 0);
+			glEnableVertexAttribArray(0);
+
+			glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (const void*)(3 * sizeof(GLfloat)));
+			glEnableVertexAttribArray(1);
+
+			glBindVertexArray(0);
+			glDeleteBuffers(1, buffers);
+		}
+
+		GLuint ssplaneVAO;
+		glGenVertexArrays(1, &ssplaneVAO);
+		{
+			glBindVertexArray(ssplaneVAO);
+			GLuint buffers[1];
+			glGenBuffers(1, buffers);
+
+			static const GLfloat data[2 * 4] = { 0,0, 1,0, 0,1, 1,1 };
+
+			glBindBuffer(GL_ARRAY_BUFFER, buffers[0]);
+			glBufferData(GL_ARRAY_BUFFER, 8 * sizeof(GLfloat), data, GL_STATIC_DRAW);
+
+			glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
+			glEnableVertexAttribArray(0);
+
+			glBindVertexArray(0);
+			glDeleteBuffers(1, buffers);
+		}
+
+		GLuint FBO;
+		{
+			glGenFramebuffers(1, &FBO);
+			glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+
+			GLuint fboTex;
+			glGenTextures(1, &fboTex);
+			glBindTexture(GL_TEXTURE_2D, fboTex);
+
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fboTex, 0);
+
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		}
+
+		double nextFrameTime = 1;
+		size_t frameCount = 0;
+
 		//Render Loop
 		while (!glfwWindowShouldClose(window))
 		{
+			double currentFrametime = glfwGetTime(); // Displace framerate
+			frameCount++;
+			if (currentFrametime >= nextFrameTime) {
+				std::cout << frameCount << "FPS" << std::endl;
+				frameCount = 0;
+				nextFrameTime = currentFrametime + 1;
+			}
+
 			// Handle Inputs
 			glfwPollEvents();
 
@@ -250,7 +322,27 @@ int main(int argc, char** argv)
 				glBindBuffer(GL_UNIFORM_BUFFER, 0);
 			}
 
+			//myObjectRenderer.DrawOverrideMaterial(debugMaterial);
 			myObjectRenderer.Draw();
+
+			{
+				glEnable(GL_BLEND);
+				glDepthMask(false);
+				particleShader->UseProgram();
+				GLuint modelMatrixLocation = particleShader->GetUniformLocation("modelMatrix");
+				GLuint normalMatrixLocation = particleShader->GetUniformLocation("modelNormalMatrix");
+				glm::mat4 ident = glm::mat4(1);
+				glUniformMatrix4fv(modelMatrixLocation, 1, GL_FALSE, glm::value_ptr(ident));
+				particleTex.Bind(0);
+
+				glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
+				glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+
+				glBindVertexArray(particleVAO);
+				glDrawArrays(GL_POINTS, 0, 4);
+				glDisable(GL_BLEND);
+				glDepthMask(true);
+			}
 
 			//Flip Buffers
 			glfwSwapBuffers(window);
@@ -259,6 +351,7 @@ int main(int argc, char** argv)
 
 		//clean up before leaving scope
 		glUseProgram(0);
+		glDeleteFramebuffers(1, &FBO);
 	}
 	_shaderCompileError:
 

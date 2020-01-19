@@ -36,5 +36,5 @@ public:
 	void RemoveObject(GameObject * obj);
 
 	void Draw();
-	void DrawOverrideMaterial(std::weak_ptr<Material> material);
+	void DrawOverrideMaterial(Material& material);
 };

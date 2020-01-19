@@ -36,6 +36,7 @@ public:
 class MeshBuilder {
 public:
 	static std::unique_ptr<Mesh> Quad();
+	static std::unique_ptr<Mesh> Quad(GLfloat minx, GLfloat miny, GLfloat maxx, GLfloat maxy);
 	static std::unique_ptr<Mesh> BoxFlatShaded(float x, float y, float z);
 	static std::unique_ptr<Mesh> CylinderSplitShaded(float height, float radius, unsigned int segmentCount);
 	static std::unique_ptr<Mesh> Sphere(float radius, unsigned int segmentsHorizontal, unsigned int segmentsVertical);
