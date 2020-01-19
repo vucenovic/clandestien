@@ -85,11 +85,12 @@ int main(int argc, char** argv)
 	glfwSetScrollCallback(window, scroll_callback);
 
 	{
-		std::shared_ptr<ShaderProgram> standardShader,LitCookTorrance, myShaderProgram, debugShader;
+		std::shared_ptr<ShaderProgram> standardShader,LitCookTorrance, myShaderProgram, debugShader, particleShader;
 		try
 		{
 			myShaderProgram = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/common.vert", "res/shaders/LitPhong.frag"));
 			//LitCookTorrance = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/common.vert", "res/shaders/LitCookTorrance.frag"));
+			particleShader = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/particle.vert", "res/shaders/particle.geom", "res/shaders/particle.frag"));
 			standardShader = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/common.vert", "res/shaders/TexturedLitPhong.frag"));
 			debugShader = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/common.vert", "res/shaders/Debug.frag"));
 		}

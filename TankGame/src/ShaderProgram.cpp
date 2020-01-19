@@ -13,6 +13,34 @@ void ShaderProgram::CreateAndLink(Shader * vertexShader, Shader * fragmentShader
 
 	glLinkProgram(programHandle);
 
+	if (!CheckLinkedStatus()) return;
+
+	glDetachShader(programHandle, vertexShader->getShaderID());
+	glDetachShader(programHandle, fragmentShader->getShaderID());
+}
+
+void ShaderProgram::CreateAndLink(Shader * vert, Shader * geom, Shader * frag)
+{
+	if (vert == nullptr || geom == nullptr || frag == nullptr)  throw std::invalid_argument("received nullptr");
+	if (!vert->compiledSuccessfully() || !geom->compiledSuccessfully() || !frag->compiledSuccessfully())  throw std::invalid_argument("received an uncompiled shader");
+
+	programHandle = glCreateProgram();
+
+	glAttachShader(programHandle, vert->getShaderID());
+	glAttachShader(programHandle, geom->getShaderID());
+	glAttachShader(programHandle, frag->getShaderID());
+
+	glLinkProgram(programHandle);
+
+	if (!CheckLinkedStatus()) return;
+
+	glDetachShader(programHandle, vert->getShaderID());
+	glDetachShader(programHandle, geom->getShaderID());
+	glDetachShader(programHandle, frag->getShaderID());
+}
+
+bool ShaderProgram::CheckLinkedStatus()
+{
 	GLint linked;
 	glGetProgramiv(programHandle, GL_LINK_STATUS, (int *)&linked);
 	if (linked == GL_FALSE)
@@ -30,16 +58,19 @@ void ShaderProgram::CreateAndLink(Shader * vertexShader, Shader * fragmentShader
 		std::cout << s << std::endl;
 
 		delete[] infoLog;
-		return;
+		return false;
 	}
-
-	glDetachShader(programHandle, vertexShader->getShaderID());
-	glDetachShader(programHandle, fragmentShader->getShaderID());
+	return true;
 }
 
 ShaderProgram::ShaderProgram(Shader* vertexShader, Shader* fragmentShader)
 {
 	CreateAndLink(vertexShader, fragmentShader);
+}
+
+ShaderProgram::ShaderProgram(Shader * vertexShader, Shader * geometryShader, Shader * fragmentShader)
+{
+	CreateAndLink(vertexShader, geometryShader, fragmentShader);
 }
 
 ShaderProgram::ShaderProgram(const std::string& vertSource, const std::string& fragSource)
@@ -53,16 +84,45 @@ ShaderProgram::ShaderProgram(const std::string& vertSource, const std::string& f
 	delete frag;
 }
 
-ShaderProgram* ShaderProgram::FromFile(const std::string& filePath)
+ShaderProgram::ShaderProgram(const std::string& vertSource, const std::string& geomSource, const std::string& fragSource)
+{
+	Shader* vert = new Shader(GL_VERTEX_SHADER, vertSource);
+	Shader* geom = new Shader(GL_GEOMETRY_SHADER, geomSource);
+	Shader* frag = new Shader(GL_FRAGMENT_SHADER, fragSource);
+
+	CreateAndLink(vert, geom, frag);
+
+	delete vert;
+	delete geom;
+	delete frag;
+}
+
+std::unique_ptr<ShaderProgram> ShaderProgram::FromFile(const std::string& filePath)
 {
 	return FromFile(filePath + ".vert", filePath + ".frag");
 }
 
-ShaderProgram * ShaderProgram::FromFile(const std::string & vertexShaderFilePath, const std::string & fragmentShaderFilePath)
+std::unique_ptr<ShaderProgram> ShaderProgram::FromFile(const std::string & vertexShaderFilePath, const std::string & fragmentShaderFilePath)
 {
 	std::string vertSource = loadFileAsString(vertexShaderFilePath);
 	std::string fragSource = loadFileAsString(fragmentShaderFilePath);
-	return new ShaderProgram(vertSource, fragSource);
+	return std::make_unique<ShaderProgram>(vertSource, fragSource);
+}
+
+std::unique_ptr<ShaderProgram> ShaderProgram::FromFile(const std::string & vertexShaderFilePath, const std::string & geometryShaderFilePath, const std::string & fragmentShaderFilePath)
+{
+	std::string vertSource = loadFileAsString(vertexShaderFilePath);
+	std::string fragSource = loadFileAsString(fragmentShaderFilePath);
+	std::string geomSource = loadFileAsString(geometryShaderFilePath);
+	return std::make_unique<ShaderProgram>(vertSource, geomSource, fragSource);
+}
+
+std::unique_ptr<ShaderProgram> FromFile(const std::string& vertexShaderFilePath, const std::string& geometryShaderFilePath, const std::string& fragmentShaderFilePath)
+{
+	std::string vertSource = loadFileAsString(vertexShaderFilePath);
+	std::string fragSource = loadFileAsString(fragmentShaderFilePath);
+	std::string geomSource = loadFileAsString(geometryShaderFilePath);
+	return std::make_unique<ShaderProgram>(vertSource, geomSource, fragSource);
 }
 
 ShaderProgram::~ShaderProgram()
