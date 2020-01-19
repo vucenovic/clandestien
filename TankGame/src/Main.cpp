@@ -19,6 +19,7 @@
 #include "LightManager.h"
 #include "Texture.h"
 #include "Renderer.h"
+#include "FrameBuffer.h"
 
 #include "Main.h"
 
@@ -259,38 +260,7 @@ int main(int argc, char** argv)
 			glDeleteBuffers(1, &buffers);
 		}
 
-		GLuint FBO;
-		GLuint fboTex[2];
-		{
-			glGenFramebuffers(1, &FBO);
-			glBindFramebuffer(GL_FRAMEBUFFER, FBO);
-
-			glGenTextures(2, fboTex);
-			glBindTexture(GL_TEXTURE_2D, fboTex[0]);
-
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			/*
-			glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, fboTex[0]);
-
-			glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGBA16F, width, height, false);
-			glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			*/
-
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fboTex[0], 0);
-
-			glBindTexture(GL_TEXTURE_2D, fboTex[1]);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, width, height, 0,GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, nullptr);
-
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, fboTex[1], 0);
-
-			glBindTexture(GL_TEXTURE_2D, 0);
-			if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-				std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
-			glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		}
+		FrameBuffer fbo = FrameBuffer(width, height);
 
 		double nextFrameTime = 1;
 		size_t frameCount = 0;
@@ -340,14 +310,14 @@ int main(int argc, char** argv)
 			}
 
 
-			glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+			fbo.Bind();
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			glEnable(GL_DEPTH_TEST);
 
 			//myObjectRenderer.DrawOverrideMaterial(debugMaterial);
 			myObjectRenderer.Draw();
 
-			{
+			{ //TODO move into particle system class and particle sytemrenderer
 				glEnable(GL_BLEND);
 				glDepthMask(false);
 				particleShader->UseProgram();
@@ -366,20 +336,14 @@ int main(int argc, char** argv)
 				glDepthMask(true);
 			}
 
+			//Apply basic post processing
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			glDisable(GL_DEPTH_TEST);
 
 			pp_demultAlpha->UseProgram();
-			glBindTexture(GL_TEXTURE_2D, fboTex[0]);
+			glBindTexture(GL_TEXTURE_2D, fbo.fboTex[0]);
 			glBindVertexArray(ssplaneVAO);
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-
-			/*
-			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-			glBindFramebuffer(GL_READ_FRAMEBUFFER, FBO);
-			glDrawBuffer(GL_BACK);
-			glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_LINEAR);
-			*/
 
 			//Flip Buffers
 			glfwSwapBuffers(window);
@@ -388,10 +352,9 @@ int main(int argc, char** argv)
 
 		//clean up before leaving scope
 		glUseProgram(0);
-		glDeleteFramebuffers(1, &FBO);
 		glDeleteVertexArrays(1, &particleVAO);
 		glDeleteVertexArrays(1, &ssplaneVAO);
-		glDeleteTextures(2, fboTex);
+
 	}
 	_shaderCompileError:
 

@@ -135,6 +135,7 @@
   <ItemGroup>
     <ClCompile Include="src\DDSImage.cpp" />
     <ClCompile Include="src\CameraController.cpp" />
+    <ClCompile Include="src\FrameBuffer.cpp" />
     <ClCompile Include="src\Mesh.cpp" />
     <ClCompile Include="src\Physics.cpp" />
     <ClCompile Include="src\LightManager.cpp" />
@@ -150,6 +151,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\FileUtils.h" />
+    <ClInclude Include="src\FrameBuffer.h" />
     <ClInclude Include="src\Physics.h" />
     <ClInclude Include="src\INIReader.h" />
     <ClInclude Include="src\Main.h" />
