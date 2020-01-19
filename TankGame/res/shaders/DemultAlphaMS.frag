@@ -8,5 +8,5 @@ in vec2 screenposition;
 
 void main() {
     color = texture(tex, screenposition);
-    color.rgb = color.rgb * color.w;
+    color.rgb = color.rgb / color.w;
 }

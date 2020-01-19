@@ -11,5 +11,4 @@ layout (binding = 0 ) uniform sampler2D tex;
 
 void main() {
     color = texture(tex, textureCoord);
-    color.rgb = color.rgb * color.w;
 }
