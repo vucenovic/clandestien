@@ -7,6 +7,7 @@
 #include "Material.h"
 #include "Mesh.h"
 #include "Utils.h"
+#include "ParticleSystem.h"
 
 class GameObject
 {
@@ -37,4 +38,18 @@ public:
 
 	void Draw();
 	void DrawOverrideMaterial(Material& material);
+};
+
+class ParticleSystemRenderer
+{
+private:
+	std::vector<ParticleSystem> particleSystems;
+public:
+	ParticleSystemRenderer();
+	~ParticleSystemRenderer();
+
+	void AddPS(GameObject * obj);
+	void RemovePS(GameObject * obj);
+
+	void Draw();
 };

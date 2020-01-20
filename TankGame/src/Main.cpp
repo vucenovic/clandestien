@@ -23,6 +23,8 @@
 
 #include "Main.h"
 
+#include <random>
+
 float scrollOffset = 0; // very ugly solution until I figure out something better Namely a proper inputmanager TODO
 bool wireframeMode = false;
 bool backfaceCulling = true;
@@ -46,7 +48,8 @@ int main(int argc, char** argv)
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+	glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
 	//glfwWindowHint(GLFW_SAMPLES, 4);
 
 	#if _DEBUG
@@ -77,9 +80,7 @@ int main(int argc, char** argv)
 
 	glViewport(0, 0, width, height);
 	glClearColor(1, 1, 1, 1);
-	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
-	//glEnable(GL_MULTISAMPLE);
 	glfwSwapInterval(1); // vsync
 
 	glfwSetKeyCallback(window, MyKeyCallback);
@@ -217,21 +218,38 @@ int main(int argc, char** argv)
 
 		Texture2D particleTex = Texture2D("res/textures/particle");
 		GLuint particleVAO;
+		const size_t pcount = 32;
 		{
 			glGenVertexArrays(1, &particleVAO);
 			glBindVertexArray(particleVAO);
 			GLuint buffers[1];
 			glGenBuffers(1, buffers);
 
-			const GLfloat data[4 * 4] = {3,3,3,1, 2,2,3,1, 4,3,2,0.5f, 2,3,2,1.5f};
+			const size_t psize = 4;
+			const glm::vec3 pos = glm::vec3(3, 3, 3);
+
+
+			std::default_random_engine gen;
+			std::uniform_real_distribution<float> distr1(-0.25f,0.25f);
+			std::uniform_real_distribution<float> distr2(0.5f, 1.5f);
+
+			GLfloat * data = new GLfloat[psize * pcount];
+			for (int i = 0; i < pcount; i++) {
+				data[i*psize] = pos.x + distr1(gen);
+				data[i*psize + 1] = pos.y + distr1(gen);
+				data[i*psize + 2] = pos.z + distr1(gen);
+				data[i*psize + 3] = distr2(gen);
+			}
 
 			glBindBuffer(GL_ARRAY_BUFFER, buffers[0]);
-			glBufferData(GL_ARRAY_BUFFER, 16 * sizeof(GLfloat), data, GL_STATIC_DRAW);
+			glBufferData(GL_ARRAY_BUFFER, psize * pcount * sizeof(GLfloat), data, GL_DYNAMIC_DRAW);
 
-			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 4, 0);
+			delete[] data;
+
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, psize, 0);
 			glEnableVertexAttribArray(0);
 
-			glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (const void*)(3 * sizeof(GLfloat)));
+			glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, psize * sizeof(GLfloat), (const void*)(3 * sizeof(GLfloat)));
 			glEnableVertexAttribArray(1);
 
 			glBindVertexArray(0);
@@ -260,7 +278,8 @@ int main(int argc, char** argv)
 			glDeleteBuffers(1, &buffers);
 		}
 
-		FrameBuffer fbo = FrameBuffer(width, height);
+		RenderFrameBuffer renderFBO = RenderFrameBuffer(width, height);
+		ColorFrameBuffer ppFBO = ColorFrameBuffer(width, height);
 
 		double nextFrameTime = 1;
 		size_t frameCount = 0;
@@ -310,8 +329,9 @@ int main(int argc, char** argv)
 			}
 
 
-			fbo.Bind();
+			renderFBO.Bind();
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			//glEnable(GL_MULTISAMPLE);
 			glEnable(GL_DEPTH_TEST);
 
 			//myObjectRenderer.DrawOverrideMaterial(debugMaterial);
@@ -331,17 +351,25 @@ int main(int argc, char** argv)
 				glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE, GL_ONE, GL_ONE);
 
 				glBindVertexArray(particleVAO);
-				glDrawArrays(GL_POINTS, 0, 4);
+				glDrawArrays(GL_POINTS, 0, pcount);
 				glDisable(GL_BLEND);
 				glDepthMask(true);
 			}
 
+			/* multisample stuffs 
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, ppFBO.GetHandle());
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, renderFBO.GetHandle());
+			//glDrawBuffer(GL_BACK);
+			glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+			glDisable(GL_MULTISAMPLE);
+			*/
+
 			//Apply basic post processing
-			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			FrameBuffer::Unbind();
 			glDisable(GL_DEPTH_TEST);
 
 			pp_demultAlpha->UseProgram();
-			glBindTexture(GL_TEXTURE_2D, fbo.fboTex[0]);
+			glBindTexture(GL_TEXTURE_2D, renderFBO.color);
 			glBindVertexArray(ssplaneVAO);
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
