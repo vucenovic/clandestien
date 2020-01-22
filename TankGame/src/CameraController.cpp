@@ -21,7 +21,7 @@ void CameraController::HandleInputs(const float &scrolloffset)
 	}
 	//Set Rotation
 	cameraTransform->SetRotationDegrees(pivotPitch, pivotYaw, 0);
-	glm::mat3 rotmatrix = Transform::BuildRotationMatrix(cameraTransform->rotation);
+	glm::mat3 rotmatrix = Transform::BuildRotationMatrix(cameraTransform->GetRotation());
 
 	glm::vec3 forwardVector = rotmatrix * glm::vec3(0, 0, 1);
 	glm::vec3 rightVector = rotmatrix * glm::vec3(1, 0, 0);
@@ -36,7 +36,7 @@ void CameraController::HandleInputs(const float &scrolloffset)
 	if (pivotRadius < 0) pivotRadius = 0;
 
 	//set Combined Position
-	cameraTransform->position = pivotPostion + forwardVector * pivotRadius;
+	cameraTransform->SetPostion(pivotPostion + forwardVector * pivotRadius);
 
 	lastX = x;
 	lastY = y;

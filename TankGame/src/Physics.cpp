@@ -12,7 +12,7 @@ namespace Physics {
 
 	AABB AABB::GetAABB(Transform transform)
 	{
-		return AABB(min + glm::vec2(transform.position), max + glm::vec2(transform.position));
+		return AABB(min + glm::vec2(transform.GetPosition()), max + glm::vec2(transform.GetPosition()));
 	}
 
 	Circle::Circle(float radius, glm::vec2 pos) : radius(radius), pos(pos)
@@ -26,7 +26,7 @@ namespace Physics {
 
 	AABB Circle::GetAABB(Transform transform)
 	{
-		return AABB(pos - radius + glm::vec2(transform.position), pos + radius + glm::vec2(transform.position));
+		return AABB(pos - radius + glm::vec2(transform.GetPosition()), pos + radius + glm::vec2(transform.GetPosition()));
 	}
 
 	void Collider::TransformCollider(Collider & collider, Transform transform)
@@ -37,15 +37,15 @@ namespace Physics {
 		case Physics::ColliderType::AABB:
 		{
 			AABB & col = (AABB&)collider;
-			col.center = glm::vec2(transform.position) + col.center;
-			col.min = glm::vec2(transform.position) + col.min;
-			col.max = glm::vec2(transform.position) + col.max;
+			col.center = glm::vec2(transform.GetPosition()) + col.center;
+			col.min = glm::vec2(transform.GetPosition()) + col.min;
+			col.max = glm::vec2(transform.GetPosition()) + col.max;
 		}
 			break;
 		case Physics::ColliderType::CIRCLE:
 		{
 			Circle & col = (Circle&)collider;
-			col.pos = glm::vec2(transform.position) + col.pos;
+			col.pos = glm::vec2(transform.GetPosition()) + col.pos;
 		}
 			break;
 		default:

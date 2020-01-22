@@ -48,24 +48,35 @@ TextureCubemap::TextureCubemap(const std::string & filepath)
 	glGenTextures(1, &textureHandle);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, textureHandle);
 
-	DDSImage img;
-	img = DDSImage::loadDDS((filepath + "negx.dds").c_str());
-	glCompressedTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, img.format, img.width, img.height, 0, img.size, img.data);
+	{
+		DDSImage img = DDSImage::loadDDS((filepath + "negx.dds").c_str());
+		glCompressedTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, img.format, img.width, img.height, 0, img.size, img.data);
+	}
 
-	img = DDSImage::loadDDS((filepath + "posx.dds").c_str());
-	glCompressedTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, img.format, img.width, img.height, 0, img.size, img.data);
+	{
+		DDSImage img = DDSImage::loadDDS((filepath + "posx.dds").c_str());
+		glCompressedTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, img.format, img.width, img.height, 0, img.size, img.data);
+	}
 
-	img = DDSImage::loadDDS((filepath + "negy.dds").c_str());
-	glCompressedTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, img.format, img.width, img.height, 0, img.size, img.data);
+	{
+		DDSImage img = DDSImage::loadDDS((filepath + "negy.dds").c_str());
+		glCompressedTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, img.format, img.width, img.height, 0, img.size, img.data);
+	}
 
-	img = DDSImage::loadDDS((filepath + "posy.dds").c_str());
-	glCompressedTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, img.format, img.width, img.height, 0, img.size, img.data);
+	{
+		DDSImage img = DDSImage::loadDDS((filepath + "posy.dds").c_str());
+		glCompressedTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, img.format, img.width, img.height, 0, img.size, img.data);
+	}
 
-	img = DDSImage::loadDDS((filepath + "negz.dds").c_str());
-	glCompressedTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, img.format, img.width, img.height, 0, img.size, img.data);
+	{
+		DDSImage img = DDSImage::loadDDS((filepath + "negz.dds").c_str());
+		glCompressedTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, img.format, img.width, img.height, 0, img.size, img.data);
+	}
 
-	img = DDSImage::loadDDS((filepath + "posz.dds").c_str());
-	glCompressedTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, img.format, img.width, img.height, 0, img.size, img.data);
+	{
+		DDSImage img = DDSImage::loadDDS((filepath + "posz.dds").c_str());
+		glCompressedTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, img.format, img.width, img.height, 0, img.size, img.data);
+	}
 
 	glGenerateMipmap(GL_TEXTURE_CUBE_MAP); //this is incredibly slow (cubemap mipmap generation seems to be done in software whereas Texture2D is done in hardware)
 

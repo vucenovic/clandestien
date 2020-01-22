@@ -5,15 +5,15 @@
 
 size_t GameObject::IDCounter = 0;
 
-ObjectRenderer::ObjectRenderer()
+MasterRenderer::MasterRenderer()
 {
 }
 
-ObjectRenderer::~ObjectRenderer()
+MasterRenderer::~MasterRenderer()
 {
 }
 
-void ObjectRenderer::AddObject(GameObject * obj)
+void MasterRenderer::AddObject(GameObject * obj)
 {
 	auto & shaderGroup = renderGroups[obj->material->shader.get()];
 	std::unordered_map<Mesh*, std::vector<GameObject*>> & meshGroups = shaderGroup[obj->material];
@@ -21,7 +21,7 @@ void ObjectRenderer::AddObject(GameObject * obj)
 	objects.push_back(obj);
 }
 
-void ObjectRenderer::RemoveObject(GameObject * obj)
+void MasterRenderer::RemoveObject(GameObject * obj)
 {
 	auto & shaderGroup = renderGroups[obj->material->shader.get()];
 	std::unordered_map<Mesh*, std::vector<GameObject*>> & meshGroups = shaderGroup[obj->material];
@@ -36,7 +36,7 @@ void ObjectRenderer::RemoveObject(GameObject * obj)
 	if (shaderGroup.size() == 0) renderGroups.erase(obj->material->shader.get());
 }
 
-void ObjectRenderer::Draw()
+void MasterRenderer::Draw()
 {
 	for (std::pair<ShaderProgram*, std::unordered_map<Material*, std::unordered_map<Mesh*, std::vector<GameObject*>>>>  shaderGroup : renderGroups)
 	{
@@ -61,7 +61,7 @@ void ObjectRenderer::Draw()
 	}
 }
 
-void ObjectRenderer::DrawOverrideMaterial(Material& material)
+void MasterRenderer::DrawOverrideMaterial(Material& material)
 {
 	material.Use();
 	GLuint modelMatrixLocation = material.shader->GetUniformLocation("modelMatrix");

@@ -27,7 +27,12 @@ public:
 		return *this;
 	};
 
-	~DDSImage() { if (data != nullptr) { delete[] data; data = nullptr; } }
+	~DDSImage() {
+		if (data != nullptr) {
+			delete[] data;
+			data = nullptr;
+		}
+	}
 
 	static DDSImage loadDDS(const char* file);
 };

@@ -151,22 +151,22 @@ int main(int argc, char** argv)
 		GameObject testobject = GameObject();
 		testobject.mesh = myTestMesh.get();
 		testobject.material = &tilesMaterial;
-		testobject.GetTransform().position = glm::vec3(3, 1.5f, 0);
+		testobject.GetTransform().SetPostion(glm::vec3(3, 1.5f, 0));
 
 		GameObject sphere = GameObject();
 		sphere.mesh = mySphereMesh.get();
 		sphere.material = &tilesMaterial;
-		sphere.GetTransform().position = glm::vec3(1.5f,-1,0);
+		sphere.GetTransform().SetPostion(glm::vec3(1.5f,-1,0));
 
 		GameObject cube = GameObject();
 		cube.mesh = myCubeMesh.get();
 		cube.material = &woodMaterial;
-		cube.GetTransform().position = glm::vec3(0, 1.5f, 0);
+		cube.GetTransform().SetPostion(glm::vec3(0, 1.5f, 0));
 
 		GameObject cylinder = GameObject();
 		cylinder.mesh = myCylinderMesh.get();
 		cylinder.material = &tilesMaterial;
-		cylinder.GetTransform().position = glm::vec3(-1.5f, -1, 0);
+		cylinder.GetTransform().SetPostion(glm::vec3(-1.5f, -1, 0));
 
 		//--------Uniform Buffers
 
@@ -206,7 +206,7 @@ int main(int argc, char** argv)
 
 		myLightManager.UpdateBuffer();
 
-		ObjectRenderer myObjectRenderer = ObjectRenderer();
+		MasterRenderer myObjectRenderer = MasterRenderer();
 
 		myObjectRenderer.AddObject(&sphere);
 		myObjectRenderer.AddObject(&cube);
@@ -301,14 +301,9 @@ int main(int argc, char** argv)
 			glfwPollEvents();
 
 			myCameraController.HandleInputs(scrollOffset);
-			if(glfwGetKey(window,GLFW_KEY_J) == GLFW_PRESS)
-				testobject.GetTransform().rotation.y += 0.01f;
-			if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS)
-				testobject.GetTransform().rotation.x += 0.01f;
-			if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS)
-				testobject.GetTransform().rotation.z += 0.01f;
+			testobject.GetTransform().Rotate((glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) * 0.01f,(glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS) * 0.01f,(glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) * 0.01f);
 			if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
-				testobject.GetTransform().rotation = glm::vec3();
+				testobject.GetTransform().SetRotation(glm::vec3());
 
 			bool debugPressed = glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS; //getto solution for now
 			if (debugPressed && !debugpressedLastFrame) {
@@ -320,7 +315,7 @@ int main(int argc, char** argv)
 			//Set ViewProjectionMatrix
 			{
 				glm::mat4 viewPerspective = perspective * myCameraTransform.ToInverseMatrix();
-				glm::vec4 eyePos = glm::vec4(myCameraTransform.position,1);
+				glm::vec4 eyePos = glm::vec4(myCameraTransform.GetPosition(),1);
 
 				glBindBuffer(GL_UNIFORM_BUFFER, viewDataBuffer.GetHandle());
 				glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(viewPerspective));

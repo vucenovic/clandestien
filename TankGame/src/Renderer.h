@@ -9,7 +9,7 @@
 #include "Utils.h"
 #include "ParticleSystem.h"
 
-class GameObject
+class GameObject //TODO separate material and mesh from gameobject
 {
 private:
 	static size_t IDCounter;
@@ -25,31 +25,18 @@ public:
 	Transform & GetTransform();
 };
 
-class ObjectRenderer
+class MasterRenderer
 {
 private:
 	std::unordered_map<ShaderProgram *, std::unordered_map<Material*, std::unordered_map<Mesh*, std::vector<GameObject*>>>> renderGroups;//Improve sort by render pass
+	std::vector<ParticleSystem> particleSystems;
 public:
-	ObjectRenderer();
-	~ObjectRenderer();
+	MasterRenderer();
+	~MasterRenderer();
 
 	void AddObject(GameObject * obj);
 	void RemoveObject(GameObject * obj);
 
 	void Draw();
 	void DrawOverrideMaterial(Material& material);
-};
-
-class ParticleSystemRenderer
-{
-private:
-	std::vector<ParticleSystem> particleSystems;
-public:
-	ParticleSystemRenderer();
-	~ParticleSystemRenderer();
-
-	void AddPS(GameObject * obj);
-	void RemovePS(GameObject * obj);
-
-	void Draw();
 };
