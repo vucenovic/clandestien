@@ -7,7 +7,7 @@
 #include "Material.h"
 #include "Mesh.h"
 #include "Utils.h"
-#include "ParticleSystem.h"
+#include "Particles.h"
 
 class GameObject //TODO separate material and mesh from gameobject
 {
@@ -29,7 +29,6 @@ class MasterRenderer
 {
 private:
 	std::unordered_map<ShaderProgram *, std::unordered_map<Material*, std::unordered_map<Mesh*, std::vector<GameObject*>>>> renderGroups;//Improve sort by render pass
-	std::vector<ParticleSystem> particleSystems;
 public:
 	MasterRenderer();
 	~MasterRenderer();

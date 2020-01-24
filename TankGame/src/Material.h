@@ -55,9 +55,9 @@ public:
 	Material(std::shared_ptr<ShaderProgram> shaderProg);
 	~Material();
 
-	void Use();
-	void UseShader();
-	void ApplyProperties();
+	void Use() const;
+	void UseShader() const;
+	void ApplyProperties() const;
 
 	void SetPropertyf(const std::string & name, GLfloat val);
 	void SetProperty3f(const std::string & name, glm::vec3 val);

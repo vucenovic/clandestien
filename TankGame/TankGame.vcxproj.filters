@@ -60,7 +60,7 @@
     <ClCompile Include="src\FrameBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\ParticleSystem.cpp">
+    <ClCompile Include="src\Particles.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -116,7 +116,7 @@
     <ClInclude Include="src\FrameBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\ParticleSystem.h">
+    <ClInclude Include="src\Particles.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

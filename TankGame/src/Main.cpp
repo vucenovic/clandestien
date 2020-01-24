@@ -225,12 +225,12 @@ int main(int argc, char** argv)
 			GLuint buffers[1];
 			glGenBuffers(1, buffers);
 
-			const size_t psize = 4;
+			const size_t psize = 5;
 			const glm::vec3 pos = glm::vec3(3, 3, 3);
 
 
 			std::default_random_engine gen;
-			std::uniform_real_distribution<float> distr1(-0.25f,0.25f);
+			std::uniform_real_distribution<float> distr1(-1.25f,1.25f);
 			std::uniform_real_distribution<float> distr2(0.5f, 1.5f);
 
 			GLfloat * data = new GLfloat[psize * pcount];
@@ -239,6 +239,7 @@ int main(int argc, char** argv)
 				data[i*psize + 1] = pos.y + distr1(gen);
 				data[i*psize + 2] = pos.z + distr1(gen);
 				data[i*psize + 3] = distr2(gen);
+				data[i*psize + 4] = distr1(gen);
 			}
 
 			glBindBuffer(GL_ARRAY_BUFFER, buffers[0]);
@@ -246,11 +247,14 @@ int main(int argc, char** argv)
 
 			delete[] data;
 
-			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, psize, 0);
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, psize * sizeof(GLfloat), 0);
 			glEnableVertexAttribArray(0);
 
 			glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, psize * sizeof(GLfloat), (const void*)(3 * sizeof(GLfloat)));
 			glEnableVertexAttribArray(1);
+
+			glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, psize * sizeof(GLfloat), (const void*)(4 * sizeof(GLfloat)));
+			glEnableVertexAttribArray(2);
 
 			glBindVertexArray(0);
 			glDeleteBuffers(1, buffers);

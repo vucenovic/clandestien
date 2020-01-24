@@ -8,18 +8,18 @@ Material::~Material()
 {
 }
 
-void Material::Use()
+void Material::Use() const
 {
 	UseShader();
 	ApplyProperties();
 }
 
-void Material::UseShader()
+void Material::UseShader() const
 {
 	shader->UseProgram();
 }
 
-void Material::ApplyProperties()
+void Material::ApplyProperties() const
 {
 	for (std::pair<GLuint, std::shared_ptr<Texture>> tex : textures) {
 		tex.second->Bind(tex.first);
