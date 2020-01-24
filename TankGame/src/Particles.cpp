@@ -28,8 +28,27 @@ namespace Particles {
 
 	ParticleSystemMeshManager::~ParticleSystemMeshManager()
 	{
+		if (buffer != nullptr) End();
 		glDeleteBuffers(1, &ParticleBuffer);
 		glDeleteVertexArrays(1, &VAO);
+	}
+
+	void ParticleSystemMeshManager::Begin()
+	{
+		glBindBuffer(GL_ARRAY_BUFFER, ParticleBuffer);
+		buffer = (Particle *)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+	}
+
+	Particle * ParticleSystemMeshManager::GetBuffer()
+	{
+		return buffer;
+	}
+
+	void ParticleSystemMeshManager::End()
+	{
+		buffer = nullptr;
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glUnmapBuffer(GL_ARRAY_BUFFER);
 	}
 
 	void ParticleSystemMeshManager::Bind() const

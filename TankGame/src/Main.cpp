@@ -20,6 +20,7 @@
 #include "Texture.h"
 #include "Renderer.h"
 #include "FrameBuffer.h"
+#include "Particles.h"
 
 #include "Main.h"
 
@@ -337,8 +338,8 @@ int main(int argc, char** argv)
 			myObjectRenderer.Draw();
 
 			{ //TODO move into particle system class and particle sytemrenderer
-				glEnable(GL_BLEND);
-				glDepthMask(false);
+				using namespace Particles;
+				ParticleSystem::PrepareDraw();
 				particleShader->UseProgram();
 				GLuint modelMatrixLocation = particleShader->GetUniformLocation("modelMatrix");
 				GLuint normalMatrixLocation = particleShader->GetUniformLocation("modelNormalMatrix");
@@ -346,13 +347,9 @@ int main(int argc, char** argv)
 				glUniformMatrix4fv(modelMatrixLocation, 1, GL_FALSE, glm::value_ptr(ident));
 				particleTex.Bind(0);
 
-				glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
-				glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE, GL_ONE, GL_ONE);
-
 				glBindVertexArray(particleVAO);
 				glDrawArrays(GL_POINTS, 0, pcount);
-				glDisable(GL_BLEND);
-				glDepthMask(true);
+				ParticleSystem::FinishDraw();
 			}
 
 			/* multisample stuffs 

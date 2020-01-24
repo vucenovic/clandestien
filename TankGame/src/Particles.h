@@ -4,6 +4,7 @@
 #include <memory>
 #include "Material.h"
 
+//overall this whole thing needs a lot of refactoring, but coming up with a good structure ist difficult
 namespace Particles
 {
 	struct Particle {
@@ -18,9 +19,15 @@ namespace Particles
 		size_t maxParticleCount;
 		GLuint VAO;
 		GLuint ParticleBuffer;
+
+		Particle * buffer = nullptr;
 	public:
 		ParticleSystemMeshManager(size_t maxParticles);
 		~ParticleSystemMeshManager();
+
+		void Begin();
+		Particle * GetBuffer();
+		void End();
 
 		void Bind() const;
 	};
