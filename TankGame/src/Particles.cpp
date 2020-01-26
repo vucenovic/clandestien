@@ -28,27 +28,13 @@ namespace Particles {
 
 	ParticleSystemMeshManager::~ParticleSystemMeshManager()
 	{
-		if (buffer != nullptr) End();
 		glDeleteBuffers(1, &ParticleBuffer);
 		glDeleteVertexArrays(1, &VAO);
 	}
 
-	void ParticleSystemMeshManager::Begin()
+	const GLuint ParticleSystemMeshManager::GetBufferHandle() const
 	{
-		glBindBuffer(GL_ARRAY_BUFFER, ParticleBuffer);
-		buffer = (Particle *)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-	}
-
-	Particle * ParticleSystemMeshManager::GetBuffer()
-	{
-		return buffer;
-	}
-
-	void ParticleSystemMeshManager::End()
-	{
-		buffer = nullptr;
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glUnmapBuffer(GL_ARRAY_BUFFER);
+		return ParticleBuffer;
 	}
 
 	void ParticleSystemMeshManager::Bind() const
@@ -56,7 +42,40 @@ namespace Particles {
 		glBindVertexArray(VAO);
 	}
 
-	ParticleSystem::ParticleSystem(const ParticleSystemPrototype & prototype)
+	void ParticleSystem::RemoveDeadParticles()
+	{
+		size_t end = 0;
+		size_t emptyCount = 0;
+		size_t start = 0;
+		bool rem = false;
+
+		for (size_t i = 0; i < activeParticles; i++) {
+			if (particleLifetimes[i] > prototype.lifeTime) {
+				if (rem) {
+					if (end != 0) {
+						memmove(particleLifetimes + end, particleLifetimes + start, (i - start) * sizeof(float));
+						memmove(particles + end, particles + start, (i - start) * sizeof(float));
+					}
+					emptyCount = 0;
+					rem = false;
+					end += i - start;
+				}
+				emptyCount++;
+			}
+			else {
+				if (!rem) start = i;
+				rem = true;
+			}
+		}
+		if (rem && end != 0) {
+			memmove(particleLifetimes + end, particleLifetimes + start, (activeParticles - start) * sizeof(float));
+			memmove(particles + end, particles + start, (activeParticles - start) * sizeof(float));
+			end += activeParticles - start;
+		}
+		activeParticles = end;
+	}
+
+	ParticleSystem::ParticleSystem(ParticleSystemPrototype & prototype) : prototype(prototype)
 	{
 		const size_t pcount = 32;
 		std::default_random_engine gen;
@@ -69,6 +88,16 @@ namespace Particles {
 			data[i*PARTICLE_FLOAT_SIZE + 1] = distr1(gen);
 			data[i*PARTICLE_FLOAT_SIZE + 2] = distr1(gen);
 			data[i*PARTICLE_FLOAT_SIZE + 3] = distr2(gen);
+		}
+	}
+
+	void ParticleSystem::Update(const float deltaTime)
+	{
+		RemoveDeadParticles();
+		for (size_t i = 0; i < activeParticles; i++) {
+			particleLifetimes[i] += deltaTime; //increase lifetimes
+			particles[i].velocity += prototype.constantForce; //integrate velocity
+			particles[i].postion += particles[i].velocity; //integrate postion
 		}
 	}
 
@@ -104,10 +133,5 @@ namespace Particles {
 	{
 		glDisable(GL_BLEND);
 		glDepthMask(true);
-	}
-
-	inline const float AnimatedValue::Evaluate(const float time) const
-	{
-		return keys.value;
 	}
 }

@@ -3,15 +3,19 @@
 #include <glm/glm.hpp>
 #include <memory>
 #include "Material.h"
+#include <vector>
 
 //overall this whole thing needs a lot of refactoring, but coming up with a good structure ist difficult
 namespace Particles
 {
-	struct Particle {
+	struct Particle { //maybe switch particles to a non interleaved format to allow only writing whats needed?
 		glm::vec3 postion;
+		glm::vec3 velocity;
+		glm::vec4 color;
 		GLfloat size;
 		GLfloat rotation;
 	};
+
 	constexpr size_t PARTICLE_FLOAT_SIZE = sizeof(Particle) / sizeof(GLfloat);
 
 	class ParticleSystemMeshManager{
@@ -19,53 +23,72 @@ namespace Particles
 		size_t maxParticleCount;
 		GLuint VAO;
 		GLuint ParticleBuffer;
-
-		Particle * buffer = nullptr;
 	public:
 		ParticleSystemMeshManager(size_t maxParticles);
 		~ParticleSystemMeshManager();
 
-		void Begin();
-		Particle * GetBuffer();
-		void End();
+		const GLuint GetBufferHandle() const;
 
 		void Bind() const;
 	};
 
+	template<typename T>
 	class AnimatedValueKey {
 	public:
-		float value;
+		T value;
 		float time;
 	public:
+		const T & GetValue() const { return value; };
 
+		AnimatedValueKey() : time(0), value(T()) {};
+		AnimatedValueKey(float time, T value) : time(time), value(value) {};
+
+		bool operator > (const AnimatedValueKey& o) { return time > o.time; };
+		bool operator < (const AnimatedValueKey& o) { return time < o.time; };
 	};
 
+	template<typename T>
 	class AnimatedValue {
 	private:
-		AnimatedValueKey keys;
+		std::vector<AnimatedValueKey<T>> keys;
+		bool loop;
+		float currentTime;
 	public:
-		inline const float Evaluate(const float time) const;
+		inline const T Evaluate(const float time) const {
+			return keys.value;
+		}
+	};
+
+	class ParticleEmitter {
+
 	};
 
 	class ParticleSystemPrototype {
 	public:
 		size_t maxParticles;
+		float lifeTime;
+		glm::vec3 constantForce = glm::vec3(0);
 		std::shared_ptr<Material> material;
 	};
 
 	class ParticleSystem
 	{
 	private:
-		ParticleSystemPrototype prototype;
+		ParticleSystemPrototype & prototype;
 		std::shared_ptr<ParticleSystemMeshManager> meshManager;
 
 		size_t indexStart, count;
 		size_t activeParticles;
 
 		Particle * particles;
+		float * particleLifetimes;
+		
+		void RemoveDeadParticles();
 	public:
-		ParticleSystem(const ParticleSystemPrototype & prototype);
+		ParticleSystem(ParticleSystemPrototype & prototype);
 		~ParticleSystem();
+
+		void Update(const float deltaTime);
 
 		void WriteMesh(const void* PBuffer, const size_t minIndex, const size_t maxIndex);
 

@@ -1,8 +1,10 @@
 #version 450 core
 
 layout (location = 0) in vec3 position;
-layout (location = 1) in float size;
-layout (location = 2) in float rotation;
+layout (location = 1) in vec3 velocity;
+layout (location = 2) in vec4 color;
+layout (location = 3) in float size;
+layout (location = 4) in float rotation;
 //possibly add velocity and color and animstate
 
 layout (binding = 0, std140) uniform viewData
@@ -18,6 +20,9 @@ out ParticleDataGeom
 {
     float size;
 	vec2 upVector;
+
+	vec4 color;
+	vec2 velocityVector;
 } particle;
 
 void main()
@@ -27,6 +32,10 @@ void main()
     particle.size = size;
 	particle.upVector.x = sin(rotation);
 	particle.upVector.y = cos(rotation);
+
+	particle.color = color;
+	vec4 velRaw =  modelMatrix*vec4(velocity,1);
+	particle.velocityVector =velRaw.xy;
 
 	gl_Position = viewProjection*worldPos;
 }

@@ -7,10 +7,14 @@ in ParticleDataGeom
 {
     float size;
     vec2 upVector;
+
+    vec4 color;
+	vec2 velocityVector;
 } particle[];
 
 out ParticleData
 {
+    vec4 color;
     vec2 textureCoord;
 } pOut;
 
@@ -19,7 +23,7 @@ float size;
 vec2 upVec;
 vec2 rightVec;
 
-void generateBillboard() {    
+void generateBillboard() {
     gl_Position = position + vec4(-(upVec + rightVec) * size,0,0); 
     pOut.textureCoord = vec2(0,0);
     EmitVertex();
@@ -44,5 +48,7 @@ void main() {
     size = particle[0].size;
     upVec = particle[0].upVector;
     rightVec = vec2(upVec.y,-upVec.x);
+
+    pOut.color = particle[0].color;
     generateBillboard();
 }

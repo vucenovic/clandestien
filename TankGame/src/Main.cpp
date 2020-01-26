@@ -231,7 +231,7 @@ int main(int argc, char** argv)
 
 
 			std::default_random_engine gen;
-			std::uniform_real_distribution<float> distr1(-1.25f,1.25f);
+			std::normal_distribution<float> distr1(0,1);
 			std::uniform_real_distribution<float> distr2(0.5f, 1.5f);
 
 			GLfloat * data = new GLfloat[psize * pcount];
@@ -251,11 +251,11 @@ int main(int argc, char** argv)
 			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, psize * sizeof(GLfloat), 0);
 			glEnableVertexAttribArray(0);
 
-			glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, psize * sizeof(GLfloat), (const void*)(3 * sizeof(GLfloat)));
-			glEnableVertexAttribArray(1);
+			glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, psize * sizeof(GLfloat), (const void*)(3 * sizeof(GLfloat)));
+			glEnableVertexAttribArray(3);
 
-			glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, psize * sizeof(GLfloat), (const void*)(4 * sizeof(GLfloat)));
-			glEnableVertexAttribArray(2);
+			glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, psize * sizeof(GLfloat), (const void*)(4 * sizeof(GLfloat)));
+			glEnableVertexAttribArray(4);
 
 			glBindVertexArray(0);
 			glDeleteBuffers(1, buffers);
