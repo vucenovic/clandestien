@@ -90,6 +90,7 @@ namespace Particles
 		~ParticleSystem();
 
 		void CreateDebugParticles(); //temporary function to test with until the remaining systems are in place
+		void AddDebugParticles();
 
 		void Update(const float deltaTime);
 

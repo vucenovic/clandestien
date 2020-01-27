@@ -228,18 +228,11 @@ int main(int argc, char** argv)
 		ParticleSystemDefinition pSystemDef;
 		{
 			pSystemDef.lifeTime = 5;
-			pSystemDef.maxParticles = 50;
+			pSystemDef.maxParticles = 150;
 			pSystemDef.material = particlesMaterial;
 		}
 		ParticleSystem pSystem(pSystemDef);
 		pSystem.CreateDebugParticles();
-		{
-			glBindBuffer(GL_ARRAY_BUFFER,pmmanager.GetBufferHandle());
-			void * buf = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-			pSystem.WriteMesh((Particle*)buf, 0, 150);
-			glUnmapBuffer(GL_ARRAY_BUFFER);
-			glBindBuffer(GL_ARRAY_BUFFER,0);
-		}
 		
 		GLuint ssplaneVAO;
 		{
@@ -266,19 +259,22 @@ int main(int argc, char** argv)
 		RenderFrameBuffer renderFBO = RenderFrameBuffer(width, height);
 		ColorFrameBuffer ppFBO = ColorFrameBuffer(width, height);
 
-		double nextFrameTime = 1;
+		double lastFrameTime = 0;
+		double nextSecond = 1;
 		size_t frameCount = 0;
 
 		//Render Loop
 		while (!glfwWindowShouldClose(window))
 		{
+			double currentFrametime = glfwGetTime();
+			float deltaTime = (float)(currentFrametime - lastFrameTime);
+			lastFrameTime = currentFrametime;
 			/* DISPLAY FRAMES PER SECOND
-			double currentFrametime = glfwGetTime(); // Displace framerate
 			frameCount++;
-			if (currentFrametime >= nextFrameTime) {
+			if (currentFrametime >= nextSecond) {
 				std::cout << frameCount << "FPS" << std::endl;
 				frameCount = 0;
-				nextFrameTime = currentFrametime + 1;
+				nextSecond = currentFrametime + 1;
 			}
 			*/
 

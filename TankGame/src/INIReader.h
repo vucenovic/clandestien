@@ -119,7 +119,8 @@ INIReader::INIReader(std::string filePath)
 				mid_ptr = FindFirstNonOccurance(mid_ptr + 1, lr.LineEnd(), ' ');
 				ptr1 = FindFirstOccurance(mid_ptr, lr.LineEnd() - 1, ' ');
 				std::string value = std::string(mid_ptr, ptr1);
-				(*currentSection)[name] = value;
+				auto & tmp = (*currentSection); //I dont know why but writing it to a temp and then using it fixes some weird bug that triggered a stack based overflow error
+				tmp[name] = value;
 			}
 			break;
 			case ';': //Comment

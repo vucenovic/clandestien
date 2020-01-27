@@ -59,10 +59,8 @@ namespace Particles {
 		for (size_t i = 0; i < activeParticles; i++) {
 			if (particleLifetimes[i] > prototype.lifeTime) {
 				if (rem) {
-					if (end != 0) {
-						memmove(particleLifetimes + end, particleLifetimes + start, (i - start) * sizeof(float));
-						memmove(particles + end, particles + start, (i - start) * sizeof(float));
-					}
+					memmove(particleLifetimes + end, particleLifetimes + start, (i - start) * sizeof(float));
+					memmove(particles + end, particles + start, (i - start) * sizeof(Particle));
 					emptyCount = 0;
 					rem = false;
 					end += i - start;
@@ -75,14 +73,11 @@ namespace Particles {
 			}
 		}
 		if (rem) {
-			if (end != 0) {
-				memmove(particleLifetimes + end, particleLifetimes + start, (activeParticles - start) * sizeof(float));
-				memmove(particles + end, particles + start, (activeParticles - start) * sizeof(float));
-				end += activeParticles - start;
-				activeParticles = end;
-			}
+			memmove(particleLifetimes + end, particleLifetimes + start, (activeParticles - start) * sizeof(float));
+			memmove(particles + end, particles + start, (activeParticles - start) * sizeof(Particle));
+			end += activeParticles - start;
 		}
-		else activeParticles = 0;
+		activeParticles = end;
 	}
 
 	void ParticleSystem::SpawnNewParticles()
@@ -101,21 +96,35 @@ namespace Particles {
 		delete[] particleLifetimes;
 	}
 
+	std::default_random_engine gen;
+	std::normal_distribution<float> distr1(0, 1);
+	std::uniform_real_distribution<float> distr2(0.5f, 1.5f);
+	std::uniform_real_distribution<float> distr3(0, 5);
+
 	void ParticleSystem::CreateDebugParticles()
 	{
-		std::default_random_engine gen;
-		std::normal_distribution<float> distr1(0, 1);
-		std::uniform_real_distribution<float> distr2(0.5f, 1.5f);
-
 		for (int i = 0; i < prototype.maxParticles; i++) {
 			Particle & p = particles[i];
 			p.postion = glm::vec3(distr1(gen), distr1(gen), distr1(gen));
 			p.velocity = glm::vec3(distr1(gen), distr1(gen), distr1(gen)) * 0.1f;
 			p.rotation = distr1(gen);
 			p.size = distr2(gen);
-			particleLifetimes[i] = 0;
+			particleLifetimes[i] = distr3(gen);
 		}
 		activeParticles = prototype.maxParticles;
+	}
+
+	void ParticleSystem::AddDebugParticles()
+	{
+		if (activeParticles < prototype.maxParticles) {
+			particleLifetimes[activeParticles] = 0;
+			Particle & p = particles[activeParticles];
+			p.postion = glm::vec3(distr1(gen), distr1(gen), distr1(gen));
+			p.velocity = glm::vec3(distr1(gen), distr1(gen), distr1(gen)) * 0.1f;
+			p.rotation = distr1(gen);
+			p.size = distr2(gen);
+			activeParticles++;
+		}
 	}
 
 	void ParticleSystem::Update(const float deltaTime)
@@ -126,6 +135,7 @@ namespace Particles {
 			particles[i].velocity += prototype.constantForce * deltaTime; //integrate velocity
 			particles[i].postion += particles[i].velocity * deltaTime; //integrate postion
 		}
+		AddDebugParticles();
 	}
 
 	void ParticleSystem::WriteMesh(const Particle * PBuffer, const size_t offset, const size_t maxCount)
