@@ -14,15 +14,22 @@ namespace Particles {
 		glBindBuffer(GL_ARRAY_BUFFER, ParticleBuffer);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(Particle) * maxParticleCount, nullptr, GL_DYNAMIC_DRAW);
 
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Particle), 0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Particle), 0); //position
 		glEnableVertexAttribArray(0);
 
-		glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, sizeof(Particle), (const void*)(3 * sizeof(GLfloat)));
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Particle), (const void*)(3 * sizeof(GLfloat))); //velocity
 		glEnableVertexAttribArray(1);
 
-		glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(Particle), (const void*)(4 * sizeof(GLfloat)));
+		glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(Particle), (const void*)(6 * sizeof(GLfloat))); //color
 		glEnableVertexAttribArray(2);
 
+		glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(Particle), (const void*)(10 * sizeof(GLfloat))); //size
+		glEnableVertexAttribArray(3);
+
+		glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, sizeof(Particle), (const void*)(11 * sizeof(GLfloat))); //rotation
+		glEnableVertexAttribArray(4);
+
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindVertexArray(0);
 	}
 
@@ -67,28 +74,48 @@ namespace Particles {
 				rem = true;
 			}
 		}
-		if (rem && end != 0) {
-			memmove(particleLifetimes + end, particleLifetimes + start, (activeParticles - start) * sizeof(float));
-			memmove(particles + end, particles + start, (activeParticles - start) * sizeof(float));
-			end += activeParticles - start;
+		if (rem) {
+			if (end != 0) {
+				memmove(particleLifetimes + end, particleLifetimes + start, (activeParticles - start) * sizeof(float));
+				memmove(particles + end, particles + start, (activeParticles - start) * sizeof(float));
+				end += activeParticles - start;
+				activeParticles = end;
+			}
 		}
-		activeParticles = end;
+		else activeParticles = 0;
 	}
 
-	ParticleSystem::ParticleSystem(ParticleSystemPrototype & prototype) : prototype(prototype)
+	void ParticleSystem::SpawnNewParticles()
 	{
-		const size_t pcount = 32;
+	}
+
+	ParticleSystem::ParticleSystem(ParticleSystemDefinition & prototype) : prototype(prototype)
+	{
+		particles = new Particle[prototype.maxParticles];
+		particleLifetimes = new float[prototype.maxParticles];
+	}
+
+	ParticleSystem::~ParticleSystem()
+	{
+		delete[] particles;
+		delete[] particleLifetimes;
+	}
+
+	void ParticleSystem::CreateDebugParticles()
+	{
 		std::default_random_engine gen;
-		std::uniform_real_distribution<float> distr1(-0.25f, 0.25f);
+		std::normal_distribution<float> distr1(0, 1);
 		std::uniform_real_distribution<float> distr2(0.5f, 1.5f);
 
-		GLfloat * data = new GLfloat[PARTICLE_FLOAT_SIZE * pcount];
-		for (int i = 0; i < pcount; i++) {
-			data[i*PARTICLE_FLOAT_SIZE] = distr1(gen);
-			data[i*PARTICLE_FLOAT_SIZE + 1] = distr1(gen);
-			data[i*PARTICLE_FLOAT_SIZE + 2] = distr1(gen);
-			data[i*PARTICLE_FLOAT_SIZE + 3] = distr2(gen);
+		for (int i = 0; i < prototype.maxParticles; i++) {
+			Particle & p = particles[i];
+			p.postion = glm::vec3(distr1(gen), distr1(gen), distr1(gen));
+			p.velocity = glm::vec3(distr1(gen), distr1(gen), distr1(gen)) * 0.1f;
+			p.rotation = distr1(gen);
+			p.size = distr2(gen);
+			particleLifetimes[i] = 0;
 		}
+		activeParticles = prototype.maxParticles;
 	}
 
 	void ParticleSystem::Update(const float deltaTime)
@@ -96,16 +123,16 @@ namespace Particles {
 		RemoveDeadParticles();
 		for (size_t i = 0; i < activeParticles; i++) {
 			particleLifetimes[i] += deltaTime; //increase lifetimes
-			particles[i].velocity += prototype.constantForce; //integrate velocity
-			particles[i].postion += particles[i].velocity; //integrate postion
+			particles[i].velocity += prototype.constantForce * deltaTime; //integrate velocity
+			particles[i].postion += particles[i].velocity * deltaTime; //integrate postion
 		}
 	}
 
-	void ParticleSystem::WriteMesh(const void * PBuffer, const size_t minIndex, const size_t maxIndex)
+	void ParticleSystem::WriteMesh(const Particle * PBuffer, const size_t offset, const size_t maxCount)
 	{
-		count = maxIndex - minIndex;
-		indexStart = minIndex;
-		memcpy((Particle*)PBuffer + minIndex, particles, count * sizeof(Particle));
+		count = maxCount < activeParticles ? maxCount : activeParticles;
+		indexStart = offset;
+		memcpy((void*)(PBuffer + offset), particles, count * sizeof(Particle));
 	}
 
 	void ParticleSystem::Draw() const
@@ -121,6 +148,7 @@ namespace Particles {
 		glDrawArrays(GL_POINTS, indexStart, count);//except this, this should then be inlined
 	}
 
+	//Sets the render state for drawing particle systems
 	void ParticleSystem::PrepareDraw()
 	{ //TODO move into a proper render manager
 		glEnable(GL_BLEND);
@@ -129,6 +157,7 @@ namespace Particles {
 		glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE, GL_ONE, GL_ONE);
 	}
 
+	//sets the render state for rendering regular geometry (this should be moved somewhere else really)
 	void ParticleSystem::FinishDraw()
 	{
 		glDisable(GL_BLEND);

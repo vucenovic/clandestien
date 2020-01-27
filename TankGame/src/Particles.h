@@ -55,26 +55,26 @@ namespace Particles
 		float currentTime;
 	public:
 		inline const T Evaluate(const float time) const {
-			return keys.value;
+			return keys[0].GetValue();
 		}
 	};
 
-	class ParticleEmitter {
-
-	};
-
-	class ParticleSystemPrototype {
+	class ParticleSystemDefinition {
 	public:
 		size_t maxParticles;
 		float lifeTime;
 		glm::vec3 constantForce = glm::vec3(0);
 		std::shared_ptr<Material> material;
+
+		AnimatedValue<float> size;
+		AnimatedValue<float> rotation;
+		AnimatedValue<glm::vec4> color;
 	};
 
 	class ParticleSystem
 	{
 	private:
-		ParticleSystemPrototype & prototype;
+		ParticleSystemDefinition & prototype;
 		std::shared_ptr<ParticleSystemMeshManager> meshManager;
 
 		size_t indexStart, count;
@@ -84,13 +84,16 @@ namespace Particles
 		float * particleLifetimes;
 		
 		void RemoveDeadParticles();
+		void SpawnNewParticles();
 	public:
-		ParticleSystem(ParticleSystemPrototype & prototype);
+		ParticleSystem(ParticleSystemDefinition & prototype);
 		~ParticleSystem();
+
+		void CreateDebugParticles(); //temporary function to test with until the remaining systems are in place
 
 		void Update(const float deltaTime);
 
-		void WriteMesh(const void* PBuffer, const size_t minIndex, const size_t maxIndex);
+		void WriteMesh(const Particle* PBuffer, const size_t minIndex, const size_t maxIndex);
 
 		void Draw() const; //meshManager must be Bound before calling draw on the ParticleSystem
 

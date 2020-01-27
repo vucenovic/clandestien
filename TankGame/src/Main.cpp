@@ -112,6 +112,8 @@ int main(int argc, char** argv)
 		std::shared_ptr<Texture2D> blackTex = std::make_shared<Texture2D>(glm::vec3(0));
 		std::shared_ptr<Texture2D> purpleTex = std::make_shared<Texture2D>(glm::vec3(0.5f,0.5f,1));
 
+		std::shared_ptr<Texture2D> particleTex = std::make_shared<Texture2D>("res/textures/particle");
+
 		//--------Camera
 
 		//setup identity matrix and perspective transformmatrix
@@ -127,6 +129,9 @@ int main(int argc, char** argv)
 		std::shared_ptr<Mesh> myCylinderMesh = MeshBuilder::CylinderSplitShaded(1.3f, 1, 32);
 		std::shared_ptr<Mesh> mySphereMesh = MeshBuilder::Sphere(1, 64, 32);
 		std::shared_ptr<Mesh> myTestMesh = OBJLoader::LoadOBJ("res/models/monkey.obj");
+
+		std::shared_ptr<Material> particlesMaterial = std::make_shared<Material>(particleShader);
+		particlesMaterial->SetTexture(particleTex, 0);
 
 		Material debugMaterial = Material(debugShader);
 		debugMaterial.SetPropertyi("mode",2);
@@ -217,50 +222,25 @@ int main(int argc, char** argv)
 		int debugmode = -1;
 		bool debugpressedLastFrame = false;
 
-		Texture2D particleTex = Texture2D("res/textures/particle");
-		GLuint particleVAO;
-		const size_t pcount = 32;
+		using namespace Particles;
+
+		ParticleSystemMeshManager pmmanager(150);
+		ParticleSystemDefinition pSystemDef;
 		{
-			glGenVertexArrays(1, &particleVAO);
-			glBindVertexArray(particleVAO);
-			GLuint buffers[1];
-			glGenBuffers(1, buffers);
-
-			const size_t psize = 5;
-			const glm::vec3 pos = glm::vec3(3, 3, 3);
-
-
-			std::default_random_engine gen;
-			std::normal_distribution<float> distr1(0,1);
-			std::uniform_real_distribution<float> distr2(0.5f, 1.5f);
-
-			GLfloat * data = new GLfloat[psize * pcount];
-			for (int i = 0; i < pcount; i++) {
-				data[i*psize] = pos.x + distr1(gen);
-				data[i*psize + 1] = pos.y + distr1(gen);
-				data[i*psize + 2] = pos.z + distr1(gen);
-				data[i*psize + 3] = distr2(gen);
-				data[i*psize + 4] = distr1(gen);
-			}
-
-			glBindBuffer(GL_ARRAY_BUFFER, buffers[0]);
-			glBufferData(GL_ARRAY_BUFFER, psize * pcount * sizeof(GLfloat), data, GL_DYNAMIC_DRAW);
-
-			delete[] data;
-
-			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, psize * sizeof(GLfloat), 0);
-			glEnableVertexAttribArray(0);
-
-			glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, psize * sizeof(GLfloat), (const void*)(3 * sizeof(GLfloat)));
-			glEnableVertexAttribArray(3);
-
-			glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, psize * sizeof(GLfloat), (const void*)(4 * sizeof(GLfloat)));
-			glEnableVertexAttribArray(4);
-
-			glBindVertexArray(0);
-			glDeleteBuffers(1, buffers);
+			pSystemDef.lifeTime = 5;
+			pSystemDef.maxParticles = 50;
+			pSystemDef.material = particlesMaterial;
 		}
-
+		ParticleSystem pSystem(pSystemDef);
+		pSystem.CreateDebugParticles();
+		{
+			glBindBuffer(GL_ARRAY_BUFFER,pmmanager.GetBufferHandle());
+			void * buf = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+			pSystem.WriteMesh((Particle*)buf, 0, 150);
+			glUnmapBuffer(GL_ARRAY_BUFFER);
+			glBindBuffer(GL_ARRAY_BUFFER,0);
+		}
+		
 		GLuint ssplaneVAO;
 		{
 			glGenVertexArrays(1, &ssplaneVAO);
@@ -334,21 +314,22 @@ int main(int argc, char** argv)
 			//glEnable(GL_MULTISAMPLE);
 			glEnable(GL_DEPTH_TEST);
 
+			{
+				pSystem.Update(0.01f);
+				glBindBuffer(GL_ARRAY_BUFFER, pmmanager.GetBufferHandle());
+				void * buf = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+				pSystem.WriteMesh((Particle*)buf, 0, 150);
+				glUnmapBuffer(GL_ARRAY_BUFFER);
+				glBindBuffer(GL_ARRAY_BUFFER, 0);
+			}
+
 			//myObjectRenderer.DrawOverrideMaterial(debugMaterial);
 			myObjectRenderer.Draw();
 
 			{ //TODO move into particle system class and particle sytemrenderer
-				using namespace Particles;
 				ParticleSystem::PrepareDraw();
-				particleShader->UseProgram();
-				GLuint modelMatrixLocation = particleShader->GetUniformLocation("modelMatrix");
-				GLuint normalMatrixLocation = particleShader->GetUniformLocation("modelNormalMatrix");
-				glm::mat4 ident = glm::mat4(1);
-				glUniformMatrix4fv(modelMatrixLocation, 1, GL_FALSE, glm::value_ptr(ident));
-				particleTex.Bind(0);
-
-				glBindVertexArray(particleVAO);
-				glDrawArrays(GL_POINTS, 0, pcount);
+				pmmanager.Bind();
+				pSystem.Draw();
 				ParticleSystem::FinishDraw();
 			}
 
@@ -376,7 +357,6 @@ int main(int argc, char** argv)
 
 		//clean up before leaving scope
 		glUseProgram(0);
-		glDeleteVertexArrays(1, &particleVAO);
 		glDeleteVertexArrays(1, &ssplaneVAO);
 
 	}
