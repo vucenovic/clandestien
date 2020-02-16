@@ -1,5 +1,6 @@
 #include "Particles.h"
 #include <random>
+#include <glm/gtx/norm.hpp>
 
 namespace Particles {
 
@@ -138,6 +139,35 @@ namespace Particles {
 		AddDebugParticles();
 	}
 
+	void ParticleSystem::SortParticles(const glm::vec3 direction)
+	{
+		struct t {
+			float dist;
+			size_t index;
+			bool operator < (const t & o) {
+				return dist < o.dist;
+			}
+		};
+		t * dists = new t[activeParticles];
+		for (size_t i = 0; i < activeParticles; i++) {
+			dists[i].index = i;
+			dists[i].dist = glm::dot(particles[i].postion,direction);
+		}
+		std::sort(dists,dists+activeParticles);
+		//maybe think of a more clever solution to this, but for now meh
+		Particle * tmpP = new Particle[activeParticles];
+		float * tmpL = new float[activeParticles];
+		for (size_t i = 0; i < activeParticles; i++) {
+			tmpP[i] = particles[dists[i].index];
+			tmpL[i] = particleLifetimes[dists[i].index];
+		}
+		memcpy(particles, tmpP, activeParticles * sizeof(Particle));
+		memcpy(particleLifetimes, tmpL, activeParticles * sizeof(float));
+		delete[] dists;
+		delete[] tmpP;
+		delete[] tmpL;
+	}
+
 	void ParticleSystem::WriteMesh(const Particle * PBuffer, const size_t offset, const size_t maxCount)
 	{
 		count = maxCount < activeParticles ? maxCount : activeParticles;
@@ -164,7 +194,8 @@ namespace Particles {
 		glEnable(GL_BLEND);
 		glDepthMask(false);
 		glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
-		glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE, GL_ONE, GL_ONE);
+		glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE, GL_ONE, GL_ONE);//additive blending
+		//glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);//opaque alpha blending
 	}
 
 	//sets the render state for rendering regular geometry (this should be moved somewhere else really)

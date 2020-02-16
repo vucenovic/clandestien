@@ -94,6 +94,8 @@ namespace Particles
 
 		void Update(const float deltaTime);
 
+		void SortParticles(const glm::vec3 direction);
+
 		void WriteMesh(const Particle* PBuffer, const size_t minIndex, const size_t maxIndex);
 
 		void Draw() const; //meshManager must be Bound before calling draw on the ParticleSystem

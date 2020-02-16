@@ -269,14 +269,14 @@ int main(int argc, char** argv)
 			double currentFrametime = glfwGetTime();
 			float deltaTime = (float)(currentFrametime - lastFrameTime);
 			lastFrameTime = currentFrametime;
-			/* DISPLAY FRAMES PER SECOND
+			//DISPLAY FRAMES PER SECOND
 			frameCount++;
 			if (currentFrametime >= nextSecond) {
 				std::cout << frameCount << "FPS" << std::endl;
 				frameCount = 0;
 				nextSecond = currentFrametime + 1;
 			}
-			*/
+			
 
 			// Handle Inputs
 			glfwPollEvents();
@@ -311,9 +311,11 @@ int main(int argc, char** argv)
 			glEnable(GL_DEPTH_TEST);
 
 			{
-				pSystem.Update(0.01f);
+				pSystem.Update(deltaTime);
 				glBindBuffer(GL_ARRAY_BUFFER, pmmanager.GetBufferHandle());
 				void * buf = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+				glm::vec3 forward = myCameraTransform.ToMatrix()*glm::vec4(0, 0, 1, 0);
+				pSystem.SortParticles(forward); // sort particles that use alpha blending instead of additive blending
 				pSystem.WriteMesh((Particle*)buf, 0, 150);
 				glUnmapBuffer(GL_ARRAY_BUFFER);
 				glBindBuffer(GL_ARRAY_BUFFER, 0);
