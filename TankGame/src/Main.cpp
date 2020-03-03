@@ -51,6 +51,7 @@ int main(int argc, char** argv)
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 	glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
+	glfwWindowHint(GLFW_REFRESH_RATE, 60);
 	//glfwWindowHint(GLFW_SAMPLES, 4);
 
 	#if _DEBUG
@@ -82,7 +83,7 @@ int main(int argc, char** argv)
 	glViewport(0, 0, width, height);
 	glClearColor(1, 1, 1, 1);
 	glEnable(GL_CULL_FACE);
-	glfwSwapInterval(1); // vsync
+	glfwSwapInterval(0); // vsync
 
 	glfwSetKeyCallback(window, MyKeyCallback);
 	glfwSetScrollCallback(window, scroll_callback);
@@ -304,12 +305,11 @@ int main(int argc, char** argv)
 				glBindBuffer(GL_UNIFORM_BUFFER, 0);
 			}
 
-
 			renderFBO.Bind();
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			//glEnable(GL_MULTISAMPLE);
 			glEnable(GL_DEPTH_TEST);
-
+			
 			{
 				pSystem.Update(deltaTime);
 				glBindBuffer(GL_ARRAY_BUFFER, pmmanager.GetBufferHandle());
@@ -342,11 +342,16 @@ int main(int argc, char** argv)
 			//Apply basic post processing
 			FrameBuffer::Unbind();
 			glDisable(GL_DEPTH_TEST);
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 			pp_demultAlpha->UseProgram();
+			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, renderFBO.color);
 			glBindVertexArray(ssplaneVAO);
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+			if (wireframeMode) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 			//Flip Buffers
 			glfwSwapBuffers(window);
@@ -374,8 +379,6 @@ static void MyKeyCallback(GLFWwindow * window, int key, int scancode, int action
 			glfwSetWindowShouldClose(window, GLFW_TRUE);
 			break;
 		case GLFW_KEY_F1:
-			if (wireframeMode) glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-			else glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 			wireframeMode = !wireframeMode;
 			break;
 		case GLFW_KEY_F2:
