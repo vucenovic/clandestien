@@ -39,9 +39,12 @@ public:
 		}
 		if (notFound) { //no endl found
 			if (file.eof()) {
-				bool ret = last;
-				last = false;
-				return ret;
+				if (last) {
+					bufferOffset = bufferLength;
+					last = false;
+					return true;
+				}
+				return false;
 			}
 			else {
 				size_t remLen = bufferLength - bufferOffset;
@@ -49,7 +52,7 @@ public:
 				size_t before = file.tellg();
 				file.read(lineBuffer + remLen, bufferOffset);
 				if (file.eof()) {
-					bufferLength = fileLength - before + remLen;
+					bufferLength = fileLength - before + remLen; //Return end of line on last line instead of beginning (TODO FIX)
 				}
 				bufferOffset = 0;
 				return getline(); //easiest way of doing this

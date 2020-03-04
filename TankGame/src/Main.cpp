@@ -34,12 +34,17 @@ int main(int argc, char** argv)
 {
 	INIReader reader("res/settings.ini");
 
-	int width = reader.Get<int>("window", "width", 800);
-	int height = reader.Get<int>("window", "height", 800);
-	std::string window_title = reader.Get<std::string>("window", "title", "Tank Game");
-	float FOV = reader.Get<float>("camera", "fov", 60.0);
-	float nearPlane = reader.Get<float>("camera", "near", 0.1);
-	float farPlane = reader.Get<float>("camera", "far", 100.0);
+	int width = reader.Get<int>("gfx", "width", 800);
+	int height = reader.Get<int>("gfx", "height", 800);
+	int targetFPS = reader.Get<int>("gfx", "refresh_rate", 60);
+	bool fpsCapped = targetFPS != 0;
+	bool fullscreen = reader.Get<bool>("gfx", "fullscreen", false);
+	int vsync = reader.Get<int>("gfx", "vsync", 0);
+
+	std::string window_title = "That Game";
+	float FOV = 60;
+	float nearPlane = 0.1;
+	float farPlane = 100;
 
 	if (!glfwInit()) {
 		std::cerr << "Failed to initialize GLFW";
@@ -50,8 +55,7 @@ int main(int argc, char** argv)
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-	glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
-	glfwWindowHint(GLFW_REFRESH_RATE, 60);
+	glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_FALSE);
 	//glfwWindowHint(GLFW_SAMPLES, 4);
 
 	#if _DEBUG
@@ -59,7 +63,7 @@ int main(int argc, char** argv)
 	#endif
 
 	//create and initialize Context
-	GLFWwindow* window = glfwCreateWindow(width, height, window_title.c_str(), NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(width, height, window_title.c_str(), fullscreen ? glfwGetPrimaryMonitor() : NULL, NULL);
 	if (!window) {
 		glfwTerminate();
 		std::cerr << "Failed to init Window";
@@ -83,7 +87,7 @@ int main(int argc, char** argv)
 	glViewport(0, 0, width, height);
 	glClearColor(1, 1, 1, 1);
 	glEnable(GL_CULL_FACE);
-	glfwSwapInterval(0); // vsync
+	glfwSwapInterval(vsync);
 
 	glfwSetKeyCallback(window, MyKeyCallback);
 	glfwSetScrollCallback(window, scroll_callback);
@@ -355,6 +359,7 @@ int main(int argc, char** argv)
 
 			//Flip Buffers
 			glfwSwapBuffers(window);
+			glFlush();
 			scrollOffset = 0;
 		}
 

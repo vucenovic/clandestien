@@ -33,9 +33,9 @@ glm::mat4 Transform::BuildRotationMatrix(const glm::vec3 rot)
 	float cz = glm::cos(rot.z);
 	float sz = glm::sin(rot.z);
 	return glm::mat4(
-		cz * cy + sx * sz * sy, -sz * cx, cz * sy - sx * sz * cy, 0,
-		cy * sz - sy * sx * cz, cz*cx, (cz * sx * cy + sz * sy), 0,
-		-cx * sy, -sx, cx * cy, 0,
+		cz * cy + sx * sz * sy,		-sz * cx,		cz * sy - sx * sz * cy,		0,
+		cy * sz - sy * sx * cz,		cz*cx,			(cz * sx * cy + sz * sy),	0,
+		-cx * sy,					-sx,			cx * cy,					0,
 		0, 0, 0, 1
 	);
 }

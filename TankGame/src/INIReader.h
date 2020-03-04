@@ -99,7 +99,7 @@ INIReader::INIReader(std::string filePath)
 		size_t fileLength = file.tellg();
 		file.seekg(0, std::ios::beg);
 
-		lineReader lr = lineReader(512, file, fileLength);
+		lineReader lr = lineReader(32, file, fileLength);
 		char * mid_ptr, * start_ptr;
 		while (lr.getline())
 		{
