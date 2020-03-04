@@ -52,7 +52,7 @@ public:
 				size_t before = file.tellg();
 				file.read(lineBuffer + remLen, bufferOffset);
 				if (file.eof()) {
-					bufferLength = fileLength - before + remLen; //Return end of line on last line instead of beginning (TODO FIX)
+					bufferLength = fileLength - before + remLen;
 				}
 				bufferOffset = 0;
 				return getline(); //easiest way of doing this
