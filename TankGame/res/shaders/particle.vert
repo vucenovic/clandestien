@@ -9,8 +9,8 @@ layout (location = 4) in float rotation;
 
 layout (binding = 0, std140) uniform viewData
 {
-	mat4 viewProjection;
-	vec4 eyePos;
+	mat4 projection;
+	mat4 view;
 };
 
 uniform mat4 modelMatrix;
@@ -37,5 +37,5 @@ void main()
 	vec4 velRaw =  modelMatrix*vec4(velocity,1);
 	particle.velocityVector =velRaw.xy;
 
-	gl_Position = viewProjection*worldPos;
+	gl_Position = projection * view * worldPos;
 }

@@ -7,8 +7,8 @@ layout (location = 3) in vec4 tangent;
 
 layout (binding = 0, std140) uniform viewData
 {
-	mat4 viewProjection;
-	vec4 eyePos;
+	mat4 projection;
+	mat4 view;
 };
 
 uniform mat4 modelMatrix;
@@ -32,9 +32,10 @@ void main()
 	
 	vertex.TBN = mat3(worldTangent,cross(worldTangent,worldNormal) * tangent.w ,normalize(worldNormal));
 
+	vec4 eyePos = (inverse(view) * vec4(0,0,0,1));
 	vertex.eyeDir = (eyePos - worldPos).xyz;
 	vertex.worldPos = worldPos.xyz;
 
-	gl_Position = viewProjection*worldPos;
+	gl_Position = projection * view * worldPos;
 	vertex.texCoord = texCoord;
 }

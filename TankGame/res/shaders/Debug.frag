@@ -2,6 +2,12 @@
 
 layout (location = 0) out vec4 color;
 
+layout (binding = 0, std140) uniform viewData
+{
+	mat4 projection;
+	mat4 view;
+};
+
 in VertexData
 {
 	vec3 eyeDir;

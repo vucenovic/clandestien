@@ -138,7 +138,6 @@
     <ClCompile Include="src\FrameBuffer.cpp" />
     <ClCompile Include="src\Mesh.cpp" />
     <ClCompile Include="src\Particles.cpp" />
-    <ClCompile Include="src\Physics.cpp" />
     <ClCompile Include="src\LightManager.cpp" />
     <ClCompile Include="src\Lights.cpp" />
     <ClCompile Include="src\Main.cpp" />
@@ -154,7 +153,6 @@
     <ClInclude Include="src\FileUtils.h" />
     <ClInclude Include="src\FrameBuffer.h" />
     <ClInclude Include="src\Particles.h" />
-    <ClInclude Include="src\Physics.h" />
     <ClInclude Include="src\INIReader.h" />
     <ClInclude Include="src\Main.h" />
     <ClInclude Include="src\DDSImage.h" />

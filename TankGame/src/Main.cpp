@@ -29,6 +29,8 @@
 float scrollOffset = 0; // very ugly solution until I figure out something better Namely a proper inputmanager TODO
 bool wireframeMode = false;
 bool backfaceCulling = true;
+bool debugDraw = false;
+int debugDrawmode = -1;
 
 int main(int argc, char** argv)
 {
@@ -181,7 +183,7 @@ int main(int argc, char** argv)
 
 		//--------Uniform Buffers
 
-		UniformBuffer viewDataBuffer = UniformBuffer(*standardShader, std::string("viewData"), { "viewProjection","eyePos" }, 2);
+		UniformBuffer viewDataBuffer = UniformBuffer(*standardShader, std::string("viewData"), { "projection","view" }, 2);
 		viewDataBuffer.BindToPort(0);
 
 		LightManager myLightManager = LightManager(*standardShader);
@@ -224,9 +226,6 @@ int main(int argc, char** argv)
 		myObjectRenderer.AddObject(&cylinder);
 		myObjectRenderer.AddObject(&testobject);
 
-		int debugmode = -1;
-		bool debugpressedLastFrame = false;
-
 		using namespace Particles;
 
 		ParticleSystemMeshManager pmmanager(150);
@@ -239,7 +238,7 @@ int main(int argc, char** argv)
 		ParticleSystem pSystem(pSystemDef);
 		pSystem.CreateDebugParticles();
 		
-		GLuint ssplaneVAO;
+		GLuint ssplaneVAO; //create screenspace Rect for all screenspace effects
 		{
 			glGenVertexArrays(1, &ssplaneVAO);
 			glBindVertexArray(ssplaneVAO);
@@ -281,7 +280,6 @@ int main(int argc, char** argv)
 				frameCount = 0;
 				nextSecond = currentFrametime + 1;
 			}
-			
 
 			// Handle Inputs
 			glfwPollEvents();
@@ -291,21 +289,14 @@ int main(int argc, char** argv)
 			if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
 				testobject.GetTransform().SetRotation(glm::vec3());
 
-			bool debugPressed = glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS; //getto solution for now
-			if (debugPressed && !debugpressedLastFrame) {
-				debugmode = (debugmode + 1) % 7;
-				debugMaterial.SetPropertyi("mode", debugmode);
-			}
-			debugpressedLastFrame = debugPressed;
-
 			//Set ViewProjectionMatrix
 			{
-				glm::mat4 viewPerspective = perspective * myCameraTransform.ToInverseMatrix();
+				glm::mat4 view = myCameraTransform.ToInverseMatrix();
 				glm::vec4 eyePos = glm::vec4(myCameraTransform.GetPosition(),1);
 
 				glBindBuffer(GL_UNIFORM_BUFFER, viewDataBuffer.GetHandle());
-				glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(viewPerspective));
-				glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::vec4), glm::value_ptr(eyePos));
+				glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(perspective));
+				glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(view));
 				glBindBuffer(GL_UNIFORM_BUFFER, 0);
 			}
 
@@ -325,8 +316,16 @@ int main(int argc, char** argv)
 				glBindBuffer(GL_ARRAY_BUFFER, 0);
 			}
 
-			//myObjectRenderer.DrawOverrideMaterial(debugMaterial);
-			myObjectRenderer.Draw();
+			if (debugDraw) {
+				debugMaterial.SetPropertyi("mode", debugDrawmode);
+				myObjectRenderer.DrawOverrideMaterial(debugMaterial);
+			}
+			else {
+				myObjectRenderer.Draw();
+			}
+
+			//Draw WorldPortals between Opaque phase and transparent phase
+			//use stencil buffer for masking drawing and an oblique projection
 
 			{ //TODO move into particle system class and particle sytemrenderer
 				ParticleSystem::PrepareDraw();
@@ -356,6 +355,8 @@ int main(int argc, char** argv)
 
 			if (wireframeMode) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 			else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+			if (backfaceCulling) glEnable(GL_CULL_FACE);
+			else glDisable(GL_CULL_FACE);
 
 			//Flip Buffers
 			glfwSwapBuffers(window);
@@ -387,9 +388,13 @@ static void MyKeyCallback(GLFWwindow * window, int key, int scancode, int action
 			wireframeMode = !wireframeMode;
 			break;
 		case GLFW_KEY_F2:
-			if (backfaceCulling) glDisable(GL_CULL_FACE);
-			else glEnable(GL_CULL_FACE);
 			backfaceCulling = !backfaceCulling;
+			break;
+		case GLFW_KEY_F3:
+			debugDraw = !debugDraw;
+			break;
+		case GLFW_KEY_1:
+			debugDrawmode = (debugDrawmode + 1) % 7;
 			break;
 		default:
 			break;
