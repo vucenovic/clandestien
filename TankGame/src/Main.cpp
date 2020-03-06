@@ -327,6 +327,27 @@ int main(int argc, char** argv)
 			//Draw WorldPortals between Opaque phase and transparent phase
 			//use stencil buffer for masking drawing and an oblique projection
 
+			//render portal to stencil buffer
+			//render screen quad with only stencil testing and write depth to be the far plane (to reset depth buffer in the portal)
+			//rerender scene from other perspective with stencil and depth testing
+			//?
+			//profit
+
+			/*
+				//rough scematic
+				renderScene(drawPortals){
+					renderOpaque();
+					if(drawPortals){
+						renderPortal(){
+							drawHoldoutToScreen();
+							setViewParameters();
+							renderScene();
+						};
+					}
+					renderTransparents();
+				}
+			*/
+
 			{ //TODO move into particle system class and particle sytemrenderer
 				ParticleSystem::PrepareDraw();
 				pmmanager.Bind();
@@ -343,9 +364,9 @@ int main(int argc, char** argv)
 			*/
 
 			//Apply basic post processing
-			FrameBuffer::Unbind();
 			glDisable(GL_DEPTH_TEST);
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+			FrameBuffer::Unbind();
 
 			pp_demultAlpha->UseProgram();
 			glActiveTexture(GL_TEXTURE0);
