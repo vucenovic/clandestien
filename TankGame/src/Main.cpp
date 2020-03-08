@@ -30,7 +30,7 @@ float scrollOffset = 0; // very ugly solution until I figure out something bette
 bool wireframeMode = false;
 bool backfaceCulling = true;
 bool debugDraw = false;
-int debugDrawmode = -1;
+int debugDrawmode = 0;
 
 int main(int argc, char** argv)
 {
