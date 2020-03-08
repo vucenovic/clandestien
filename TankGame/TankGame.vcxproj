@@ -133,6 +133,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\AudioFile.cpp" />
     <ClCompile Include="src\DDSImage.cpp" />
     <ClCompile Include="src\CameraController.cpp" />
     <ClCompile Include="src\FrameBuffer.cpp" />
@@ -150,6 +151,7 @@
     <ClCompile Include="src\UniformBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\AudioFile.h" />
     <ClInclude Include="src\FileUtils.h" />
     <ClInclude Include="src\FrameBuffer.h" />
     <ClInclude Include="src\Particles.h" />

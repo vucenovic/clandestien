@@ -42,6 +42,7 @@ int main(int argc, char** argv)
 	bool fpsCapped = targetFPS != 0;
 	bool fullscreen = reader.Get<bool>("gfx", "fullscreen", false);
 	int vsync = reader.Get<int>("gfx", "vsync", 0);
+	float gamma = reader.Get<float>("gfx", "brightness", 1);
 
 	std::string window_title = "That Game";
 	float FOV = 60;
@@ -95,7 +96,7 @@ int main(int argc, char** argv)
 	glfwSetScrollCallback(window, scroll_callback);
 
 	{
-		std::shared_ptr<ShaderProgram> standardShader,LitCookTorrance, myShaderProgram, debugShader, particleShader, pp_demultAlpha;
+		std::shared_ptr<ShaderProgram> standardShader,LitCookTorrance, myShaderProgram, debugShader, particleShader, pp_demultAlpha, pp_gammaCorrect;
 		try
 		{
 			myShaderProgram = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/common.vert", "res/shaders/LitPhong.frag"));
@@ -103,7 +104,8 @@ int main(int argc, char** argv)
 			particleShader = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/particle.vert", "res/shaders/particle.geom", "res/shaders/particle.frag"));
 			standardShader = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/common.vert", "res/shaders/TexturedLitPhong.frag"));
 			debugShader = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/common.vert", "res/shaders/Debug.frag"));
-			pp_demultAlpha = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/screenspace.vert", "res/shaders/DemultAlphaMS.frag"));
+			pp_demultAlpha = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/screenspace.vert", "res/shaders/DemultAlpha.frag"));
+			pp_gammaCorrect = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/screenspace.vert", "res/shaders/GammaCorrect.frag"));
 		}
 		catch (const std::invalid_argument&)
 		{
@@ -130,12 +132,14 @@ int main(int argc, char** argv)
 
 		CameraController myCameraController(&myCameraTransform,window);
 
-		//--------Meshes
+		//Meshes
 
 		std::shared_ptr<Mesh> myCubeMesh = MeshBuilder::BoxFlatShaded(1.5f, 1.5f, 1.5f);
 		std::shared_ptr<Mesh> myCylinderMesh = MeshBuilder::CylinderSplitShaded(1.3f, 1, 32);
 		std::shared_ptr<Mesh> mySphereMesh = MeshBuilder::Sphere(1, 64, 32);
 		std::shared_ptr<Mesh> myTestMesh = OBJLoader::LoadOBJ("res/models/monkey.obj");
+
+		//Materials
 
 		std::shared_ptr<Material> particlesMaterial = std::make_shared<Material>(particleShader);
 		particlesMaterial->SetTexture(particleTex, 0);
@@ -159,7 +163,7 @@ int main(int argc, char** argv)
 		woodMaterial.SetTexture(purpleTex, 2);
 		woodMaterial.SetTexture(blackTex, 3);
 
-		//--------Objects
+		//Objects
 
 		GameObject testobject = GameObject();
 		testobject.mesh = myTestMesh.get();
@@ -226,6 +230,8 @@ int main(int argc, char** argv)
 		myObjectRenderer.AddObject(&cylinder);
 		myObjectRenderer.AddObject(&testobject);
 
+		//Particles
+
 		using namespace Particles;
 
 		ParticleSystemMeshManager pmmanager(150);
@@ -238,6 +244,8 @@ int main(int argc, char** argv)
 		ParticleSystem pSystem(pSystemDef);
 		pSystem.CreateDebugParticles();
 		
+		//Post processing
+
 		GLuint ssplaneVAO; //create screenspace Rect for all screenspace effects
 		{
 			glGenVertexArrays(1, &ssplaneVAO);
@@ -341,7 +349,7 @@ int main(int argc, char** argv)
 						renderPortal(){
 							drawHoldoutToScreen();
 							setViewParameters();
-							renderScene();
+							renderScene(false);
 						};
 					}
 					renderTransparents();
@@ -363,17 +371,30 @@ int main(int argc, char** argv)
 			glDisable(GL_MULTISAMPLE);
 			*/
 
-			//Apply basic post processing
-			glDisable(GL_DEPTH_TEST);
-			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-			FrameBuffer::Unbind();
+			//Apply post processing
+			//TODO: Abstract individual commands into a postprocessing stack container
+			{
+				glDisable(GL_DEPTH_TEST);
+				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-			pp_demultAlpha->UseProgram();
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, renderFBO.color);
-			glBindVertexArray(ssplaneVAO);
-			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+				glActiveTexture(GL_TEXTURE0);
+				glBindVertexArray(ssplaneVAO);
 
+				ppFBO.Bind();
+				pp_demultAlpha->UseProgram();
+				glBindTexture(GL_TEXTURE_2D, renderFBO.color);
+				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+				FrameBuffer::Unbind();
+				pp_gammaCorrect->UseProgram();
+				GLuint gammaLocation = pp_gammaCorrect->GetUniformLocation("gamma");
+				glUniform1f(gammaLocation, gamma);
+
+				glBindTexture(GL_TEXTURE_2D, ppFBO.color);
+				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+			}
+
+			//Reset Renderstate
 			if (wireframeMode) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 			else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 			if (backfaceCulling) glEnable(GL_CULL_FACE);
