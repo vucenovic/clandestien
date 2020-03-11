@@ -42,7 +42,7 @@ int main(int argc, char** argv)
 	bool fpsCapped = targetFPS != 0;
 	bool fullscreen = reader.Get<bool>("gfx", "fullscreen", false);
 	int vsync = reader.Get<int>("gfx", "vsync", 0);
-	float gamma = reader.Get<float>("gfx", "brightness", 1);
+	float gamma = reader.Get<float>("gfx", "gamma", 1);
 
 	std::string window_title = "That Game";
 	float FOV = 60;
@@ -88,7 +88,7 @@ int main(int argc, char** argv)
 	#endif
 
 	glViewport(0, 0, width, height);
-	glClearColor(1, 1, 1, 1);
+	glClearColor(0, 0, 0, 1);
 	glEnable(GL_CULL_FACE);
 	glfwSwapInterval(vsync);
 
@@ -96,7 +96,7 @@ int main(int argc, char** argv)
 	glfwSetScrollCallback(window, scroll_callback);
 
 	{
-		std::shared_ptr<ShaderProgram> standardShader,LitCookTorrance, myShaderProgram, debugShader, particleShader, pp_demultAlpha, pp_gammaCorrect;
+		std::shared_ptr<ShaderProgram> standardShader,LitCookTorrance, myShaderProgram, debugShader, particleShader, pp_demultAlpha, pp_gammaCorrect, pp_blur, pp_bloom;
 		try
 		{
 			myShaderProgram = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/common.vert", "res/shaders/LitPhong.frag"));
@@ -106,6 +106,8 @@ int main(int argc, char** argv)
 			debugShader = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/common.vert", "res/shaders/Debug.frag"));
 			pp_demultAlpha = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/screenspace.vert", "res/shaders/DemultAlpha.frag"));
 			pp_gammaCorrect = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/screenspace.vert", "res/shaders/GammaCorrect.frag"));
+			pp_blur = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/screenspace.vert", "res/shaders/Blur.frag"));
+			pp_bloom = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/screenspace.vert", "res/shaders/Bloom.frag"));
 		}
 		catch (const std::invalid_argument&)
 		{
@@ -194,7 +196,7 @@ int main(int argc, char** argv)
 		myLightManager.BindToPort(1);
 
 		{
-			myLightManager.lightsUsed.point = 3;
+			myLightManager.lightsUsed.point = 4;
 			myLightManager.lightsUsed.directional = 1;
 			myLightManager.lightsUsed.spot = 1;
 
@@ -202,6 +204,10 @@ int main(int argc, char** argv)
 
 			myLightManager.pointLights[0].SetPosition(glm::vec3());
 			myLightManager.pointLights[0].SetAttenuation(1, 0.4f, 0.1f);
+
+			myLightManager.pointLights[3].SetPosition(glm::vec3(2.2f,1,0));
+			myLightManager.pointLights[3].SetColor(15,5,15);
+			myLightManager.pointLights[3].SetAttenuation(1, 1, 1);
 
 			myLightManager.pointLights[1].SetPosition(glm::vec3(-5,1,0));
 			myLightManager.pointLights[1].SetAttenuation(1, 0.4f, 0.3f);
@@ -270,6 +276,8 @@ int main(int argc, char** argv)
 
 		RenderFrameBuffer renderFBO = RenderFrameBuffer(width, height);
 		ColorFrameBuffer ppFBO = ColorFrameBuffer(width, height);
+		ColorFrameBuffer ppFBO2 = ColorFrameBuffer(width, height);
+		ColorFrameBuffer ppFBO3 = ColorFrameBuffer(width, height);
 
 		double lastFrameTime = 0;
 		double nextSecond = 1;
@@ -359,7 +367,7 @@ int main(int argc, char** argv)
 			{ //TODO move into particle system class and particle sytemrenderer
 				ParticleSystem::PrepareDraw();
 				pmmanager.Bind();
-				pSystem.Draw();
+				//pSystem.Draw();
 				ParticleSystem::FinishDraw();
 			}
 
@@ -380,17 +388,44 @@ int main(int argc, char** argv)
 				glActiveTexture(GL_TEXTURE0);
 				glBindVertexArray(ssplaneVAO);
 
+				//Demultipy alpha values
 				ppFBO.Bind();
 				pp_demultAlpha->UseProgram();
 				glBindTexture(GL_TEXTURE_2D, renderFBO.color);
 				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-				FrameBuffer::Unbind();
-				pp_gammaCorrect->UseProgram();
-				GLuint gammaLocation = pp_gammaCorrect->GetUniformLocation("gamma");
-				glUniform1f(gammaLocation, gamma);
-
+				//Filter Highlights out of image
+				ppFBO3.Bind();
+				pp_bloom->UseProgram();
 				glBindTexture(GL_TEXTURE_2D, ppFBO.color);
+				glUniform1i(pp_bloom->GetUniformLocation("combine"), 0);
+				glUniform1f(pp_bloom->GetUniformLocation("cutoff"), 2);
+				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+				
+				//Blur Highlights
+				ppFBO2.Bind();
+				pp_blur->UseProgram();
+				glBindTexture(GL_TEXTURE_2D, ppFBO3.color);
+				glUniform1f(pp_blur->GetUniformLocation("scale"), 2.5f);
+				glUniform1i(pp_blur->GetUniformLocation("horizontal"), 0);
+				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+				ppFBO3.Bind();
+				glBindTexture(GL_TEXTURE_2D, ppFBO2.color);
+				glUniform1i(pp_blur->GetUniformLocation("horizontal"), 1);
+				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+				//Combine Blurred Highlights with base Image
+				FrameBuffer::Unbind();
+				pp_bloom->UseProgram();
+				glActiveTexture(GL_TEXTURE1);
+				glBindTexture(GL_TEXTURE_2D, ppFBO3.color);
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, ppFBO.color);
+
+				glUniform1i(pp_bloom->GetUniformLocation("combine"), 1);
+				glUniform1f(pp_bloom->GetUniformLocation("exposure"), 1);
+				glUniform1f(pp_bloom->GetUniformLocation("gamma"), gamma);
 				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 			}
 
