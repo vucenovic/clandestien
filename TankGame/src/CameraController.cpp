@@ -21,7 +21,7 @@ void CameraController::HandleInputs(const float &scrolloffset)
 	}
 	//Set Rotation
 	cameraTransform->SetRotationDegrees(pivotPitch, pivotYaw, 0);
-	glm::mat3 rotmatrix = Transform::BuildRotationMatrix(cameraTransform->GetRotation());
+	glm::mat3 rotmatrix = glm::toMat4(cameraTransform->GetRotation());
 
 	glm::vec3 forwardVector = rotmatrix * glm::vec3(0, 0, 1);
 	glm::vec3 rightVector = rotmatrix * glm::vec3(1, 0, 0);
