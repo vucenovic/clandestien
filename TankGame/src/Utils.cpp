@@ -1,16 +1,6 @@
 #include "Utils.h"
-#include <sstream>
-#include <fstream>
 #include <glm/gtc/type_ptr.hpp>
 #include <limits>
-
-std::string loadFileAsString(std::string filepath)
-{
-	std::ifstream t(filepath);
-	std::stringstream buffer;
-	buffer << t.rdbuf();
-	return buffer.str();
-}
 
 Transform::Transform() : position(glm::vec3(0, 0, 0)), rotation(glm::vec3(0,0,0)), scale(glm::vec3(1, 1, 1)), parent(nullptr)
 {

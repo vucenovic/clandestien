@@ -136,6 +136,7 @@
     <ClCompile Include="src\AudioFile.cpp" />
     <ClCompile Include="src\DDSImage.cpp" />
     <ClCompile Include="src\CameraController.cpp" />
+    <ClCompile Include="src\FileUtils.cpp" />
     <ClCompile Include="src\FrameBuffer.cpp" />
     <ClCompile Include="src\Mesh.cpp" />
     <ClCompile Include="src\Particles.cpp" />

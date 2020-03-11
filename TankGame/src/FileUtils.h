@@ -2,6 +2,8 @@
 
 #include <fstream>
 
+std::string loadFileAsString(const std::string & filepath);
+
 /*
 	A lot faster than std::getline but also a lot less safe
 	if a line in the file is longer than the buffer length then it will not be fully read //TODO fix this (maybe? it would become slower)
@@ -25,42 +27,5 @@ public:
 	};
 	~lineReader() { delete[] lineBuffer; };
 
-	bool getline() {
-		line = lineBuffer + bufferOffset;
-		bool notFound = true;
-
-		size_t nextBreak = bufferOffset;
-		for (int i = bufferOffset; i < bufferLength; i++) {
-			if (lineBuffer[i] == '\n') {
-				nextBreak = i;
-				notFound = false;
-				break;
-			}
-		}
-		if (notFound) { //no endl found
-			if (file.eof()) {
-				if (last) {
-					bufferOffset = bufferLength;
-					last = false;
-					return true;
-				}
-				return false;
-			}
-			else {
-				size_t remLen = bufferLength - bufferOffset;
-				memmove(lineBuffer, line, remLen);
-				size_t before = file.tellg();
-				file.read(lineBuffer + remLen, bufferOffset);
-				if (file.eof()) {
-					bufferLength = fileLength - before + remLen;
-				}
-				bufferOffset = 0;
-				return getline(); //easiest way of doing this
-			}
-		}
-		else {
-			bufferOffset = nextBreak + 1;
-			return true;
-		}
-	}
+	bool getline();
 };

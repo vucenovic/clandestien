@@ -2,10 +2,7 @@
 #include <GL\glew.h>
 #include <glm\glm.hpp>
 #include <glm\gtx\quaternion.hpp>
-#include <string>
 #include <vector>
-
-std::string loadFileAsString(std::string filepath);
 
 template <typename T>
 inline T sgn(T x) {	return (x > 0) - (x < 0); }

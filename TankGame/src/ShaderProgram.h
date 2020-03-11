@@ -2,7 +2,6 @@
 #include <map>
 #include <GL\glew.h>
 #include "Shader.h"
-#include "Utils.h"
 #include <memory>
 
 class ShaderProgram

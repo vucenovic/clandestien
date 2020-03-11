@@ -1,5 +1,6 @@
 #include "ShaderProgram.h"
 #include <iostream>
+#include "FileUtils.h"
 
 void ShaderProgram::CreateAndLink(Shader * vertexShader, Shader * fragmentShader)
 {
