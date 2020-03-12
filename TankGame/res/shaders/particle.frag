@@ -11,5 +11,5 @@ in ParticleData
 layout (binding = 0 ) uniform sampler2D tex;
 
 void main() {
-    outColor = texture(tex, textureCoord);
+    outColor = texture(tex, textureCoord) * color;
 }

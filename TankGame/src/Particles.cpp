@@ -110,6 +110,7 @@ namespace Particles {
 			p.velocity = glm::vec3(distr1(gen), distr1(gen), distr1(gen)) * 0.1f;
 			p.rotation = distr1(gen);
 			p.size = distr2(gen);
+			p.color = glm::vec4(1, 1, 1, 1);
 			particleLifetimes[i] = distr3(gen);
 		}
 		activeParticles = prototype.maxParticles;
@@ -124,6 +125,7 @@ namespace Particles {
 			p.velocity = glm::vec3(distr1(gen), distr1(gen), distr1(gen)) * 0.1f;
 			p.rotation = distr1(gen);
 			p.size = distr2(gen);
+			p.color = glm::vec4(1, 1, 1, 1);
 			activeParticles++;
 		}
 	}

@@ -25,6 +25,13 @@ public:
 	Transform & GetTransform();
 };
 
+class GfxObject
+{
+public:
+	Mesh * mesh;
+	Material * material;
+};
+
 class MasterRenderer
 {
 private:
