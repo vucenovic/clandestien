@@ -10,8 +10,8 @@ in vec2 screenposition;
 uniform float gamma = 1;
 
 uniform bool combine;
-uniform float cutoff;
-uniform float exposure;
+uniform float cutoff = 2;
+uniform float exposure = 1;
 
 //yes having multiple shaders would make them a little bit faster but we are not worried about the performance of this little operation
 void main() {

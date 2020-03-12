@@ -206,7 +206,7 @@ int main(int argc, char** argv)
 			myLightManager.pointLights[0].SetAttenuation(1, 0.4f, 0.1f);
 
 			myLightManager.pointLights[3].SetPosition(glm::vec3(2.2f,1,0));
-			myLightManager.pointLights[3].SetColor(15,5,15);
+			myLightManager.pointLights[3].SetColor(50,0,0);
 			myLightManager.pointLights[3].SetAttenuation(1, 1, 1);
 
 			myLightManager.pointLights[1].SetPosition(glm::vec3(-5,1,0));
@@ -274,10 +274,15 @@ int main(int argc, char** argv)
 			glDeleteBuffers(1, &buffers);
 		}
 
+
 		RenderFrameBuffer renderFBO = RenderFrameBuffer(width, height);
+
 		ColorFrameBuffer ppFBO = ColorFrameBuffer(width, height);
 		ColorFrameBuffer ppFBO2 = ColorFrameBuffer(width, height);
-		ColorFrameBuffer ppFBO3 = ColorFrameBuffer(width, height);
+
+		const float bloomScale = 4;
+		ColorFrameBuffer ppFBOb = ColorFrameBuffer(width / bloomScale, height / bloomScale); //smaller scale frame buffers *just for the bloom* I don't really like it
+		ColorFrameBuffer ppFBOb2 = ColorFrameBuffer(width / bloomScale, height / bloomScale); //but this was the obvious solution to the sampling problem
 
 		double lastFrameTime = 0;
 		double nextSecond = 1;
@@ -395,7 +400,8 @@ int main(int argc, char** argv)
 				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
 				//Filter Highlights out of image
-				ppFBO3.Bind();
+				ppFBOb.Bind();
+				glViewport(0, 0, width / bloomScale, height / bloomScale);
 				pp_bloom->UseProgram();
 				glBindTexture(GL_TEXTURE_2D, ppFBO.color);
 				glUniform1i(pp_bloom->GetUniformLocation("combine"), 0);
@@ -403,23 +409,24 @@ int main(int argc, char** argv)
 				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 				
 				//Blur Highlights
-				ppFBO2.Bind();
+				ppFBOb2.Bind();
 				pp_blur->UseProgram();
-				glBindTexture(GL_TEXTURE_2D, ppFBO3.color);
-				glUniform1f(pp_blur->GetUniformLocation("scale"), 2.5f);
+				glBindTexture(GL_TEXTURE_2D, ppFBOb.color);
+				glUniform1f(pp_blur->GetUniformLocation("scale"), 1.0f);
 				glUniform1i(pp_blur->GetUniformLocation("horizontal"), 0);
 				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-				ppFBO3.Bind();
-				glBindTexture(GL_TEXTURE_2D, ppFBO2.color);
+				ppFBOb.Bind();
+				glBindTexture(GL_TEXTURE_2D, ppFBOb2.color);
 				glUniform1i(pp_blur->GetUniformLocation("horizontal"), 1);
 				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
+				glViewport(0, 0, width, height);
 				//Combine Blurred Highlights with base Image
 				FrameBuffer::Unbind();
 				pp_bloom->UseProgram();
 				glActiveTexture(GL_TEXTURE1);
-				glBindTexture(GL_TEXTURE_2D, ppFBO3.color);
+				glBindTexture(GL_TEXTURE_2D, ppFBOb.color);
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_2D, ppFBO.color);
 
