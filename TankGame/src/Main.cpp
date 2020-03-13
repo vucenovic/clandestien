@@ -27,9 +27,11 @@
 
 #include <random>
 
+/*
+#define SOL_ALL_SAFETIES_ON 1
 #include <lua/lua.hpp>
-//#define SOL_ALL_SAFETIES_ON 1
-//#include <sol.hpp>
+#include <sol.hpp>
+*/
 
 float scrollOffset = 0; // very ugly solution until I figure out something better Namely a proper inputmanager TODO
 bool wireframeMode = false;
@@ -53,15 +55,6 @@ int main(int argc, char** argv)
 	float FOV = 60;
 	float nearPlane = 0.1;
 	float farPlane = 100;
-
-	//Heyo it works
-	lua_State* L = luaL_newstate();
-
-	luaL_dostring(L, "x=42");
-	lua_getglobal(L, "x");
-	lua_Number x = lua_tonumber(L, 1);
-	std::cout << x << std::endl;
-	lua_close(L);
 
 	if (!glfwInit()) {
 		std::cerr << "Failed to initialize GLFW";

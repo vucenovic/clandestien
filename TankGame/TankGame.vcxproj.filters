@@ -162,5 +162,6 @@
   <ItemGroup>
     <None Include="glew32.dll" />
     <None Include="glfw3.dll" />
+    <None Include="Lua.dll" />
   </ItemGroup>
 </Project>
