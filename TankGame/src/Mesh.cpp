@@ -46,11 +46,10 @@ void Mesh::Draw()
 
 std::unique_ptr<Mesh> Mesh::InterleavedPNT(unsigned int vertexCount, const GLfloat data[], unsigned int faceCount, const GLushort indices[])
 {
-	std::unique_ptr<Mesh> mesh = std::make_unique<Mesh>();
+	std::unique_ptr<Mesh> mesh = std::make_unique<Mesh>(2);
 
 	mesh->Bind();
-	GLuint buffers[2];
-	glGenBuffers(2, buffers);
+	GLuint * buffers = mesh->GetBufferIDs();
 
 	glBindBuffer(GL_ARRAY_BUFFER, buffers[0]);
 	glBufferData(GL_ARRAY_BUFFER, vertexCount * 8 * sizeof(GLfloat), data, GL_STATIC_DRAW);
@@ -70,7 +69,6 @@ std::unique_ptr<Mesh> Mesh::InterleavedPNT(unsigned int vertexCount, const GLflo
 
 	glBindVertexArray(0);
 
-	glDeleteBuffers(2, buffers);
 	mesh->bounds = BoundingBox(data,vertexCount,8);
 
 	return mesh;
@@ -78,13 +76,12 @@ std::unique_ptr<Mesh> Mesh::InterleavedPNT(unsigned int vertexCount, const GLflo
 
 std::unique_ptr<Mesh> Mesh::InterleavedPNTT(unsigned int vertexCount, const GLfloat data[], unsigned int faceCount, const GLushort indices[])
 {
-	std::unique_ptr<Mesh> mesh = std::make_unique<Mesh>();
+	std::unique_ptr<Mesh> mesh = std::make_unique<Mesh>(2);
 
 	constexpr int vertexSize = 3 + 3 + 2 + 4; //pos,norm,tex,tangent
 
 	mesh->Bind();
-	GLuint buffers[2];
-	glGenBuffers(2, buffers);
+	GLuint * buffers = mesh->GetBufferIDs();
 
 	glBindBuffer(GL_ARRAY_BUFFER, buffers[0]);
 	glBufferData(GL_ARRAY_BUFFER, vertexCount * vertexSize * sizeof(GLfloat), data, GL_STATIC_DRAW);
@@ -107,7 +104,6 @@ std::unique_ptr<Mesh> Mesh::InterleavedPNTT(unsigned int vertexCount, const GLfl
 
 	glBindVertexArray(0);
 
-	glDeleteBuffers(2, buffers);
 	mesh->bounds = BoundingBox(data, vertexCount, vertexSize);
 
 	return mesh;
