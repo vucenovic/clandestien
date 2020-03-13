@@ -1,5 +1,66 @@
 #include "Scene.h"
 
+bool Scene::AddObject(std::unique_ptr<GameObject> & obj)
+{
+	if (gameObjects.find(obj->name) == gameObjects.end()) {
+		auto & shaderGroup = renderGroups[obj->material->shader.get()];
+		std::unordered_map<Mesh*, std::vector<GameObject*>> & meshGroups = shaderGroup[obj->material];
+		std::vector<GameObject*> & objects = meshGroups[obj->mesh];
+		objects.push_back(obj.get());
+		gameObjects[obj->name] = std::move(obj);
+		return true;
+	}
+	return false; //GameObject already exists
+}
+
+GameObject * Scene::GetObject(const std::string & name)
+{
+	if (gameObjects.find(name) == gameObjects.end()) {
+		return nullptr;
+	}
+	return gameObjects[name].get();
+}
+
+void Scene::RemoveObject(const std::string & name)
+{
+	auto & obj = gameObjects[name];
+	auto & shaderGroup = renderGroups[obj->material->shader.get()];
+	std::unordered_map<Mesh*, std::vector<GameObject*>> & meshGroups = shaderGroup[obj->material];
+	std::vector<GameObject*> & objects = meshGroups[obj->mesh];
+	for (int i = 0; i < objects.size(); i++) {
+		if (objects[i] == obj.get()) {
+			objects.erase(objects.begin() + i);
+		}
+	}
+	if (objects.size() == 0) meshGroups.erase(obj->mesh);
+	if (meshGroups.size() == 0) shaderGroup.erase(obj->material);
+	if (shaderGroup.size() == 0) renderGroups.erase(obj->material->shader.get());
+	gameObjects.erase(name);
+}
+
+void Scene::DrawOpaqueObjects(const Material & material)
+{
+	material.Use();
+	GLuint modelMatrixLocation = material.shader->GetUniformLocation("modelMatrix");
+	GLuint normalMatrixLocation = material.shader->GetUniformLocation("modelNormalMatrix");
+
+	for (std::pair<ShaderProgram*, std::unordered_map<Material*, std::unordered_map<Mesh*, std::vector<GameObject*>>>> shaderGroup : renderGroups)
+	{
+		for (std::pair<Material*, std::unordered_map<Mesh*, std::vector<GameObject*>>> meshGroup : shaderGroup.second) {
+			for (std::pair<Mesh*, std::vector<GameObject*>> GameObjects : meshGroup.second)
+			{
+				GameObjects.first->Bind();
+				for (GameObject* gameObject : GameObjects.second)
+				{
+					glUniformMatrix4fv(modelMatrixLocation, 1, GL_FALSE, glm::value_ptr(gameObject->GetTransform().ToMatrix()));
+					glUniformMatrix4fv(normalMatrixLocation, 1, GL_FALSE, glm::value_ptr(gameObject->GetTransform().ToNormalMatrix()));
+					GameObjects.first->Draw();
+				}
+			}
+		}
+	}
+}
+
 void Scene::DrawOpaqueObjects()
 {
 	for (auto shaderGroup : renderGroups)
@@ -43,11 +104,16 @@ void Scene::DrawScene(bool drawPortals)
 
 	DrawOpaqueObjects();
 	if (drawPortals) {
-		/*renderPortal() {
-			drawHoldoutToScreen();
-			setViewParameters();
-			DrawScenen(false);
-		};*/
+		/*
+		for(Portal portal : portals){
+			renderPortal() {
+				drawHoldoutToScreen();
+				setViewParameters();
+				DrawScene(false);
+				resetStencil();
+			};
+		}
+		*/
 	}
 	DrawTransparentObjects();
 }
