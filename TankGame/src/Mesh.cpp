@@ -5,15 +5,22 @@
 #include <unordered_map>
 #include "FileUtils.h"
 
-Mesh::Mesh()
+Mesh::Mesh(size_t bfc)
 {
 	indicesCount = 0;
+	bufferCount = bfc;
+	if(bfc>0) bufferIDs = new GLuint[bfc];
+	glGenBuffers(bfc, bufferIDs);
 	glGenVertexArrays(1, &vaoID);
 }
 
 Mesh::~Mesh()
 {
 	glDeleteVertexArrays(1, &vaoID);
+	if (bufferCount) {
+		glDeleteBuffers(bufferCount, bufferIDs);
+		delete[] bufferIDs;
+	}
 }
 
 void Mesh::Bind()
@@ -62,8 +69,8 @@ std::unique_ptr<Mesh> Mesh::InterleavedPNT(unsigned int vertexCount, const GLflo
 	mesh->indicesCount = faceCount * 3;
 
 	glBindVertexArray(0);
-	glDeleteBuffers(2, buffers);
 
+	glDeleteBuffers(2, buffers);
 	mesh->bounds = BoundingBox(data,vertexCount,8);
 
 	return mesh;
@@ -99,8 +106,8 @@ std::unique_ptr<Mesh> Mesh::InterleavedPNTT(unsigned int vertexCount, const GLfl
 	mesh->indicesCount = faceCount * 3;
 
 	glBindVertexArray(0);
-	glDeleteBuffers(2, buffers);
 
+	glDeleteBuffers(2, buffers);
 	mesh->bounds = BoundingBox(data, vertexCount, vertexSize);
 
 	return mesh;
@@ -108,26 +115,24 @@ std::unique_ptr<Mesh> Mesh::InterleavedPNTT(unsigned int vertexCount, const GLfl
 
 std::unique_ptr<Mesh> Mesh::SimpleIndexed(unsigned int vertexCount, const GLfloat vertices[], unsigned int faceCount, const GLushort indices[])
 {
-	std::unique_ptr<Mesh> mesh = std::make_unique<Mesh>();
+	std::unique_ptr<Mesh> mesh = std::make_unique<Mesh>(2);
 
 	mesh->Bind();
-	GLuint vbos[2];
-	glGenBuffers(2, vbos);
+	GLuint * buffers = mesh->GetBufferIDs();
 
-	glBindBuffer(GL_ARRAY_BUFFER, vbos[0]);
+	glBindBuffer(GL_ARRAY_BUFFER, buffers[0]);
 
 	glBufferData(GL_ARRAY_BUFFER, vertexCount * 3 * sizeof(GLfloat), vertices, GL_STATIC_DRAW);
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(0);
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbos[1]);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers[1]);
 
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, faceCount * 3 * sizeof(GLushort), indices, GL_STATIC_DRAW);
 	mesh->indicesCount = faceCount * 3;
 
 	glBindVertexArray(0);
-	glDeleteBuffers(2, vbos);
 
 	mesh->bounds = BoundingBox(vertices, vertexCount);
 
@@ -136,33 +141,31 @@ std::unique_ptr<Mesh> Mesh::SimpleIndexed(unsigned int vertexCount, const GLfloa
 
 std::unique_ptr<Mesh> Mesh::SimpleIndexed(unsigned int vertexCount, const GLfloat vertices[], const GLfloat normals[], unsigned int faceCount, const GLushort indices[])
 {
-	std::unique_ptr<Mesh> mesh = std::make_unique<Mesh>();
+	std::unique_ptr<Mesh> mesh = std::make_unique<Mesh>(3);
 
 	mesh->Bind();
-	GLuint vbos[3];
-	glGenBuffers(3, vbos);
+	GLuint * buffers = mesh->GetBufferIDs();
 
-	glBindBuffer(GL_ARRAY_BUFFER, vbos[0]);
+	glBindBuffer(GL_ARRAY_BUFFER, buffers[0]);
 
 	glBufferData(GL_ARRAY_BUFFER, vertexCount * 3 * sizeof(GLfloat), vertices, GL_STATIC_DRAW);
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(0);
 
-	glBindBuffer(GL_ARRAY_BUFFER, vbos[1]);
+	glBindBuffer(GL_ARRAY_BUFFER, buffers[1]);
 
 	glBufferData(GL_ARRAY_BUFFER, vertexCount * 3 * sizeof(GLfloat), normals, GL_STATIC_DRAW);
 
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(1);
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbos[2]);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers[2]);
 
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, faceCount * 3 * sizeof(GLushort), indices, GL_STATIC_DRAW);
 	mesh->indicesCount = faceCount * 3;
 
 	glBindVertexArray(0);
-	glDeleteBuffers(3, vbos);
 
 	mesh->bounds = BoundingBox(vertices, vertexCount);
 
@@ -171,20 +174,19 @@ std::unique_ptr<Mesh> Mesh::SimpleIndexed(unsigned int vertexCount, const GLfloa
 
 std::unique_ptr<Mesh> Mesh::SimpleIndexed(unsigned int vertexCount, const GLfloat vertices[], const GLfloat normals[], const GLfloat textureCoords[], unsigned int faceCount, const GLushort indices[])
 {
-	std::unique_ptr<Mesh> mesh = std::make_unique<Mesh>();
+	std::unique_ptr<Mesh> mesh = std::make_unique<Mesh>(4);
 
 	mesh->Bind();
-	GLuint vbos[4];
-	glGenBuffers(4, vbos);
+	GLuint * buffers = mesh->GetBufferIDs();
 
-	glBindBuffer(GL_ARRAY_BUFFER, vbos[0]);
+	glBindBuffer(GL_ARRAY_BUFFER, buffers[0]);
 
 	glBufferData(GL_ARRAY_BUFFER, vertexCount * 3 * sizeof(GLfloat), vertices, GL_STATIC_DRAW);
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(0);
 
-	glBindBuffer(GL_ARRAY_BUFFER, vbos[1]);
+	glBindBuffer(GL_ARRAY_BUFFER, buffers[1]);
 
 	glBufferData(GL_ARRAY_BUFFER, vertexCount * 3 * sizeof(GLfloat), normals, GL_STATIC_DRAW);
 
@@ -192,20 +194,19 @@ std::unique_ptr<Mesh> Mesh::SimpleIndexed(unsigned int vertexCount, const GLfloa
 	glEnableVertexAttribArray(1);
 
 
-	glBindBuffer(GL_ARRAY_BUFFER, vbos[2]);
+	glBindBuffer(GL_ARRAY_BUFFER, buffers[2]);
 
 	glBufferData(GL_ARRAY_BUFFER, vertexCount * 2 * sizeof(GLfloat), textureCoords, GL_STATIC_DRAW);
 
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(2);
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbos[3]);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers[3]);
 
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, faceCount * 3 * sizeof(GLushort), indices, GL_STATIC_DRAW);
 	mesh->indicesCount = faceCount * 3;
 
 	glBindVertexArray(0);
-	glDeleteBuffers(4, vbos);
 
 	mesh->bounds = BoundingBox(vertices, vertexCount);
 
@@ -214,20 +215,19 @@ std::unique_ptr<Mesh> Mesh::SimpleIndexed(unsigned int vertexCount, const GLfloa
 
 std::unique_ptr<Mesh> Mesh::SimpleIndexed(unsigned int vertexCount, const GLfloat vertices[], const GLfloat normals[], const GLfloat textureCoords[], const GLfloat tangents[], unsigned int faceCount, const GLushort indices[])
 {
-	std::unique_ptr<Mesh> mesh = std::make_unique<Mesh>();
+	std::unique_ptr<Mesh> mesh = std::make_unique<Mesh>(5);
 
 	mesh->Bind();
-	GLuint vbos[5];
-	glGenBuffers(5, vbos);
+	GLuint * buffers = mesh->GetBufferIDs();
 
-	glBindBuffer(GL_ARRAY_BUFFER, vbos[0]);
+	glBindBuffer(GL_ARRAY_BUFFER, buffers[0]);
 
 	glBufferData(GL_ARRAY_BUFFER, vertexCount * 3 * sizeof(GLfloat), vertices, GL_STATIC_DRAW);
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(0);
 
-	glBindBuffer(GL_ARRAY_BUFFER, vbos[1]);
+	glBindBuffer(GL_ARRAY_BUFFER, buffers[1]);
 
 	glBufferData(GL_ARRAY_BUFFER, vertexCount * 3 * sizeof(GLfloat), normals, GL_STATIC_DRAW);
 
@@ -235,27 +235,26 @@ std::unique_ptr<Mesh> Mesh::SimpleIndexed(unsigned int vertexCount, const GLfloa
 	glEnableVertexAttribArray(1);
 
 
-	glBindBuffer(GL_ARRAY_BUFFER, vbos[2]);
+	glBindBuffer(GL_ARRAY_BUFFER, buffers[2]);
 
 	glBufferData(GL_ARRAY_BUFFER, vertexCount * 2 * sizeof(GLfloat), textureCoords, GL_STATIC_DRAW);
 
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(2);
 
-	glBindBuffer(GL_ARRAY_BUFFER, vbos[3]);
+	glBindBuffer(GL_ARRAY_BUFFER, buffers[3]);
 
 	glBufferData(GL_ARRAY_BUFFER, vertexCount * 4 * sizeof(GLfloat), tangents, GL_STATIC_DRAW);
 
 	glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(3);
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbos[4]);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers[4]);
 
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, faceCount * 3 * sizeof(GLushort), indices, GL_STATIC_DRAW);
 	mesh->indicesCount = faceCount * 3;
 
 	glBindVertexArray(0);
-	glDeleteBuffers(5, vbos);
 
 	mesh->bounds = BoundingBox(vertices, vertexCount);
 

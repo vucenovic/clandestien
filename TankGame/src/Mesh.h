@@ -10,9 +10,14 @@ private:
 	GLuint vaoID;
 	size_t indicesCount;
 	BoundingBox bounds;
+
+	GLuint * bufferIDs;
+	size_t bufferCount;
 public:
-	Mesh();
+	Mesh(size_t bufferCount = 0);
 	~Mesh();
+
+	GLuint * GetBufferIDs() { return bufferIDs; }
 
 	const size_t GetIndicesCount() const;
 
