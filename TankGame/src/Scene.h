@@ -4,6 +4,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <memory>
 
 #include "ShaderProgram.h"
 #include "Material.h"
@@ -21,12 +22,17 @@ private:
 	std::unordered_map<ShaderProgram *, std::unordered_map<Material*, std::unordered_map<Mesh*, std::vector<GameObject*>>>> renderGroups;
 
 	//string map for searching objects by name
-	std::map<std::string, GameObject> gameObjects;
+	std::map<std::string, std::unique_ptr<GameObject>> gameObjects;
 
-private:
+public:
+	void DrawOpaqueObjects(const Material & material);
 	void DrawOpaqueObjects();
 	void DrawTransparentObjects();
+
 public:
+	bool AddObject(std::unique_ptr<GameObject> & gameobject);
+	GameObject * GetObject(const std::string & name);
+	void RemoveObject(const std::string & name);
 
 	void DrawScene(bool drawPortals);
 };

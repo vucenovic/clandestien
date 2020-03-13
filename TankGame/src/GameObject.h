@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 #include "Utils.h"
 #include "Mesh.h"
 #include "Material.h"
@@ -13,14 +15,14 @@ enum class GameObjectType {
 class GameObject //TODO separate material and mesh from gameobject
 {
 private:
-	static size_t IDCounter;
-	size_t ID;
 	Transform transform;
 public:
+	std::string name;//must be unique in a scene
+
 	Mesh * mesh;
 	Material * material;
 
-	GameObject() : ID(IDCounter++), transform(Transform()), mesh(nullptr), material(nullptr) {};
+	GameObject() : transform(Transform()), mesh(nullptr), material(nullptr) {};
 	~GameObject();
 
 	//virtual const GameObjectType & GetType() const { return GameObjectType::Object; }

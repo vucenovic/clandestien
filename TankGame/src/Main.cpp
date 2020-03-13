@@ -18,7 +18,8 @@
 #include "Lights.h"
 #include "LightManager.h"
 #include "Texture.h"
-#include "Renderer.h"
+#include "Scene.h"
+#include "GameObject.h"
 #include "FrameBuffer.h"
 #include "Particles.h"
 #include "Camera.h"
@@ -172,25 +173,29 @@ int main(int argc, char** argv)
 
 		//Objects
 
-		GameObject testobject = GameObject();
-		testobject.mesh = myTestMesh.get();
-		testobject.material = &tilesMaterial;
-		testobject.GetTransform().SetPostion(glm::vec3(3, 1.5f, 0));
+		std::unique_ptr<GameObject> testobject = std::make_unique<GameObject>();
+		testobject->mesh = myTestMesh.get();
+		testobject->material = &tilesMaterial;
+		testobject->GetTransform().SetPostion(glm::vec3(3, 1.5f, 0));
+		testobject->name = "test";
 
-		GameObject sphere = GameObject();
-		sphere.mesh = mySphereMesh.get();
-		sphere.material = &tilesMaterial;
-		sphere.GetTransform().SetPostion(glm::vec3(1.5f,-1,0));
+		std::unique_ptr<GameObject> sphere = std::make_unique<GameObject>();
+		sphere->mesh = mySphereMesh.get();
+		sphere->material = &tilesMaterial;
+		sphere->GetTransform().SetPostion(glm::vec3(1.5f,-1,0));
+		sphere->name = "sphere";
 
-		GameObject cube = GameObject();
-		cube.mesh = myCubeMesh.get();
-		cube.material = &woodMaterial;
-		cube.GetTransform().SetPostion(glm::vec3(0, 1.5f, 0));
+		std::unique_ptr<GameObject> cube = std::make_unique<GameObject>();
+		cube->mesh = myCubeMesh.get();
+		cube->material = &woodMaterial;
+		cube->GetTransform().SetPostion(glm::vec3(0, 1.5f, 0));
+		cube->name = "cube";
 
-		GameObject cylinder = GameObject();
-		cylinder.mesh = myCylinderMesh.get();
-		cylinder.material = &tilesMaterial;
-		cylinder.GetTransform().SetPostion(glm::vec3(-1.5f, -1, 0));
+		std::unique_ptr<GameObject> cylinder = std::make_unique<GameObject>();
+		cylinder->mesh = myCylinderMesh.get();
+		cylinder->material = &tilesMaterial;
+		cylinder->GetTransform().SetPostion(glm::vec3(-1.5f, -1, 0));
+		cylinder->name = "cylinder";
 
 		//--------Uniform Buffers
 
@@ -234,12 +239,12 @@ int main(int argc, char** argv)
 
 		myLightManager.UpdateBuffer();
 
-		MasterRenderer myObjectRenderer = MasterRenderer();
+		Scene myScene = Scene();
 
-		myObjectRenderer.AddObject(&sphere);
-		myObjectRenderer.AddObject(&cube);
-		myObjectRenderer.AddObject(&cylinder);
-		myObjectRenderer.AddObject(&testobject);
+		myScene.AddObject(sphere);
+		myScene.AddObject(cube);
+		myScene.AddObject(cylinder);
+		myScene.AddObject(testobject);
 
 		//Particles
 
@@ -310,9 +315,10 @@ int main(int argc, char** argv)
 			glfwPollEvents();
 
 			myCameraController.HandleInputs(scrollOffset);
-			testobject.GetTransform().Rotate((glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) * 0.01f,(glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS) * 0.01f,(glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) * 0.01f);
+			GameObject * test = myScene.GetObject("test");
+			test->GetTransform().Rotate((glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) * 0.01f,(glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS) * 0.01f,(glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) * 0.01f);
 			if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
-				testobject.GetTransform().SetRotation(glm::vec3());
+				test->GetTransform().SetRotation(glm::vec3());
 
 			//Set ViewProjectionMatrix
 			camera.UseCamera(viewDataBuffer);
@@ -335,10 +341,10 @@ int main(int argc, char** argv)
 
 			if (debugDraw) {
 				debugMaterial.SetPropertyi("mode", debugDrawmode);
-				myObjectRenderer.DrawOverrideMaterial(debugMaterial);
+				myScene.DrawOpaqueObjects(debugMaterial);
 			}
 			else {
-				myObjectRenderer.Draw();
+				myScene.DrawScene(false);
 			}
 
 			//Draw WorldPortals between Opaque phase and transparent phase
