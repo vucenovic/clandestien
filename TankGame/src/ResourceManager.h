@@ -19,6 +19,8 @@ public:
 	std::map<std::string, std::shared_ptr<Texture>> textures;
 	//std::map<std::string, std::shared_ptr<GfxObject>> renderObjects;//Combination of mesh and material
 
-	//Frees all loaded Resources
-	void Cleanup();
+	void GetShader(const std::string & name);
+	void GetMesh(const std::string & name);
+	void GetMaterial(const std::string & name);
+	void GetTexture(const std::string & name);
 };

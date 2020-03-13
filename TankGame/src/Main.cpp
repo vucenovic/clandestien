@@ -21,6 +21,7 @@
 #include "Renderer.h"
 #include "FrameBuffer.h"
 #include "Particles.h"
+#include "Camera.h"
 
 #include "Main.h"
 
@@ -127,12 +128,10 @@ int main(int argc, char** argv)
 
 		//--------Camera
 
-		//setup identity matrix and perspective transformmatrix
-		glm::mat4 perspective = glm::perspective(glm::radians(FOV), (float)width / (float)height, nearPlane, farPlane);
+		Camera camera = Camera();
+		camera.SetPerspective(FOV, (float)width / (float)height, nearPlane, farPlane);
 
-		Transform myCameraTransform = Transform();
-
-		CameraController myCameraController(&myCameraTransform,window);
+		CameraController myCameraController(&camera.GetTransform(),window);
 
 		//Meshes
 
@@ -310,15 +309,7 @@ int main(int argc, char** argv)
 				testobject.GetTransform().SetRotation(glm::vec3());
 
 			//Set ViewProjectionMatrix
-			{
-				glm::mat4 view = myCameraTransform.ToInverseMatrix();
-				glm::vec4 eyePos = glm::vec4(myCameraTransform.GetPosition(),1);
-
-				glBindBuffer(GL_UNIFORM_BUFFER, viewDataBuffer.GetHandle());
-				glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(perspective));
-				glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(view));
-				glBindBuffer(GL_UNIFORM_BUFFER, 0);
-			}
+			camera.UseCamera(viewDataBuffer);
 
 			renderFBO.Bind();
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -329,7 +320,7 @@ int main(int argc, char** argv)
 				pSystem.Update(deltaTime);
 				glBindBuffer(GL_ARRAY_BUFFER, pmmanager.GetBufferHandle());
 				void * buf = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-				glm::vec3 forward = myCameraTransform.ToMatrix()*glm::vec4(0, 0, 1, 0);
+				glm::vec3 forward = camera.GetForward();
 				pSystem.SortParticles(forward); // sort particles that use alpha blending instead of additive blending
 				pSystem.WriteMesh((Particle*)buf, 0, 150);
 				glUnmapBuffer(GL_ARRAY_BUFFER);
@@ -404,7 +395,7 @@ int main(int argc, char** argv)
 				pp_bloom->UseProgram();
 				glBindTexture(GL_TEXTURE_2D, ppFBO.color);
 				glUniform1i(pp_bloom->GetUniformLocation("combine"), 0);
-				glUniform1f(pp_bloom->GetUniformLocation("cutoff"), 2);
+				glUniform1f(pp_bloom->GetUniformLocation("cutoff"), 1);
 				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 				
 				//Blur Highlights

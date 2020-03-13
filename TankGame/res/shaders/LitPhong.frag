@@ -27,7 +27,7 @@ layout (binding = 1, std140) uniform LightData{
 	vec4 ambientColor;
 	uvec4 lightCounts;
 
-	PointLight[5] pointLights;
+	PointLight[15] pointLights;
 
 	DirectionalLight[5] directionalLights;
 
