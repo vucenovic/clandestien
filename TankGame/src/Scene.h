@@ -23,6 +23,7 @@ private:
 
 	//string map for searching objects by name
 	std::map<std::string, std::unique_ptr<GameObject>> gameObjects;
+	
 
 public:
 	void DrawOpaqueObjects(const Material & material);
@@ -35,4 +36,8 @@ public:
 	void RemoveObject(const std::string & name);
 
 	void DrawScene(bool drawPortals);
+
+public:
+	void UpdateScene();
+
 };

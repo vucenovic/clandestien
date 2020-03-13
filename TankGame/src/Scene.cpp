@@ -104,11 +104,16 @@ void Scene::DrawScene(bool drawPortals)
 
 	DrawOpaqueObjects();
 	if (drawPortals) {
-		/*renderPortal() {
-			drawHoldoutToScreen();
-			setViewParameters();
-			DrawScenen(false);
-		};*/
+		/*
+		for(Portal portal : portals){
+			renderPortal() {
+				drawHoldoutToScreen();
+				setViewParameters();
+				DrawScene(false);
+				resetStencil();
+			};
+		}
+		*/
 	}
 	DrawTransparentObjects();
 }

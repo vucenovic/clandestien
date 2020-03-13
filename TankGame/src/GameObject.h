@@ -9,6 +9,8 @@
 //unify Gameobjects with other types *maybe* *idunno*
 enum class GameObjectType {
 	Object,
+	ParticleSystem,
+	Light,
 	Camera
 };
 
