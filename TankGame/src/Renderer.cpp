@@ -3,8 +3,6 @@
 #include <GL/glew.h>
 #include <glm/gtc/type_ptr.hpp>
 
-size_t GameObject::IDCounter = 0;
-
 MasterRenderer::MasterRenderer()
 {
 }
@@ -82,13 +80,4 @@ void MasterRenderer::DrawOverrideMaterial(Material& material)
 			}
 		}
 	}
-}
-
-GameObject::~GameObject()
-{
-}
-
-Transform & GameObject::GetTransform()
-{
-	return transform;
 }

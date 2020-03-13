@@ -44,7 +44,7 @@ int main(int argc, char** argv)
 	int vsync = reader.Get<int>("gfx", "vsync", 0);
 	float gamma = reader.Get<float>("gfx", "gamma", 1);
 
-	std::string window_title = "That Game";
+	std::string window_title = "Clandestien";
 	float FOV = 60;
 	float nearPlane = 0.1;
 	float farPlane = 100;
@@ -112,7 +112,7 @@ int main(int argc, char** argv)
 		catch (const std::invalid_argument&)
 		{
 			std::cerr << "Shader failed to compile" << std::endl;
-			goto _shaderCompileError;
+			goto _shaderCompileError; //jumps to context cleanup section
 		}
 		std::shared_ptr<Texture2D> tilesDiff = std::make_shared<Texture2D>("res/textures/tiles_diffuse");
 		std::shared_ptr<Texture2D> tilesSpec = std::make_shared<Texture2D>("res/textures/tiles_specular");
@@ -273,7 +273,6 @@ int main(int argc, char** argv)
 			glBindVertexArray(0);
 			glDeleteBuffers(1, &buffers);
 		}
-
 
 		RenderFrameBuffer renderFBO = RenderFrameBuffer(width, height);
 

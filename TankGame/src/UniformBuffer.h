@@ -22,7 +22,7 @@ public:
 
 	GLuint GetBlockSize();
 	const std::vector<GLuint> & GetOffsets() const;
-	GLuint GetHandle();
+	const GLuint GetHandle() const { return bufferHandle; }
 
 	void BindToPort(GLuint bufferPort);
 };

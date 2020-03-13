@@ -8,22 +8,7 @@
 #include "Mesh.h"
 #include "Utils.h"
 #include "Particles.h"
-
-class GameObject //TODO separate material and mesh from gameobject
-{
-private:
-	static size_t IDCounter;
-	size_t ID;
-	Transform transform;
-public:
-	Mesh * mesh;
-	Material * material;
-
-	GameObject() : ID(IDCounter++), transform(Transform()), mesh(nullptr), material(nullptr) {};
-	~GameObject();
-
-	Transform & GetTransform();
-};
+#include "GameObject.h"
 
 class GfxObject
 {

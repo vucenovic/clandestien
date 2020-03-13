@@ -8,8 +8,7 @@
 #include "ShaderProgram.h"
 #include "Material.h"
 #include "Mesh.h"
-//#include "GameObject"
-#include "Renderer.h" //TODO move Gameobject into own file
+#include "GameObject.h"
 
 //TODO (maybe): Maybe split into "Scene" and "SceneRenderer" classes?
 class Scene

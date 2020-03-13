@@ -27,7 +27,7 @@ void Scene::DrawOpaqueObjects()
 
 void Scene::DrawTransparentObjects()
 {
-	auto func_multiply = [](int a, int b) -> int { return a * b; };
+	
 }
 
 void Scene::DrawScene(bool drawPortals)

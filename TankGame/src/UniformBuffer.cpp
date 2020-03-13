@@ -79,11 +79,6 @@ const std::vector<GLuint> & UniformBuffer::GetOffsets() const
 	return variableOffsets;
 }
 
-GLuint UniformBuffer::GetHandle()
-{
-	return bufferHandle;
-}
-
 void UniformBuffer::BindToPort(GLuint bufferPort)
 {
 	glBindBufferBase(GL_UNIFORM_BUFFER, bufferPort, bufferHandle);
