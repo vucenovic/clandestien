@@ -34,7 +34,6 @@ void BSPTree::setStartingSplitter(glm::vec3 centroid)
 
 void BSPTree::createTree()
 {
-	
 }
 
 void BSPTree::addGameObject(GameObject *o, glm::vec3 centroid)

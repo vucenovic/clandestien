@@ -57,6 +57,12 @@ inline std::string INIReader::convert(const std::string & str)
 	return str;
 }
 
+template<>
+inline char INIReader::convert(const std::string & str) 
+{
+	return str[0];
+}
+
 template<typename T>
 inline T INIReader::Get(const std::string & section, const std::string & name, T default_value)
 {

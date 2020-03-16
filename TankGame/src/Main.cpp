@@ -51,6 +51,10 @@ int main(int argc, char** argv)
 	bool fullscreen = reader.Get<bool>("gfx", "fullscreen", false);
 	int vsync = reader.Get<int>("gfx", "vsync", 0);
 	float gamma = reader.Get<float>("gfx", "gamma", 1);
+	char forward = reader.Get<char>("controls", "forwards", 'w');
+	char backward = reader.Get<char>("controls", "backwards", 's');
+	char left = reader.Get<char>("controls", "left", 'a');
+	char right = reader.Get<char>("controls", "right", 'd');
 
 	std::string window_title = "Clandestien";
 	float FOV = 60;
