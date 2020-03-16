@@ -3,28 +3,31 @@
 BSPTree::BSPTree()
 {
 	this->root = nullptr;
+	this->startingSplitter = glm::vec3(0, 0, 0);
 }
 
-BSPTree::BSPTree(std::map<GameObject*, std::array<GLfloat, 3>> sceneData)
+BSPTree::BSPTree(std::map<GameObject*, glm::vec3> sceneData)
 {
 	this->sceneData = sceneData;
 	this->root = nullptr;
+	this->startingSplitter = glm::vec3(0, 0, 0);
 }
 
-void BSPTree::setSceneData(std::map<GameObject*, std::array<GLfloat, 3>> sceneData)
+void BSPTree::setSceneData(std::map<GameObject*, glm::vec3> sceneData)
 {
 	this->sceneData = sceneData;
 	this->root = nullptr;
+	this->startingSplitter = glm::vec3(0, 0, 0);
 }
 
-BSPTree::BSPTree(std::map<GameObject*, std::array<GLfloat, 3>> sceneData, std::array<GLfloat, 3> centroid)
+BSPTree::BSPTree(std::map<GameObject*, glm::vec3> sceneData, glm::vec3 centroid)
 {
 	this->sceneData = sceneData;
 	this->root = nullptr;
 	this->startingSplitter = centroid;
 }
 
-void BSPTree::setStartingSplitter(std::array<GLfloat, 3> centroid) 
+void BSPTree::setStartingSplitter(glm::vec3 centroid) 
 {
 	this->startingSplitter = centroid;
 }
@@ -34,7 +37,7 @@ void BSPTree::createTree()
 	
 }
 
-void BSPTree::addGameObject(GameObject *o, std::array<GLfloat, 3> centroid)
+void BSPTree::addGameObject(GameObject *o, glm::vec3 centroid)
 {
 	this->sceneData.insert({o, centroid }); 
 }
