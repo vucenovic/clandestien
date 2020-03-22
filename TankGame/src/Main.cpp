@@ -11,6 +11,8 @@
 
 #include "INIReader.h"
 
+#include <PhysX/PxPhysicsAPI.h>
+
 #include "ShaderProgram.h"
 #include "CameraController.h"
 #include "Mesh.h"
@@ -43,6 +45,32 @@ int debugDrawmode = 0;
 int main(int argc, char** argv)
 {
 	INIReader reader("res/settings.ini");
+	using namespace physx;
+	PxDefaultAllocator		gAllocator;
+	PxDefaultErrorCallback	gErrorCallback;
+
+	PxFoundation* gFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, gAllocator, gErrorCallback);
+
+	PxPhysics* gPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *gFoundation, PxTolerancesScale(), true, NULL);
+
+	PxSceneDesc sceneDesc(gPhysics->getTolerancesScale());
+	sceneDesc.gravity = PxVec3(0.0f, -9.81f, 0.0f);
+	PxDefaultCpuDispatcher* gDispatcher = PxDefaultCpuDispatcherCreate(2);
+	sceneDesc.cpuDispatcher = gDispatcher;
+	sceneDesc.filterShader = PxDefaultSimulationFilterShader;
+	PxScene* gScene = gPhysics->createScene(sceneDesc);
+
+	PxPvdSceneClient* pvdClient = gScene->getScenePvdClient();
+	if (pvdClient)
+	{
+		pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_CONSTRAINTS, true);
+		pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_CONTACTS, true);
+		pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_SCENEQUERIES, true);
+	}
+	PxMaterial* gMaterial = gPhysics->createMaterial(0.5f, 0.5f, 0.6f);
+
+	PxRigidStatic* groundPlane = PxCreatePlane(*gPhysics, PxPlane(0, 1, 0, 0), *gMaterial);
+	gScene->addActor(*groundPlane);
 
 	int width = reader.Get<int>("gfx", "width", 800);
 	int height = reader.Get<int>("gfx", "height", 800);
