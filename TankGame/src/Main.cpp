@@ -79,10 +79,10 @@ int main(int argc, char** argv)
 	bool fullscreen = reader.Get<bool>("gfx", "fullscreen", false);
 	int vsync = reader.Get<int>("gfx", "vsync", 0);
 	float gamma = reader.Get<float>("gfx", "gamma", 1);
-	char forward = reader.Get<char>("controls", "forwards", 'w');
-	char backward = reader.Get<char>("controls", "backwards", 's');
-	char left = reader.Get<char>("controls", "left", 'a');
-	char right = reader.Get<char>("controls", "right", 'd');
+	char forward = reader.Get<char>("controls", "forwards", 'W');
+	char backward = reader.Get<char>("controls", "backwards", 'S');
+	char left = reader.Get<char>("controls", "left", 'A');
+	char right = reader.Get<char>("controls", "right", 'D');
 
 	std::string window_title = "Clandestien";
 	float FOV = 60;
@@ -173,10 +173,8 @@ int main(int argc, char** argv)
 		CameraController myCameraController(&camera.GetTransform(),window);
 
 		//Meshes
-
-		std::shared_ptr<Mesh> myCubeMesh = MeshBuilder::BoxFlatShaded(1.5f, 1.5f, 1.5f);
-		std::shared_ptr<Mesh> myCylinderMesh = MeshBuilder::CylinderSplitShaded(1.3f, 1, 32);
-		std::shared_ptr<Mesh> mySphereMesh = MeshBuilder::Sphere(1, 64, 32);
+		
+		std::shared_ptr<Mesh> gameStageMesh = OBJLoader::LoadOBJ("res/models/GameStage.obj");
 		std::shared_ptr<Mesh> myTestMesh = OBJLoader::LoadOBJ("res/models/monkey.obj");
 
 		//Materials
@@ -211,23 +209,11 @@ int main(int argc, char** argv)
 		testobject->GetTransform().SetPostion(glm::vec3(3, 1.5f, 0));
 		testobject->name = "test";
 
-		std::unique_ptr<GameObject> sphere = std::make_unique<GameObject>();
-		sphere->mesh = mySphereMesh.get();
-		sphere->material = &tilesMaterial;
-		sphere->GetTransform().SetPostion(glm::vec3(1.5f,-1,0));
-		sphere->name = "sphere";
-
-		std::unique_ptr<GameObject> cube = std::make_unique<GameObject>();
-		cube->mesh = myCubeMesh.get();
-		cube->material = &woodMaterial;
-		cube->GetTransform().SetPostion(glm::vec3(0, 1.5f, 0));
-		cube->name = "cube";
-
-		std::unique_ptr<GameObject> cylinder = std::make_unique<GameObject>();
-		cylinder->mesh = myCylinderMesh.get();
-		cylinder->material = &tilesMaterial;
-		cylinder->GetTransform().SetPostion(glm::vec3(-1.5f, -1, 0));
-		cylinder->name = "cylinder";
+		std::unique_ptr<GameObject> gameStage = std::make_unique<GameObject>();
+		gameStage->mesh = gameStageMesh.get();
+		gameStage->material = &tilesMaterial;
+		gameStage->GetTransform().SetPostion(glm::vec3(0, 0, 0));
+		gameStage->name = "gameStage";
 
 		//--------Uniform Buffers
 
@@ -273,10 +259,8 @@ int main(int argc, char** argv)
 
 		Scene myScene = Scene();
 
-		myScene.AddObject(sphere);
-		myScene.AddObject(cube);
-		myScene.AddObject(cylinder);
 		myScene.AddObject(testobject);
+		myScene.AddObject(gameStage);
 
 		//Particles
 
@@ -346,7 +330,7 @@ int main(int argc, char** argv)
 			// Handle Inputs
 			glfwPollEvents();
 
-			myCameraController.HandleInputs(scrollOffset);
+			myCameraController.HandleInputs(scrollOffset, forward, backward, left, right, currentFrametime);
 			GameObject * test = myScene.GetObject("test");
 			test->GetTransform().Rotate((glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) * 0.01f,(glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS) * 0.01f,(glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) * 0.01f);
 			if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
