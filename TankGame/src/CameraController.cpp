@@ -20,35 +20,52 @@ void CameraController::HandleInputs(const float &scrolloffset, char forward, cha
 
 	// Move forward
 	if (glfwGetKey(window, (int) forward) == GLFW_PRESS) {
-		pivotPostion += forwardVector * frametime * moveSpeed;
+		if (pivotPostion[2] >= 0) {
+			std::cout << pivotPostion[2];
+			pivotPostion += glm::vec3(0, 0, frametime * moveSpeed);
+		}
+		else {
+			pivotPostion -= glm::vec3(0, 0, frametime * moveSpeed);
+		}
 	}
 	// Move backward
 	if (glfwGetKey(window,(int) backward) == GLFW_PRESS) {
-		pivotPostion -= forwardVector * frametime * moveSpeed;
+		if (pivotPostion[2] >= 0) {
+			pivotPostion -= glm::vec3(0, 0, frametime * moveSpeed);
+		}
+		else {
+			pivotPostion += glm::vec3(0, 0, frametime * moveSpeed);
+		}
+			
 	}
 	// Strafe right
 	if (glfwGetKey(window, (int) right) == GLFW_PRESS) {
-		pivotPostion -= rightVector * frametime * moveSpeed;
+		if (pivotPostion[0] >= 0) {
+			pivotPostion -= glm::vec3(frametime * moveSpeed, 0, 0);
+		}
+		else {
+			pivotPostion += glm::vec3(frametime * moveSpeed, 0, 0);
+		}
+		
 	}
 	// Strafe left
 	if (glfwGetKey(window, (int) left) == GLFW_PRESS) {
-		pivotPostion += rightVector * frametime * moveSpeed;
+		if (pivotPostion[0] >= 0) {
+			pivotPostion += glm::vec3(frametime * moveSpeed, 0, 0);
+		}
+		else {
+			pivotPostion -= glm::vec3(frametime * moveSpeed, 0, 0);
+		}
 	}
 
-	/*cameraTransform->SetPostion(pivotPostion);
-	cameraTransform->SetRotation(pivotPostion + direction);*/
-
-	//Handle Panning
-	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT)) {
-		pivotYaw += dx * horizontalSensitivity;
-		pivotPitch += dy * verticalSensitivity;
+	pivotYaw += dx * horizontalSensitivity;
+	pivotPitch += dy * verticalSensitivity;
 		
-		if (pivotPitch >= 90) pivotPitch = 89.95f;
-		else if (pivotPitch <= -90) pivotPitch = -89.95f;
+	if (pivotPitch >= 90) pivotPitch = 89.95f;
+	else if (pivotPitch <= -90) pivotPitch = -89.95f;
 
-		if (pivotYaw > 360) pivotYaw -= 360;
-		else if (pivotYaw < -360) pivotYaw += 360;
-	}
+	if (pivotYaw > 360) pivotYaw -= 360;
+	else if (pivotYaw < -360) pivotYaw += 360;
 	//Set Rotation
 	 cameraTransform->SetRotationDegrees(pivotPitch, pivotYaw, 0);
 
