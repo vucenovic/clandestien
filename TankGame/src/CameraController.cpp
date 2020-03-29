@@ -7,7 +7,7 @@ void CameraController::HandleInputs(const float &scrolloffset, char forward, cha
 	glfwGetCursorPos(window,&xd,&yd);
 	float x = (float)xd, y = (float)yd;
 
-	glm::vec3 position = glm::vec3(0, 0, 0);
+	glm::vec3 position = glm::vec3(0.0, 0.0, 0.0);
 
 	float dx = x - lastX, dy = y - lastY;
 
@@ -41,15 +41,14 @@ void CameraController::HandleInputs(const float &scrolloffset, char forward, cha
 	}
 	// Strafe right
 	if (glfwGetKey(window, MapKeys(right)) == GLFW_PRESS) {
-		position += right * frametime * strafeSpeed;
+		position += r * frametime * strafeSpeed;
 	}
 	// Strafe left
 	if (glfwGetKey(window, MapKeys(left)) == GLFW_PRESS) {
-		position -= right * frametime * strafeSpeed;
+		position -= r * frametime * strafeSpeed;
 	}
 
-	cameraTransform->SetPostion(position);
-
+	cameraTransform->Translate(position);
 
 	//Handle Panning
 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT)) {
@@ -154,7 +153,7 @@ CameraController::CameraController(Transform* cameraTransform, GLFWwindow* windo
 	scrollSensitivity = -0.25;
 
 	strafeSpeed = -0.001f;
-	moveSpeed = -0.1f;
+	moveSpeed = -0.01f;
 }
 
 CameraController::~CameraController()
