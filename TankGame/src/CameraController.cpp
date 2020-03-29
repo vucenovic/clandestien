@@ -18,21 +18,20 @@ void CameraController::HandleInputs(const float &scrolloffset, char forward, cha
 	glm::vec3 rightVector = rotmatrix * glm::vec3(1, 0, 0);
 	glm::vec3 upVector = glm::cross(rightVector, forwardVector);
 
-	
 	// Move forward
-	if (glfwGetKey(window, MapKeys(forward)) == GLFW_PRESS) {
+	if (glfwGetKey(window, (int) forward) == GLFW_PRESS) {
 		pivotPostion += forwardVector * frametime * moveSpeed;
 	}
 	// Move backward
-	if (glfwGetKey(window, MapKeys(backward)) == GLFW_PRESS) {
+	if (glfwGetKey(window,(int) backward) == GLFW_PRESS) {
 		pivotPostion -= forwardVector * frametime * moveSpeed;
 	}
 	// Strafe right
-	if (glfwGetKey(window, MapKeys(right)) == GLFW_PRESS) {
+	if (glfwGetKey(window, (int) right) == GLFW_PRESS) {
 		pivotPostion -= rightVector * frametime * strafeSpeed;
 	}
 	// Strafe left
-	if (glfwGetKey(window, MapKeys(left)) == GLFW_PRESS) {
+	if (glfwGetKey(window, (int) left) == GLFW_PRESS) {
 		pivotPostion += rightVector * frametime * strafeSpeed;
 	}
 
@@ -68,61 +67,6 @@ void CameraController::HandleInputs(const float &scrolloffset, char forward, cha
 	lastY = y;
 }
 
-int CameraController::MapKeys(char key)
-{
-	switch (key) {
-		case 'A':
-			return GLFW_KEY_A;
-		case 'B':
-			return GLFW_KEY_B;
-		case 'C':
-			return GLFW_KEY_C;
-		case 'D':
-			return GLFW_KEY_D;
-		case 'E':
-			return GLFW_KEY_E;
-		case 'F':
-			return GLFW_KEY_F;
-		case 'G':
-			return GLFW_KEY_G;
-		case 'H':
-			return GLFW_KEY_H;
-		case 'I':
-			return GLFW_KEY_I;
-		case 'J':
-			return GLFW_KEY_K;
-		case 'L':
-			return GLFW_KEY_L;
-		case 'M':
-			return GLFW_KEY_M;
-		case 'N':
-			return GLFW_KEY_N;
-		case 'O':
-			return GLFW_KEY_O;
-		case 'P':
-			return GLFW_KEY_P;
-		case 'Q':
-			return GLFW_KEY_Q;
-		case 'R':
-			return GLFW_KEY_R;
-		case 'S':
-			return GLFW_KEY_T;
-		case 'U':
-			return GLFW_KEY_V;
-		case 'W':
-			return GLFW_KEY_W;
-		case 'X':
-			return GLFW_KEY_X;
-		case 'Y':
-			return GLFW_KEY_Y;
-		case 'Z':
-			return GLFW_KEY_Z;
-		case 'UP':
-			return GLFW_KEY_UP;
-		case 'DOWN':
-			return GLFW_KEY_DOWN;
-	}
-}
 
 CameraController::CameraController(Transform* cameraTransform, GLFWwindow* window)
 {
