@@ -28,11 +28,11 @@ void CameraController::HandleInputs(const float &scrolloffset, char forward, cha
 	}
 	// Strafe right
 	if (glfwGetKey(window, (int) right) == GLFW_PRESS) {
-		pivotPostion -= rightVector * frametime * strafeSpeed;
+		pivotPostion -= rightVector * frametime * moveSpeed;
 	}
 	// Strafe left
 	if (glfwGetKey(window, (int) left) == GLFW_PRESS) {
-		pivotPostion += rightVector * frametime * strafeSpeed;
+		pivotPostion += rightVector * frametime * moveSpeed;
 	}
 
 	/*cameraTransform->SetPostion(pivotPostion);
@@ -83,8 +83,8 @@ CameraController::CameraController(Transform* cameraTransform, GLFWwindow* windo
 	horizontalAngle = 3.14f;
 	verticalAngle = 0.0f;
 
-	strafeSpeed = -0.01f;
-	moveSpeed = -0.01f;
+	strafeSpeed = -0.008f;
+	moveSpeed = -0.008f;
 }
 
 CameraController::~CameraController()
