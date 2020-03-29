@@ -18,6 +18,8 @@ public:
 	float pivotPitch;
 	float strafeSpeed;
 	float moveSpeed;
+	float horizontalAngle;
+	float verticalAngle;
 
 	float horizontalSensitivity, verticalSensitivity, scrollSensitivity;
 

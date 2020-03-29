@@ -9,40 +9,31 @@ void CameraController::HandleInputs(const float &scrolloffset, char forward, cha
 
 	float dx = x - lastX, dy = y - lastY;
 
-	float horizontalAngle = 3.14f;
-	float verticalAngle = 0.0f;
-
 	horizontalAngle += horizontalSensitivity * frametime * float(800 / 2 - xd);
 	verticalAngle += verticalSensitivity * frametime * float(800 / 2 - yd);
 
-	glm::vec3 direction(
-		cos(verticalAngle) * sin(horizontalAngle),
-		sin(verticalAngle),
-		cos(verticalAngle) * cos(horizontalAngle)
-	);
+	glm::mat3 rotmatrix = glm::toMat4(cameraTransform->GetRotation());
 
-	glm::vec3 r = glm::vec3(
-		sin(horizontalAngle - 3.14f / 2.0f),
-		0,
-		cos(horizontalAngle - 3.14f / 2.0f)
-	);
+	glm::vec3 forwardVector = rotmatrix * glm::vec3(0, 0, 1);
+	glm::vec3 rightVector = rotmatrix * glm::vec3(1, 0, 0);
+	glm::vec3 upVector = glm::cross(rightVector, forwardVector);
 
-	glm::vec3 up = glm::cross(r, direction);
+	
 	// Move forward
 	if (glfwGetKey(window, MapKeys(forward)) == GLFW_PRESS) {
-		pivotPostion += direction * frametime * moveSpeed;
+		pivotPostion += forwardVector * frametime * moveSpeed;
 	}
 	// Move backward
 	if (glfwGetKey(window, MapKeys(backward)) == GLFW_PRESS) {
-		pivotPostion -= direction * frametime * moveSpeed;
+		pivotPostion -= forwardVector * frametime * moveSpeed;
 	}
 	// Strafe right
 	if (glfwGetKey(window, MapKeys(right)) == GLFW_PRESS) {
-		pivotPostion += r * frametime * strafeSpeed;
+		pivotPostion -= rightVector * frametime * strafeSpeed;
 	}
 	// Strafe left
 	if (glfwGetKey(window, MapKeys(left)) == GLFW_PRESS) {
-		pivotPostion -= r * frametime * strafeSpeed;
+		pivotPostion += rightVector * frametime * strafeSpeed;
 	}
 
 	/*cameraTransform->SetPostion(pivotPostion);
@@ -61,11 +52,6 @@ void CameraController::HandleInputs(const float &scrolloffset, char forward, cha
 	}
 	//Set Rotation
 	 cameraTransform->SetRotationDegrees(pivotPitch, pivotYaw, 0);
-	glm::mat3 rotmatrix = glm::toMat4(cameraTransform->GetRotation());
-
-	glm::vec3 forwardVector = rotmatrix * glm::vec3(0, 0, 1);
-	glm::vec3 rightVector = rotmatrix * glm::vec3(1, 0, 0);
-	glm::vec3 upVector = glm::cross(rightVector, forwardVector);
 
 	//Handle Strafing
 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT)) {
@@ -150,7 +136,10 @@ CameraController::CameraController(Transform* cameraTransform, GLFWwindow* windo
 	verticalSensitivity = -0.25;
 	scrollSensitivity = -0.25;
 
-	strafeSpeed = -0.001f;
+	horizontalAngle = 3.14f;
+	verticalAngle = 0.0f;
+
+	strafeSpeed = -0.01f;
 	moveSpeed = -0.01f;
 }
 
