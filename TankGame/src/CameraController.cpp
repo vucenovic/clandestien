@@ -7,7 +7,7 @@ void CameraController::HandleInputs(const float &scrolloffset, char forward, cha
 	glfwGetCursorPos(window,&xd,&yd);
 	float x = (float)xd, y = (float)yd;
 
-	glm::vec3 position = glm::vec3(0.0, 0.0, 0.0);
+	glm::vec3 position = glm::vec3(0.0, 5.0, 0.0);
 
 	float dx = x - lastX, dy = y - lastY;
 
@@ -32,7 +32,6 @@ void CameraController::HandleInputs(const float &scrolloffset, char forward, cha
 	glm::vec3 up = glm::cross(r, direction);
 	// Move forward
 	if (glfwGetKey(window, MapKeys(forward)) == GLFW_PRESS) {
-		std::cout << "W pressed";
 		position += direction * frametime * moveSpeed;
 	}
 	// Move backward
@@ -48,7 +47,8 @@ void CameraController::HandleInputs(const float &scrolloffset, char forward, cha
 		position -= r * frametime * strafeSpeed;
 	}
 
-	cameraTransform->Translate(position);
+	cameraTransform->SetPostion(position);
+	cameraTransform->SetRotation(position + direction);
 
 	//Handle Panning
 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT)) {
@@ -62,7 +62,7 @@ void CameraController::HandleInputs(const float &scrolloffset, char forward, cha
 		else if (pivotYaw < -360) pivotYaw += 360;
 	}
 	//Set Rotation
-	cameraTransform->SetRotationDegrees(pivotPitch, pivotYaw, 0);
+	 cameraTransform->SetRotationDegrees(pivotPitch, pivotYaw, 0);
 	glm::mat3 rotmatrix = glm::toMat4(cameraTransform->GetRotation());
 
 	glm::vec3 forwardVector = rotmatrix * glm::vec3(0, 0, 1);
@@ -78,7 +78,7 @@ void CameraController::HandleInputs(const float &scrolloffset, char forward, cha
 	if (pivotRadius < 0) pivotRadius = 0;
 
 	//set Combined Position
-	cameraTransform->SetPostion(pivotPostion + forwardVector * pivotRadius);
+	// cameraTransform->SetPostion(pivotPostion + forwardVector * pivotRadius);
 
 	lastX = x;
 	lastY = y;
