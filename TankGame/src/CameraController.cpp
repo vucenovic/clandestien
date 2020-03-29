@@ -7,8 +7,6 @@ void CameraController::HandleInputs(const float &scrolloffset, char forward, cha
 	glfwGetCursorPos(window,&xd,&yd);
 	float x = (float)xd, y = (float)yd;
 
-	glm::vec3 position = glm::vec3(0.0, 5.0, 0.0);
-
 	float dx = x - lastX, dy = y - lastY;
 
 	float horizontalAngle = 3.14f;
@@ -32,23 +30,23 @@ void CameraController::HandleInputs(const float &scrolloffset, char forward, cha
 	glm::vec3 up = glm::cross(r, direction);
 	// Move forward
 	if (glfwGetKey(window, MapKeys(forward)) == GLFW_PRESS) {
-		position += direction * frametime * moveSpeed;
+		pivotPostion += direction * frametime * moveSpeed;
 	}
 	// Move backward
 	if (glfwGetKey(window, MapKeys(backward)) == GLFW_PRESS) {
-		position -= direction * frametime * moveSpeed;
+		pivotPostion -= direction * frametime * moveSpeed;
 	}
 	// Strafe right
 	if (glfwGetKey(window, MapKeys(right)) == GLFW_PRESS) {
-		position += r * frametime * strafeSpeed;
+		pivotPostion += r * frametime * strafeSpeed;
 	}
 	// Strafe left
 	if (glfwGetKey(window, MapKeys(left)) == GLFW_PRESS) {
-		position -= r * frametime * strafeSpeed;
+		pivotPostion -= r * frametime * strafeSpeed;
 	}
 
-	cameraTransform->SetPostion(position);
-	cameraTransform->SetRotation(position + direction);
+	/*cameraTransform->SetPostion(pivotPostion);
+	cameraTransform->SetRotation(pivotPostion + direction);*/
 
 	//Handle Panning
 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT)) {
@@ -78,7 +76,7 @@ void CameraController::HandleInputs(const float &scrolloffset, char forward, cha
 	if (pivotRadius < 0) pivotRadius = 0;
 
 	//set Combined Position
-	// cameraTransform->SetPostion(pivotPostion + forwardVector * pivotRadius);
+	cameraTransform->SetPostion(pivotPostion + forwardVector * pivotRadius);
 
 	lastX = x;
 	lastY = y;
