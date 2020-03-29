@@ -39,6 +39,7 @@ void CameraController::HandleInputs(const float &scrolloffset, char forward, cha
 		pivotPostion[0] += rightVector[0] * frametime * moveSpeed;
 	}
 
+	// TODO: first person instead of orbit
 	pivotYaw += dx * horizontalSensitivity;
 	pivotPitch += dy * verticalSensitivity;
 		
