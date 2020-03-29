@@ -21,17 +21,21 @@ void CameraController::HandleInputs(const float &scrolloffset, char forward, cha
 	// Move forward
 	if (glfwGetKey(window, (int)forward) == GLFW_PRESS) {
 		pivotPostion[2] += forwardVector[2] * frametime * moveSpeed;
+		pivotPostion[0] += forwardVector[0] * frametime * moveSpeed;
 	}
 	// Move backward
 	if (glfwGetKey(window, (int)backward) == GLFW_PRESS) {
 		pivotPostion[2] -= forwardVector[2] * frametime * moveSpeed;
+		pivotPostion[0] -= forwardVector[0] * frametime * moveSpeed;
 	}
 	// Strafe right
 	if (glfwGetKey(window, (int)right) == GLFW_PRESS) {
+		pivotPostion[2] -= rightVector[2] * frametime * moveSpeed;
 		pivotPostion[0] -= rightVector[0] * frametime * moveSpeed;
 	}
 	// Strafe left
 	if (glfwGetKey(window, (int)left) == GLFW_PRESS) {
+		pivotPostion[2] += rightVector[2] * frametime * moveSpeed;
 		pivotPostion[0] += rightVector[0] * frametime * moveSpeed;
 	}
 
