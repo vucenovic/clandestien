@@ -19,43 +19,20 @@ void CameraController::HandleInputs(const float &scrolloffset, char forward, cha
 	glm::vec3 upVector = glm::cross(rightVector, forwardVector);
 
 	// Move forward
-	if (glfwGetKey(window, (int) forward) == GLFW_PRESS) {
-		if (pivotPostion[2] >= 0) {
-			std::cout << pivotPostion[2];
-			pivotPostion += glm::vec3(0, 0, frametime * moveSpeed);
-		}
-		else {
-			pivotPostion -= glm::vec3(0, 0, frametime * moveSpeed);
-		}
+	if (glfwGetKey(window, (int)forward) == GLFW_PRESS) {
+		pivotPostion[2] += forwardVector[2] * frametime * moveSpeed;
 	}
 	// Move backward
-	if (glfwGetKey(window,(int) backward) == GLFW_PRESS) {
-		if (pivotPostion[2] >= 0) {
-			pivotPostion -= glm::vec3(0, 0, frametime * moveSpeed);
-		}
-		else {
-			pivotPostion += glm::vec3(0, 0, frametime * moveSpeed);
-		}
-			
+	if (glfwGetKey(window, (int)backward) == GLFW_PRESS) {
+		pivotPostion[2] -= forwardVector[2] * frametime * moveSpeed;
 	}
 	// Strafe right
-	if (glfwGetKey(window, (int) right) == GLFW_PRESS) {
-		if (pivotPostion[0] >= 0) {
-			pivotPostion -= glm::vec3(frametime * moveSpeed, 0, 0);
-		}
-		else {
-			pivotPostion += glm::vec3(frametime * moveSpeed, 0, 0);
-		}
-		
+	if (glfwGetKey(window, (int)right) == GLFW_PRESS) {
+		pivotPostion[0] -= rightVector[0] * frametime * moveSpeed;
 	}
 	// Strafe left
-	if (glfwGetKey(window, (int) left) == GLFW_PRESS) {
-		if (pivotPostion[0] >= 0) {
-			pivotPostion += glm::vec3(frametime * moveSpeed, 0, 0);
-		}
-		else {
-			pivotPostion -= glm::vec3(frametime * moveSpeed, 0, 0);
-		}
+	if (glfwGetKey(window, (int)left) == GLFW_PRESS) {
+		pivotPostion[0] += rightVector[0] * frametime * moveSpeed;
 	}
 
 	pivotYaw += dx * horizontalSensitivity;
