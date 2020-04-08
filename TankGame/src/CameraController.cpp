@@ -57,7 +57,11 @@ void CameraController::HandleInputs(const float &scrolloffset, char forward, cha
 	}
 
 	//set Combined Position
+<<<<<<< HEAD
 	cameraTransform->SetPostion(pivotPostion);
+=======
+	cameraTransform->SetPostion(pivotPostion + forwardVector);
+>>>>>>> 2b4306dc7c3d2521d7a65a4ff5111044c9b1507f
 
 	lastX = x;
 	lastY = y;
