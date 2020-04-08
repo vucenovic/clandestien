@@ -56,11 +56,8 @@ void CameraController::HandleInputs(const float &scrolloffset, char forward, cha
 		pivotPostion += (upVector * dy + rightVector * dx) * strafeSpeed * pivotRadius;
 	}
 
-	pivotRadius += scrollSensitivity * scrolloffset;
-	if (pivotRadius < 0) pivotRadius = 0;
-
 	//set Combined Position
-	cameraTransform->SetPostion(pivotPostion + forwardVector * pivotRadius);
+	cameraTransform->SetPostion(pivotPostion);
 
 	lastX = x;
 	lastY = y;

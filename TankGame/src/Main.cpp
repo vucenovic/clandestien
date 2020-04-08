@@ -174,7 +174,7 @@ int main(int argc, char** argv)
 
 		//Meshes
 		
-		std::shared_ptr<Mesh> gameStageMesh = OBJLoader::LoadOBJ("res/models/GameStage.obj");
+		std::shared_ptr<Mesh> gameStageMesh = OBJLoader::LoadOBJ("res/models/GameScene.obj");
 		std::shared_ptr<Mesh> myTestMesh = OBJLoader::LoadOBJ("res/models/monkey.obj");
 
 		//Materials
@@ -313,6 +313,8 @@ int main(int argc, char** argv)
 		double nextSecond = 1;
 		size_t frameCount = 0;
 
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
 		//Render Loop
 		while (!glfwWindowShouldClose(window))
 		{
@@ -331,6 +333,7 @@ int main(int argc, char** argv)
 			glfwPollEvents();
 
 			myCameraController.HandleInputs(scrollOffset, forward, backward, left, right, currentFrametime);
+
 			GameObject * test = myScene.GetObject("test");
 			test->GetTransform().Rotate((glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) * 0.01f,(glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS) * 0.01f,(glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) * 0.01f);
 			if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
