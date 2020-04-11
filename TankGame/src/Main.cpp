@@ -25,6 +25,7 @@
 #include "FrameBuffer.h"
 #include "Particles.h"
 #include "Camera.h"
+#include "GameSceneAggregateBuilder.h"
 
 #include "Main.h"
 
@@ -45,11 +46,19 @@ int debugDrawmode = 0;
 int main(int argc, char** argv)
 {
 	INIReader reader("res/settings.ini");
+
+	// initialize PhysX engine as documented by Nvidia PhysX SDK Documentary
+
 	using namespace physx;
 	PxDefaultAllocator		gAllocator;
 	PxDefaultErrorCallback	gErrorCallback;
 
 	PxFoundation* gFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, gAllocator, gErrorCallback);
+	if (!gFoundation) {
+		std::cerr << "Failed to initialize PhysX Foundation";
+	}
+
+	// initialize physics and scene
 
 	PxPhysics* gPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *gFoundation, PxTolerancesScale(), true, NULL);
 
@@ -67,10 +76,31 @@ int main(int argc, char** argv)
 		pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_CONTACTS, true);
 		pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_SCENEQUERIES, true);
 	}
-	PxMaterial* gMaterial = gPhysics->createMaterial(0.5f, 0.5f, 0.6f);
 
-	PxRigidStatic* groundPlane = PxCreatePlane(*gPhysics, PxPlane(0, 1, 0, 0), *gMaterial);
-	gScene->addActor(*groundPlane);
+
+	// initialize aggregate for gamescene for optimization
+
+	PxU32 nActors = 16;
+	GameSceneAggregateBuilder agg = GameSceneAggregateBuilder(16, false, gPhysics);
+
+	// initialize geomentry for bounding boxes of game scene
+
+	agg.addStaticBox(PxTransform(0.0, 1.25, 2.5), PxBoxGeometry(0.0, 1.25, 2.5));
+	agg.addStaticBox(PxTransform(4.5, 2.75, -2.0), PxBoxGeometry(0.5, 2.75, 4.4));
+	agg.addStaticBox(PxTransform(-4.5, 4.0, -2.0), PxBoxGeometry(0.5, 1.5, 4.4));
+	agg.addStaticBox(PxTransform(-4.5, 1.25, -3.25), PxBoxGeometry(0.5, 1.25, 2.75));
+	agg.addStaticBox(PxTransform(-4.5, 1.25, 1.75), PxBoxGeometry(0.5, 1.25, 1.25));
+	agg.addStaticBox(PxTransform(0.0, 1.25, -4.5), PxBoxGeometry(4.0, 1.25, 2.5));
+	agg.addStaticBox(PxTransform(0.0, -0.5, -0.0), PxBoxGeometry(5.0, 0.5, 2.0));
+	agg.addStaticBox(PxTransform(-4.5, 2.25, -0.0), PxBoxGeometry(0.5, 0.25, 0.5));
+	agg.addStaticBox(PxTransform(-2.25, 4.0, -6.5), PxBoxGeometry(1.75, 1.5, 0.5));
+	agg.addStaticBox(PxTransform(2.25, 4.0, -6.5), PxBoxGeometry(1.75, 1.5, 0.5));
+	agg.addStaticBox(PxTransform(0.0, 5.0, -6.5), PxBoxGeometry(0.5, 0.5, 0.5));
+	agg.addStaticBox(PxTransform(0.0, 4.3, 0.8), PxBoxGeometry(4.0, 3.0, 0.45));	//TODO: rotate
+	agg.addStaticBox(PxTransform(0.0, 6.0, -3.5), PxBoxGeometry(4.0, 0.5, 2.5));
+	agg.addStaticBox(PxTransform(0.0, 3.061, -2.15), PxBoxGeometry(4.227, 0.549, 0.13));
+
+	gScene->addAggregate(*agg.gameSceneAggregate);
 
 	int width = reader.Get<int>("gfx", "width", 800);
 	int height = reader.Get<int>("gfx", "height", 800);
