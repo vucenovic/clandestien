@@ -85,7 +85,7 @@ int main(int argc, char** argv)
 
 	// initialize geomentry for bounding boxes of game scene
 
-	agg.addStaticBox(PxTransform(0.0, 1.25, 2.5), PxBoxGeometry(0.0, 1.25, 2.5));
+	//agg.addStaticBox(PxTransform(0.0, 1.25, 2.5), PxBoxGeometry(0.0, 1.25, 2.5)); TODO: why is this in the output?
 	agg.addStaticBox(PxTransform(4.5, 2.75, -2.0), PxBoxGeometry(0.5, 2.75, 4.4));
 	agg.addStaticBox(PxTransform(-4.5, 4.0, -2.0), PxBoxGeometry(0.5, 1.5, 4.4));
 	agg.addStaticBox(PxTransform(-4.5, 1.25, -3.25), PxBoxGeometry(0.5, 1.25, 2.75));
@@ -101,6 +101,17 @@ int main(int argc, char** argv)
 	agg.addStaticBox(PxTransform(0.0, 3.061, -2.15), PxBoxGeometry(4.227, 0.549, 0.13));
 
 	gScene->addAggregate(*agg.gameSceneAggregate);
+
+	// add kinematic capsule character controller
+
+	PxControllerManager* manager = PxCreateControllerManager(*gScene);
+	PxCapsuleControllerDesc desc;
+	desc.radius = 0.5;
+	desc.height = 2.0;
+	desc.climbingMode = PxCapsuleClimbingMode::eCONSTRAINED;
+	PxController* c = manager->createController(desc);
+	manager->setOverlapRecoveryModule(true); 
+
 
 	int width = reader.Get<int>("gfx", "width", 800);
 	int height = reader.Get<int>("gfx", "height", 800);
