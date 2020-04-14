@@ -102,7 +102,7 @@ int main(int argc, char** argv)
 
 	gScene->addAggregate(*agg.gameSceneAggregate);
 
-	// add kinematic capsule character controller
+	// add kinematic capsule character controller (experimental parameters)
 
 	PxControllerManager* manager = PxCreateControllerManager(*gScene);
 	PxCapsuleControllerDesc desc;
@@ -120,6 +120,16 @@ int main(int argc, char** argv)
 	desc.climbingMode = PxCapsuleClimbingMode::eCONSTRAINED;
 	PxController* c = manager->createController(desc);
 	manager->setOverlapRecoveryModule(true); 
+
+	// add debug visualization
+
+	gScene->setVisualizationParameter(PxVisualizationParameter::eSCALE, 1.0f);
+	gScene->setVisualizationParameter(PxVisualizationParameter::eCOLLISION_AABBS, 1.0);
+	gScene->setVisualizationParameter(PxVisualizationParameter::eCOLLISION_SHAPES, 1.0);
+
+	// TODO: bind character movement to camera movement
+
+	// TODO: use raycasts to move ape object (add dynamic bounding box for it)
 
 
 	int width = reader.Get<int>("gfx", "width", 800);
