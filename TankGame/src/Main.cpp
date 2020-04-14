@@ -106,6 +106,15 @@ int main(int argc, char** argv)
 
 	PxControllerManager* manager = PxCreateControllerManager(*gScene);
 	PxCapsuleControllerDesc desc;
+	PxMaterial* controllerMaterial = gPhysics->createMaterial(0.8f, 0.8f, 0.9f);
+	desc.stepOffset = 0.001;
+	desc.contactOffset = 0.05;
+	desc.material = controllerMaterial;
+	desc.density = 10.0;
+	desc.isValid();
+	desc.scaleCoeff = 0.95;
+	desc.volumeGrowth = 1.5f;
+	desc.position = PxExtendedVec3(0.0, 1.5, 0.0);
 	desc.radius = 0.5;
 	desc.height = 2.0;
 	desc.climbingMode = PxCapsuleClimbingMode::eCONSTRAINED;
