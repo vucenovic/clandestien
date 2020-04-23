@@ -196,7 +196,7 @@ int main(int argc, char** argv)
 	glfwSetScrollCallback(window, scroll_callback);
 
 	{
-		std::shared_ptr<ShaderProgram> standardShader,unifiedPBR, myShaderProgram, debugShader, particleShader, pp_demultAlpha, pp_gammaCorrect, pp_blur, pp_bloom;
+		std::shared_ptr<ShaderProgram> standardShader,unifiedPBR, myShaderProgram, debugShader, particleShader, pp_demultAlpha, pp_gammaCorrect, pp_blur, pp_bloom, unlitShader, SSDepthReset;
 		try
 		{
 			myShaderProgram = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/common.vert", "res/shaders/LitPhong.frag"));
@@ -208,6 +208,8 @@ int main(int argc, char** argv)
 			pp_gammaCorrect = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/screenspace.vert", "res/shaders/GammaCorrect.frag"));
 			pp_blur = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/screenspace.vert", "res/shaders/Blur.frag"));
 			pp_bloom = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/screenspace.vert", "res/shaders/Bloom.frag"));
+			unlitShader = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/common.vert", "res/shaders/Unlit.frag"));
+			SSDepthReset = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/screenspace.vert", "res/shaders/DepthReset.frag"));
 		}
 		catch (const std::invalid_argument&)
 		{
@@ -375,6 +377,9 @@ int main(int argc, char** argv)
 
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
+		myScene.activeCamera = &camera;
+		myScene.viewDataBuffer = &viewDataBuffer;
+
 		//Render Loop
 		while (!glfwWindowShouldClose(window))
 		{
@@ -392,7 +397,7 @@ int main(int argc, char** argv)
 			// Handle Inputs
 			glfwPollEvents();
 
-			myCameraController.HandleInputs(scrollOffset, forward, backward, left, right, currentFrametime);
+			myCameraController.HandleInputs(scrollOffset, forward, backward, left, right, deltaTime);
 
 			GameObject * test = myScene.GetObject("test");
 			test->GetTransform().Rotate((glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) * 0.01f,(glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS) * 0.01f,(glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) * 0.01f);
@@ -400,7 +405,6 @@ int main(int argc, char** argv)
 				test->GetTransform().SetRotation(glm::vec3());
 
 			//Set ViewProjectionMatrix
-			camera.UseCamera(viewDataBuffer);
 
 			renderFBO.Bind();
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

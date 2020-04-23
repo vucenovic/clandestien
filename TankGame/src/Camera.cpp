@@ -20,9 +20,13 @@ void Camera::SetOrtho(float left, float right, float top, float bottom)
 void Camera::UseCamera(const UniformBuffer & viewDataBuffer)
 {
 	glm::mat4 view = transform.ToInverseMatrix();
+	SetViewParameters(viewDataBuffer, view, projectionMatrix);
+}
 
+void Camera::SetViewParameters(const UniformBuffer & viewDataBuffer, const glm::mat4 & view, const glm::mat4 & projection)
+{
 	glBindBuffer(GL_UNIFORM_BUFFER, viewDataBuffer.GetHandle());
-	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(projectionMatrix));
+	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(projection));
 	glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(view));
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }

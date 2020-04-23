@@ -21,6 +21,10 @@ public:
 	glm::vec3 GetForward() const { return transform.ToMatrix()*glm::vec4(0, 0, 1, 0); }
 
 	void UseCamera(const UniformBuffer & viewDataBuffer);
+	static void SetViewParameters(const UniformBuffer & viewDataBuffer, const glm::mat4 & view, const glm::mat4 & projection);
+
+	const glm::mat4 & getViewMatrix() const { return transform.ToInverseMatrix(); }
+	const glm::mat4 & getProjectionMatrix() const { return projectionMatrix; }
 
 	//virtual const GameObjectType & GetType() const override { return GameObjectType::Camera; }
 };

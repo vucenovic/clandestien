@@ -151,6 +151,7 @@
     <ClCompile Include="src\Lights.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\Material.cpp" />
+    <ClCompile Include="src\Portal.cpp" />
     <ClCompile Include="src\ResourceManager.cpp" />
     <ClCompile Include="src\Scene.cpp" />
     <ClCompile Include="src\Utils.cpp" />
@@ -176,6 +177,7 @@
     <ClInclude Include="src\LightManager.h" />
     <ClInclude Include="src\Lights.h" />
     <ClInclude Include="src\Material.h" />
+    <ClInclude Include="src\Portal.h" />
     <ClInclude Include="src\ResourceManager.h" />
     <ClInclude Include="src\Scene.h" />
     <ClInclude Include="src\Utils.h" />

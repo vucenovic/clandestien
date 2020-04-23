@@ -69,6 +69,7 @@ CameraController::CameraController(Transform* cameraTransform, GLFWwindow* windo
 	this->window = window;
 	this->cameraTransform = cameraTransform;
 
+	pivotPostion = glm::vec3(0, 1.6f, 0);
 	pivotRadius = 6;
 	pivotYaw = 0;
 	pivotPitch = 0;
@@ -79,8 +80,8 @@ CameraController::CameraController(Transform* cameraTransform, GLFWwindow* windo
 	horizontalAngle = 3.14f;
 	verticalAngle = 0.0f;
 
-	strafeSpeed = -0.008f;
-	moveSpeed = -0.008f;
+	strafeSpeed = -2.0f;
+	moveSpeed = -2.0f;
 }
 
 CameraController::~CameraController()

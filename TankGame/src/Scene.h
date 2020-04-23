@@ -10,6 +10,8 @@
 #include "Material.h"
 #include "Mesh.h"
 #include "GameObject.h"
+#include "Portal.h"
+#include "Camera.h"
 
 //TODO (maybe): Maybe split into "Scene" and "SceneRenderer" classes?
 class Scene
@@ -24,11 +26,19 @@ private:
 	//string map for searching objects by name
 	std::map<std::string, std::unique_ptr<GameObject>> gameObjects;
 	
+	std::vector<Portal> renderPortals;
+public:
+	std::shared_ptr<ShaderProgram> portalHoldoutShader;
+	std::shared_ptr<ShaderProgram> depthResetSS;
+	UniformBuffer * viewDataBuffer;
+
+	Camera * activeCamera;
 
 public:
 	void DrawOpaqueObjects(const Material & material);
 	void DrawOpaqueObjects();
 	void DrawTransparentObjects();
+	void RenderPortal(const Portal * portal);
 
 public:
 	bool AddObject(std::unique_ptr<GameObject> & gameobject);

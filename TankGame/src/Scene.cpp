@@ -91,6 +91,38 @@ void Scene::DrawTransparentObjects()
 	
 }
 
+void Scene::RenderPortal(const Portal * portal)
+{
+	glEnable(GL_STENCIL_TEST);
+	glClear(GL_STENCIL_BUFFER_BIT);
+
+	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+	glStencilFunc(GL_ALWAYS, 1, 0xFF);
+	glStencilMask(0xFF);
+
+	//bind portalHoldout shader
+
+	portal->portalMesh->BindAndDraw();
+
+	glStencilFunc(GL_EQUAL, 1, 0xFF);
+	glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+	glStencilMask(0x00);
+	glDisable(GL_DEPTH_TEST);
+
+	//bind depthResetScreenspace shader
+	//bind and draw screenspace rectangle
+
+	glEnable(GL_DEPTH_TEST);
+
+	//SetViewParameters
+	glm::mat4 view = portal->getOffsetMatrix() * activeCamera->GetTransform().ToInverseMatrix();
+	Camera::SetViewParameters(*viewDataBuffer, view, activeCamera->getProjectionMatrix());
+
+	DrawScene(false);
+	glClear(GL_STENCIL_BUFFER_BIT);
+	glDisable(GL_STENCIL_TEST);
+}
+
 void Scene::DrawScene(bool drawPortals)
 {
 	//Draw WorldPortals between Opaque phase and transparent phase
@@ -101,19 +133,12 @@ void Scene::DrawScene(bool drawPortals)
 	//rerender scene from other perspective with stencil and depth testing
 	//?
 	//profit
-
+	activeCamera->UseCamera(*viewDataBuffer);
 	DrawOpaqueObjects();
 	if (drawPortals) {
-		/*
-		for(Portal portal : portals){
-			renderPortal() {
-				drawHoldoutToScreen();
-				setViewParameters();
-				DrawScene(false);
-				resetStencil();
-			};
+		for(Portal portal : renderPortals){
+			RenderPortal(&portal);
 		}
-		*/
 	}
 	DrawTransparentObjects();
 }
