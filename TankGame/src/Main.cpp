@@ -388,7 +388,7 @@ int main(int argc, char** argv)
 		myTestPortal.portalMesh = myPortalTestMesh;
 		myTestPortal.transform.SetRotationDegrees(0,90,0);
 		myTestPortal.transform.SetPostion(glm::vec3(-3.999f, 1, 0));
-		myTestPortal.targetTransform.SetRotationDegrees(0, 180, 0);
+		myTestPortal.targetTransform.SetRotationDegrees(0, 0, 0);
 		myTestPortal.targetTransform.SetPostion(glm::vec3(0, 1, -1.999f));
 		myScene.renderPortals.push_back(myTestPortal);
 

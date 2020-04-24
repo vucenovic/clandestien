@@ -120,7 +120,7 @@ void Scene::RenderPortal(const Portal * portal)
 	glDepthFunc(GL_LESS);
 
 	//SetViewParameters
-	glm::mat4 view = activeCamera->GetTransform().ToInverseMatrix() * portal->getOffsetMatrix();
+	glm::mat4 view = glm::inverse(portal->getOffsetMatrix() * activeCamera->GetTransform().ToMatrix());
 	Camera::SetViewParameters(*viewDataBuffer, view, activeCamera->getProjectionMatrix());
 
 	DrawOpaqueObjects();
