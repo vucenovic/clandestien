@@ -99,6 +99,7 @@ void Scene::RenderPortal(const Portal * portal)
 	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 	glStencilFunc(GL_ALWAYS, 1, 0xFF);
 	glStencilMask(0xFF);
+	glColorMask(false, false, false, false);
 
 	portalHoldoutShader->UseProgram();
 	GLuint modelMatrixLocation = portalHoldoutShader->GetUniformLocation("modelMatrix");
@@ -110,6 +111,7 @@ void Scene::RenderPortal(const Portal * portal)
 	glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 	glStencilMask(0x00);
 	glDepthFunc(GL_ALWAYS);
+	glColorMask(true, true, true, true);
 
 	depthResetSS->UseProgram();
 	glBindVertexArray(SSrectVAOId);
@@ -118,7 +120,7 @@ void Scene::RenderPortal(const Portal * portal)
 	glDepthFunc(GL_LESS);
 
 	//SetViewParameters
-	glm::mat4 view = portal->getOffsetMatrix() * activeCamera->GetTransform().ToInverseMatrix();
+	glm::mat4 view = activeCamera->GetTransform().ToInverseMatrix() * portal->getOffsetMatrix();
 	Camera::SetViewParameters(*viewDataBuffer, view, activeCamera->getProjectionMatrix());
 
 	DrawOpaqueObjects();
@@ -144,6 +146,7 @@ void Scene::DrawScene(bool drawPortals)
 	DrawOpaqueObjects();
 	if (drawPortals) {
 		for(Portal portal : renderPortals){
+			activeCamera->UseCamera(*viewDataBuffer);
 			RenderPortal(&portal);
 		}
 	}

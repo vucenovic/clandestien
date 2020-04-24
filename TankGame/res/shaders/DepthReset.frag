@@ -6,5 +6,5 @@ in vec2 screenposition;
 
 void main() {
     gl_FragDepth = 1;
-    color = vec4(1,1,1,1);
+    color = vec4(0);
 }

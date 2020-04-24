@@ -238,6 +238,7 @@ int main(int argc, char** argv)
 		
 		std::shared_ptr<Mesh> gameStageMesh = OBJLoader::LoadOBJ("res/models/GameScene.obj");
 		std::shared_ptr<Mesh> myTestMesh = OBJLoader::LoadOBJ("res/models/monkey.obj");
+		std::shared_ptr<Mesh> myPortalTestMesh = MeshBuilder::Quad();
 
 		//Materials
 
@@ -384,8 +385,20 @@ int main(int argc, char** argv)
 		myScene.depthResetSS = SSDepthReset;
 
 		Portal myTestPortal = Portal();
-		myTestPortal.portalMesh = myTestMesh;
+		myTestPortal.portalMesh = myPortalTestMesh;
+		myTestPortal.transform.SetRotationDegrees(0,90,0);
+		myTestPortal.transform.SetPostion(glm::vec3(-3.999f, 1, 0));
+		myTestPortal.targetTransform.SetRotationDegrees(0, 180, 0);
+		myTestPortal.targetTransform.SetPostion(glm::vec3(0, 1, -1.999f));
 		myScene.renderPortals.push_back(myTestPortal);
+
+		Portal myTestPortal2 = Portal();
+		myTestPortal2.portalMesh = myPortalTestMesh;
+		myTestPortal2.transform.SetRotationDegrees(0, 0, 0);
+		myTestPortal2.transform.SetPostion(glm::vec3(0, 1, -1.999f));
+		myTestPortal2.targetTransform.SetRotationDegrees(0, 90, 0);
+		myTestPortal2.targetTransform.SetPostion(glm::vec3(-3.999f, 1, 0));
+		myScene.renderPortals.push_back(myTestPortal2);
 
 		//Render Loop
 		while (!glfwWindowShouldClose(window))
