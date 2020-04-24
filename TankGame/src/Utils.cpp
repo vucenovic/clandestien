@@ -2,11 +2,11 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <limits>
 
-Transform::Transform() : position(glm::vec3(0, 0, 0)), rotation(glm::vec3(0,0,0)), scale(glm::vec3(1, 1, 1)), parent(nullptr)
+Transform::Transform() : position(glm::vec3(0, 0, 0)), rotation(glm::vec3(0, 0, 0)), scale(glm::vec3(1, 1, 1)), parent(nullptr), dirtyBit(true)
 {
 }
 
-Transform::Transform(glm::vec3 pos, glm::vec3 rot, glm::vec3 scl) : position(pos), rotation(rot), scale(scl)
+Transform::Transform(glm::vec3 pos, glm::vec3 rot, glm::vec3 scl) : position(pos), rotation(rot), scale(scl), dirtyBit(true)
 {
 }
 

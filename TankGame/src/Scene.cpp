@@ -100,25 +100,31 @@ void Scene::RenderPortal(const Portal * portal)
 	glStencilFunc(GL_ALWAYS, 1, 0xFF);
 	glStencilMask(0xFF);
 
-	//bind portalHoldout shader
+	portalHoldoutShader->UseProgram();
+	GLuint modelMatrixLocation = portalHoldoutShader->GetUniformLocation("modelMatrix");
 
+	glUniformMatrix4fv(modelMatrixLocation, 1, GL_FALSE, glm::value_ptr(portal->transform.ToMatrix()));
 	portal->portalMesh->BindAndDraw();
 
 	glStencilFunc(GL_EQUAL, 1, 0xFF);
 	glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 	glStencilMask(0x00);
-	glDisable(GL_DEPTH_TEST);
+	glDepthFunc(GL_ALWAYS);
 
-	//bind depthResetScreenspace shader
-	//bind and draw screenspace rectangle
-
-	glEnable(GL_DEPTH_TEST);
+	depthResetSS->UseProgram();
+	glBindVertexArray(SSrectVAOId);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	
+	glDepthFunc(GL_LESS);
 
 	//SetViewParameters
 	glm::mat4 view = portal->getOffsetMatrix() * activeCamera->GetTransform().ToInverseMatrix();
 	Camera::SetViewParameters(*viewDataBuffer, view, activeCamera->getProjectionMatrix());
 
-	DrawScene(false);
+	DrawOpaqueObjects();
+	DrawTransparentObjects();
+
+	glStencilMask(0xFF);
 	glClear(GL_STENCIL_BUFFER_BIT);
 	glDisable(GL_STENCIL_TEST);
 }
@@ -133,6 +139,7 @@ void Scene::DrawScene(bool drawPortals)
 	//rerender scene from other perspective with stencil and depth testing
 	//?
 	//profit
+
 	activeCamera->UseCamera(*viewDataBuffer);
 	DrawOpaqueObjects();
 	if (drawPortals) {
@@ -140,5 +147,6 @@ void Scene::DrawScene(bool drawPortals)
 			RenderPortal(&portal);
 		}
 	}
+	activeCamera->UseCamera(*viewDataBuffer);
 	DrawTransparentObjects();
 }

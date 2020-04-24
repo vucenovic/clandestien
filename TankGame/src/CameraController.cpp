@@ -14,9 +14,8 @@ void CameraController::HandleInputs(const float &scrolloffset, char forward, cha
 
 	glm::mat3 rotmatrix = glm::toMat4(cameraTransform->GetRotation());
 
-	glm::vec3 forwardVector = rotmatrix * glm::vec3(0, 0, 1);
 	glm::vec3 rightVector = rotmatrix * glm::vec3(1, 0, 0);
-	glm::vec3 upVector = glm::cross(rightVector, forwardVector);
+	glm::vec3 forwardVector = glm::cross(rightVector, glm::vec3(0,1,0));
 
 	// Move forward
 	if (glfwGetKey(window, (int)forward) == GLFW_PRESS) {
@@ -49,12 +48,7 @@ void CameraController::HandleInputs(const float &scrolloffset, char forward, cha
 	if (pivotYaw > 360) pivotYaw -= 360;
 	else if (pivotYaw < -360) pivotYaw += 360;
 	//Set Rotation
-	 cameraTransform->SetRotationDegrees(pivotPitch, pivotYaw, 0);
-
-	//Handle Strafing
-	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT)) {
-		pivotPostion += (upVector * dy + rightVector * dx) * strafeSpeed * pivotRadius;
-	}
+	cameraTransform->SetRotationDegrees(pivotPitch, pivotYaw, 0);
 
 	//set Combined Position
 	cameraTransform->SetPostion(pivotPostion);

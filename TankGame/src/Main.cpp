@@ -379,6 +379,13 @@ int main(int argc, char** argv)
 
 		myScene.activeCamera = &camera;
 		myScene.viewDataBuffer = &viewDataBuffer;
+		myScene.SSrectVAOId = ssplaneVAO;
+		myScene.portalHoldoutShader = unlitShader;
+		myScene.depthResetSS = SSDepthReset;
+
+		Portal myTestPortal = Portal();
+		myTestPortal.portalMesh = myTestMesh;
+		myScene.renderPortals.push_back(myTestPortal);
 
 		//Render Loop
 		while (!glfwWindowShouldClose(window))
@@ -427,7 +434,7 @@ int main(int argc, char** argv)
 				myScene.DrawOpaqueObjects(debugMaterial);
 			}
 			else {
-				myScene.DrawScene(false);
+				myScene.DrawScene(true);
 			}
 
 			{ //TODO move into particle system class and particle sytemrenderer

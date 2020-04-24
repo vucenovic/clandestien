@@ -26,11 +26,12 @@ private:
 	//string map for searching objects by name
 	std::map<std::string, std::unique_ptr<GameObject>> gameObjects;
 	
-	std::vector<Portal> renderPortals;
 public:
+	std::vector<Portal> renderPortals;
 	std::shared_ptr<ShaderProgram> portalHoldoutShader;
 	std::shared_ptr<ShaderProgram> depthResetSS;
 	UniformBuffer * viewDataBuffer;
+	GLuint SSrectVAOId;
 
 	Camera * activeCamera;
 

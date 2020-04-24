@@ -1,13 +1,14 @@
 #pragma once
 #include "Utils.h"
 #include "Mesh.h"
+#include <memory>
 
 class Portal
 {
 public:
 	Transform transform;
 	Transform targetTransform;
-	Mesh * portalMesh;
+	std::shared_ptr<Mesh> portalMesh;
 
 public:
 	Portal();
