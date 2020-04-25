@@ -223,6 +223,8 @@ int main(int argc, char** argv)
 		std::shared_ptr<Texture2D> tilesSpec = std::make_shared<Texture2D>("res/textures/tiles_specular");
 		std::shared_ptr<Texture2D> tilesNorm = std::make_shared<Texture2D>("res/textures/tiles_normal");
 		std::shared_ptr<Texture2D> woodDiff = std::make_shared<Texture2D>("res/textures/wood_texture");
+		std::shared_ptr<Texture2D> devDiff = std::make_shared<Texture2D>("res/textures/dev_diffuse");
+		std::shared_ptr<Texture2D> devNorm = std::make_shared<Texture2D>("res/textures/dev_normal");
 		std::shared_ptr<TextureCubemap> cubeMap = std::make_shared<TextureCubemap>("res/textures/cubemap/");
 		std::shared_ptr<Texture2D> whiteTex = std::make_shared<Texture2D>(glm::vec3(1));
 		std::shared_ptr<Texture2D> blackTex = std::make_shared<Texture2D>(glm::vec3(0));
@@ -252,12 +254,20 @@ int main(int argc, char** argv)
 		debugMaterial.SetPropertyi("mode",2);
 
 		Material tilesMaterial = Material(standardShader);
-		tilesMaterial.SetProperty4f("material", glm::vec4(0.1f,0.7f,1,8));
+		tilesMaterial.SetProperty4f("material", glm::vec4(0.1f, 0.7f, 1, 8));
 		tilesMaterial.SetProperty4f("flatColor", glm::vec4(1, 1, 1, 0.15f));
 		tilesMaterial.SetTexture(tilesDiff, 0);
 		tilesMaterial.SetTexture(tilesSpec, 1);
 		tilesMaterial.SetTexture(tilesNorm, 2);
 		tilesMaterial.SetTexture(cubeMap, 3);
+
+		Material devMaterial = Material(standardShader);
+		devMaterial.SetProperty4f("material", glm::vec4(0.05f,0.5f,1,8));
+		devMaterial.SetProperty4f("flatColor", glm::vec4(0.7f, 0.7f, 0.7f, 2));
+		devMaterial.SetTexture(devDiff, 0);
+		devMaterial.SetTexture(whiteTex, 1);
+		devMaterial.SetTexture(devNorm, 2);
+		devMaterial.SetTexture(blackTex, 3);
 
 		Material woodMaterial = Material(standardShader);
 		woodMaterial.SetProperty4f("material", glm::vec4(0.1f, 0.7f, 0.1f, 2));
@@ -271,13 +281,13 @@ int main(int argc, char** argv)
 
 		std::unique_ptr<GameObject> testobject = std::make_unique<GameObject>();
 		testobject->mesh = myTestMesh.get();
-		testobject->material = &tilesMaterial;
+		testobject->material = &devMaterial;
 		testobject->GetTransform().SetPostion(glm::vec3(3, 1.5f, 0));
 		testobject->name = "test";
 
 		std::unique_ptr<GameObject> gameStage = std::make_unique<GameObject>();
 		gameStage->mesh = gameStageMesh.get();
-		gameStage->material = &tilesMaterial;
+		gameStage->material = &devMaterial;
 		gameStage->GetTransform().SetPostion(glm::vec3(0, 0, 0));
 		gameStage->name = "gameStage";
 
@@ -458,7 +468,7 @@ int main(int argc, char** argv)
 			{ //TODO move into particle system class and particle sytemrenderer
 				ParticleSystem::PrepareDraw();
 				pmmanager.Bind();
-				//pSystem.Draw();
+				pSystem.Draw();
 				ParticleSystem::FinishDraw();
 			}
 

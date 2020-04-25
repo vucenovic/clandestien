@@ -98,8 +98,8 @@ namespace Particles {
 	}
 
 	std::default_random_engine gen;
-	std::normal_distribution<float> distr1(0, 1);
-	std::uniform_real_distribution<float> distr2(0.5f, 1.5f);
+	std::normal_distribution<float> distr1(0, 0.5f);
+	std::uniform_real_distribution<float> distr2(0.15f, 0.5f);
 	std::uniform_real_distribution<float> distr3(0, 5);
 
 	void ParticleSystem::CreateDebugParticles()
