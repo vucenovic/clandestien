@@ -608,6 +608,8 @@ std::unique_ptr<Mesh> MeshBuilder::Torus(float rl, float rt, unsigned int nl, un
 	return mesh;
 }
 
+#include <iostream>
+
 std::unique_ptr<Mesh> OBJLoader::LoadOBJ(const std::string & filePath)
 {
 	GLushort vertexCount = 0;
@@ -765,7 +767,13 @@ std::unique_ptr<Mesh> OBJLoader::LoadOBJ(const std::string & filePath)
 		glm::vec2 euv1 = v2.tex - v1.tex;
 		glm::vec2 euv2 = v3.tex - v1.tex;
 
-		glm::vec3 tangent = glm::normalize((e1 * euv2.y - e2 * euv1.y) / (euv1.x * euv2.y - euv1.y * euv2.x));
+		glm::vec3 tangent;
+		if (euv1.x == 0 || euv1.y == 0 || euv2.x == 0 || euv2.y == 0) {
+			tangent = glm::normalize(e1);
+		}
+		else {
+			tangent = glm::normalize((e1 * euv2.y - e2 * euv1.y) / (euv1.x * euv2.y - euv1.y * euv2.x));
+		}
 
 		v1.tangent = tangent; //TODO average tangents on shared vertices
 		v2.tangent = tangent;
