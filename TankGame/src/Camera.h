@@ -18,6 +18,9 @@ public:
 	void SetPerspective(float FOV, float aspect, float near, float far);
 	void SetOrtho(float left, float right, float top, float bottom);
 
+	static glm::mat4 MakeOblique(glm::mat4 mat, glm::vec4 clipPlane);
+	glm::vec4 toLocalClipplane(glm::vec4 clip) const;
+
 	glm::vec3 GetForward() const { return transform.ToMatrix()*glm::vec4(0, 0, 1, 0); }
 
 	void UseCamera(const UniformBuffer & viewDataBuffer);

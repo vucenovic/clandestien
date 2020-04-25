@@ -40,6 +40,8 @@
 float scrollOffset = 0; // very ugly solution until I figure out something better Namely a proper inputmanager TODO
 bool wireframeMode = false;
 bool backfaceCulling = true;
+bool drawBloom = true;
+bool drawDepth = false;
 bool debugDraw = false;
 int debugDrawmode = 0;
 
@@ -146,7 +148,7 @@ int main(int argc, char** argv)
 
 	std::string window_title = "Clandestien";
 	float FOV = 60;
-	float nearPlane = 0.1;
+	float nearPlane = 0.05f;
 	float farPlane = 100;
 
 	if (!glfwInit()) {
@@ -196,7 +198,7 @@ int main(int argc, char** argv)
 	glfwSetScrollCallback(window, scroll_callback);
 
 	{
-		std::shared_ptr<ShaderProgram> standardShader,unifiedPBR, myShaderProgram, debugShader, particleShader, pp_demultAlpha, pp_gammaCorrect, pp_blur, pp_bloom, unlitShader, SSDepthReset;
+		std::shared_ptr<ShaderProgram> standardShader,unifiedPBR, myShaderProgram, debugShader, particleShader, pp_demultAlpha, pp_gammaCorrect, pp_blur, pp_bloom, unlitShader, SSDepthReset, DebugDepthSS;
 		try
 		{
 			myShaderProgram = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/common.vert", "res/shaders/LitPhong.frag"));
@@ -210,6 +212,7 @@ int main(int argc, char** argv)
 			pp_bloom = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/screenspace.vert", "res/shaders/Bloom.frag"));
 			unlitShader = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/common.vert", "res/shaders/Unlit.frag"));
 			SSDepthReset = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/screenspace.vert", "res/shaders/DepthReset.frag"));
+			DebugDepthSS = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/screenspace.vert", "res/shaders/depthToColor.frag"));
 		}
 		catch (const std::invalid_argument&)
 		{
@@ -421,6 +424,7 @@ int main(int argc, char** argv)
 
 			GameObject * test = myScene.GetObject("test");
 			test->GetTransform().Rotate((glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) * 0.01f,(glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS) * 0.01f,(glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) * 0.01f);
+			myCameraController.pivotPostion.y += ((glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS) - (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS)) * 0.01f;
 			if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
 				test->GetTransform().SetRotation(glm::vec3());
 
@@ -444,6 +448,7 @@ int main(int argc, char** argv)
 
 			if (debugDraw) {
 				debugMaterial.SetPropertyi("mode", debugDrawmode);
+				camera.UseCamera(viewDataBuffer);
 				myScene.DrawOpaqueObjects(debugMaterial);
 			}
 			else {
@@ -471,50 +476,68 @@ int main(int argc, char** argv)
 				glDisable(GL_DEPTH_TEST);
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-				glActiveTexture(GL_TEXTURE0);
 				glBindVertexArray(ssplaneVAO);
 
-				//Demultipy alpha values
-				ppFBO.Bind();
-				pp_demultAlpha->UseProgram();
-				glBindTexture(GL_TEXTURE_2D, renderFBO.color);
-				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+				if (drawDepth) { //draw depthbuffer to screen for debug purposes
+					FrameBuffer::Unbind();
+					glActiveTexture(GL_TEXTURE0);
+					glBindTexture(GL_TEXTURE_2D, renderFBO.depthStencil);
+					DebugDepthSS->UseProgram();
+					glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+				}
+				else
+				{
+					//Demultipy alpha values
+					ppFBO.Bind();
+					pp_demultAlpha->UseProgram();
+					glActiveTexture(GL_TEXTURE0);
+					glBindTexture(GL_TEXTURE_2D, renderFBO.color);
+					glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-				//Filter Highlights out of image
-				ppFBOb.Bind();
-				glViewport(0, 0, width / bloomScale, height / bloomScale);
-				pp_bloom->UseProgram();
-				glBindTexture(GL_TEXTURE_2D, ppFBO.color);
-				glUniform1i(pp_bloom->GetUniformLocation("combine"), 0);
-				glUniform1f(pp_bloom->GetUniformLocation("cutoff"), 1);
-				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+					//Filter Highlights out of image
+					ppFBOb.Bind();
+					glViewport(0, 0, width / bloomScale, height / bloomScale);
+					pp_bloom->UseProgram();
+					glBindTexture(GL_TEXTURE_2D, ppFBO.color);
+					glUniform1i(pp_bloom->GetUniformLocation("combine"), 0);
+					glUniform1f(pp_bloom->GetUniformLocation("cutoff"), 1);
+					glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 				
-				//Blur Highlights
-				ppFBOb2.Bind();
-				pp_blur->UseProgram();
-				glBindTexture(GL_TEXTURE_2D, ppFBOb.color);
-				glUniform1f(pp_blur->GetUniformLocation("scale"), 1.0f);
-				glUniform1i(pp_blur->GetUniformLocation("horizontal"), 0);
-				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+					//Blur Highlights
+					ppFBOb2.Bind();
+					pp_blur->UseProgram();
+					glBindTexture(GL_TEXTURE_2D, ppFBOb.color);
+					glUniform1f(pp_blur->GetUniformLocation("scale"), 1.0f);
+					glUniform1i(pp_blur->GetUniformLocation("horizontal"), 0);
+					glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-				ppFBOb.Bind();
-				glBindTexture(GL_TEXTURE_2D, ppFBOb2.color);
-				glUniform1i(pp_blur->GetUniformLocation("horizontal"), 1);
-				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+					ppFBOb.Bind();
+					glBindTexture(GL_TEXTURE_2D, ppFBOb2.color);
+					glUniform1i(pp_blur->GetUniformLocation("horizontal"), 1);
+					glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-				glViewport(0, 0, width, height);
-				//Combine Blurred Highlights with base Image
-				FrameBuffer::Unbind();
-				pp_bloom->UseProgram();
-				glActiveTexture(GL_TEXTURE1);
-				glBindTexture(GL_TEXTURE_2D, ppFBOb.color);
-				glActiveTexture(GL_TEXTURE0);
-				glBindTexture(GL_TEXTURE_2D, ppFBO.color);
+					glViewport(0, 0, width, height);
+					//Combine Blurred Highlights with base Image
+					FrameBuffer::Unbind();
+					pp_bloom->UseProgram();
 
-				glUniform1i(pp_bloom->GetUniformLocation("combine"), 1);
-				glUniform1f(pp_bloom->GetUniformLocation("exposure"), 1);
-				glUniform1f(pp_bloom->GetUniformLocation("gamma"), gamma);
-				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+					if (drawBloom) {
+						glActiveTexture(GL_TEXTURE1);
+						glBindTexture(GL_TEXTURE_2D, ppFBOb.color);
+					}
+					else {
+						blackTex->Bind(1);
+					}
+
+					glActiveTexture(GL_TEXTURE0);
+					glBindTexture(GL_TEXTURE_2D, ppFBO.color);
+
+					glUniform1i(pp_bloom->GetUniformLocation("combine"), 1);
+					glUniform1f(pp_bloom->GetUniformLocation("exposure"), 1);
+					glUniform1f(pp_bloom->GetUniformLocation("gamma"), gamma);
+					glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+				}
+
 			}
 
 			//Reset Renderstate
@@ -558,8 +581,14 @@ static void MyKeyCallback(GLFWwindow * window, int key, int scancode, int action
 		case GLFW_KEY_F3:
 			debugDraw = !debugDraw;
 			break;
+		case GLFW_KEY_F4:
+			drawDepth = !drawDepth;
+			break;
 		case GLFW_KEY_1:
 			debugDrawmode = (debugDrawmode + 1) % 7;
+			break;
+		case GLFW_KEY_2:
+			drawBloom = !drawBloom;
 			break;
 		default:
 			break;

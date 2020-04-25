@@ -101,12 +101,14 @@ void Scene::RenderPortal(const Portal * portal)
 	glStencilMask(0xFF);
 	glColorMask(false, false, false, false);
 
+	activeCamera->UseCamera(*viewDataBuffer);
 	portalHoldoutShader->UseProgram();
 	GLuint modelMatrixLocation = portalHoldoutShader->GetUniformLocation("modelMatrix");
 
 	glUniformMatrix4fv(modelMatrixLocation, 1, GL_FALSE, glm::value_ptr(portal->transform.ToMatrix()));
 	portal->portalMesh->BindAndDraw();
 
+	//clear depth inside the portal
 	glStencilFunc(GL_EQUAL, 1, 0xFF);
 	glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 	glStencilMask(0x00);
@@ -120,12 +122,27 @@ void Scene::RenderPortal(const Portal * portal)
 	glDepthFunc(GL_LESS);
 
 	//SetViewParameters
+	activeCamera->toLocalClipplane(glm::vec4(1, 0, 0, -4));
 	glm::mat4 view = glm::inverse(portal->getOffsetMatrix() * activeCamera->GetTransform().ToMatrix());
-	Camera::SetViewParameters(*viewDataBuffer, view, activeCamera->getProjectionMatrix());
+	glm::mat4 projection = activeCamera->getProjectionMatrix();
+	Camera::SetViewParameters(*viewDataBuffer, view, projection);
 
+	//draw scene from the portal
 	DrawOpaqueObjects();
 	DrawTransparentObjects();
 
+	//redraw original portal depth (to prevent stuff from being drawn inside the portal after the portal is finished drawing)
+	glColorMask(false, false, false, false);
+	glDepthFunc(GL_ALWAYS);
+
+	activeCamera->UseCamera(*viewDataBuffer);
+	portalHoldoutShader->UseProgram();
+	portal->portalMesh->BindAndDraw();
+
+	glColorMask(true, true, true, true);
+	glDepthFunc(GL_LESS);
+
+	//clear stencil
 	glStencilMask(0xFF);
 	glClear(GL_STENCIL_BUFFER_BIT);
 	glDisable(GL_STENCIL_TEST);
@@ -146,7 +163,6 @@ void Scene::DrawScene(bool drawPortals)
 	DrawOpaqueObjects();
 	if (drawPortals) {
 		for(Portal portal : renderPortals){
-			activeCamera->UseCamera(*viewDataBuffer);
 			RenderPortal(&portal);
 		}
 	}

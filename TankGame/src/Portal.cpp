@@ -18,6 +18,7 @@ glm::mat4 Portal::getOffsetMatrix() const
 
 glm::vec4 Portal::getClipPlane() const
 {
-	targetTransform.GetRotation();
-	return glm::vec4();
+	glm::vec3 normal = targetTransform.GetRotation() * glm::vec3(0,0,1);
+	float distance = glm::dot(normal, targetTransform.GetPosition());
+	return glm::vec4(normal,distance);
 }
