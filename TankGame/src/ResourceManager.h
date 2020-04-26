@@ -11,7 +11,12 @@
 
 class ResourceManager
 {
+private:
+	ResourceManager();
+	~ResourceManager();
 public:
+	static ResourceManager & GetInstance();
+
 	//maybe switch the use of shared_ptr over to the resourceManager managing the lifetimes?
 	std::map<std::string, std::shared_ptr<ShaderProgram>> shaders;
 	std::map<std::string, std::shared_ptr<Mesh>> meshes;
@@ -23,4 +28,9 @@ public:
 	void GetMesh(const std::string & name);
 	void GetMaterial(const std::string & name);
 	void GetTexture(const std::string & name);
+
+	void AddShader(std::shared_ptr<ShaderProgram> shader);
+	void LoadMeshObj(const std::string & filepath);
+	void LoadTexture2D(const std::string & filepath);
+	void AddMaterial(std::shared_ptr<Material> material);
 };
