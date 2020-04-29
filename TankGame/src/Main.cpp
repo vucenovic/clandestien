@@ -11,7 +11,7 @@
 
 #include "INIReader.h"
 
-#include <PhysX/PxPhysicsAPI.h>
+//#include <PhysX/PxPhysicsAPI.h>
 
 #include "ShaderProgram.h"
 #include "CameraController.h"
@@ -25,7 +25,7 @@
 #include "FrameBuffer.h"
 #include "Particles.h"
 #include "Camera.h"
-#include "GameSceneAggregateBuilder.h"
+//#include "GameSceneAggregateBuilder.h"
 
 #include "Main.h"
 
@@ -50,7 +50,7 @@ int main(int argc, char** argv)
 	INIReader reader("res/settings.ini");
 
 	// initialize PhysX engine as documented by Nvidia PhysX SDK Documentary
-
+	/*
 	using namespace physx;
 	PxDefaultAllocator		gAllocator;
 	PxDefaultErrorCallback	gErrorCallback;
@@ -128,7 +128,7 @@ int main(int argc, char** argv)
 	gScene->setVisualizationParameter(PxVisualizationParameter::eSCALE, 1.0f);
 	gScene->setVisualizationParameter(PxVisualizationParameter::eCOLLISION_AABBS, 1.0);
 	gScene->setVisualizationParameter(PxVisualizationParameter::eCOLLISION_SHAPES, 1.0);
-
+	*/
 	// TODO: bind character movement to camera movement
 
 	// TODO: use raycasts to move ape object (add dynamic bounding box for it)
