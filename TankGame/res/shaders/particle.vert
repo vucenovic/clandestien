@@ -5,7 +5,7 @@ layout (location = 1) in vec3 velocity;
 layout (location = 2) in vec4 color;
 layout (location = 3) in float size;
 layout (location = 4) in float rotation;
-//possibly add velocity and color and animstate
+//possibly add animstate
 
 layout (binding = 0, std140) uniform viewData
 {
@@ -34,7 +34,7 @@ void main()
 	particle.upVector.y = cos(rotation);
 
 	particle.color = color;
-	vec4 velRaw =  modelMatrix*vec4(velocity,1);
+	vec4 velRaw =  modelMatrix*vec4(velocity,0);
 	particle.velocityVector =velRaw.xy;
 
 	gl_Position = projection * view * worldPos;
