@@ -26,6 +26,7 @@
 #include "Particles.h"
 #include "Camera.h"
 #include "GameSceneAggregateBuilder.h"
+#include "HUD.h"
 
 #include "Main.h"
 
@@ -123,15 +124,19 @@ int main(int argc, char** argv)
 	PxController* c = manager->createController(desc);
 	manager->setOverlapRecoveryModule(true); 
 
-	// add debug visualization
+	// add debug visualization parameters
 
 	gScene->setVisualizationParameter(PxVisualizationParameter::eSCALE, 1.0f);
 	gScene->setVisualizationParameter(PxVisualizationParameter::eCOLLISION_AABBS, 1.0);
 	gScene->setVisualizationParameter(PxVisualizationParameter::eCOLLISION_SHAPES, 1.0);
-	
-	// TODO: bind character movement to camera movement
 
 	// TODO: use raycasts to move ape object (add dynamic bounding box for it)
+
+
+	// load HUD
+
+	HUD hudManager;
+	hudManager.addHUD("res/textures/hud_test.bmp");
 
 
 	int width = reader.Get<int>("gfx", "width", 800);
@@ -430,7 +435,18 @@ int main(int argc, char** argv)
 			// Handle Inputs
 			glfwPollEvents();
 
+			// Move character and camera
+			glm::vec3 moveCharOld = myCameraController.getPivotPosition();
 			myCameraController.HandleInputs(scrollOffset, forward, backward, left, right, deltaTime);
+			glm::vec3 moveCharNew = myCameraController.getPivotPosition();
+			glm::vec3 moveChar = moveCharNew - moveCharOld; // getting the movement vector 
+			PxControllerFilters filters(NULL, NULL, NULL);
+			PxControllerCollisionFlags collFlags = c->move(PxVec3(moveChar[0], moveChar[1], moveChar[2]), 0.0, deltaTime, filters, NULL);
+			PxControllerState state;
+			c->getState(state);
+			PxExtendedVec3 newPos = c->getPosition();
+
+			
 
 			GameObject * test = myScene.GetObject("test");
 			test->GetTransform().Rotate((glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) * 0.01f,(glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS) * 0.01f,(glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) * 0.01f);
@@ -462,8 +478,31 @@ int main(int argc, char** argv)
 				myScene.DrawOpaqueObjects(debugMaterial);
 			}
 			else {
+
 				myScene.DrawScene(true);
 			}
+
+			//gScene->simulate(1.0f / 60.0f);
+			//gScene->fetchResults();
+			
+			// PhysX DEBUG
+			//const PxRenderBuffer& rb = gScene->getRenderBuffer();
+			//for (PxU32 i = 0; i < rb.getNbLines(); i++)
+			//{
+				//const PxDebugLine& line = rb.getLines()[i];
+				/*GLfloat lineVertices[] = {
+					line.pos0[0], line.pos0[1], line.pos0[2],
+					line.pos1[0], line.pos1[1], line.pos0[2]
+				};*/
+				// render the line
+				/*glBegin(GL_LINES);
+				glColor3f(line.color0, line.color1, 0.0);
+				glVertex3f(line.pos0[0], line.pos0[1], line.pos0[2]);
+				glVertex3f(line.pos1[0], line.pos1[1], line.pos0[2]);
+				glEnd();
+			}*/
+			// PhysX DEBUG END
+			
 
 			{ //TODO move into particle system class and particle sytemrenderer
 				ParticleSystem::PrepareDraw();
@@ -549,6 +588,10 @@ int main(int argc, char** argv)
 				}
 
 			}
+
+			// draw HUD
+
+			hudManager.drawHUDquad(width, height);
 
 			//Reset Renderstate
 			if (wireframeMode) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);

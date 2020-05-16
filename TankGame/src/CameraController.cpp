@@ -57,6 +57,11 @@ void CameraController::HandleInputs(const float &scrolloffset, char forward, cha
 	lastY = y;
 }
 
+glm::vec3 CameraController::getPivotPosition() 
+{
+	return this->pivotPostion;
+}
+
 
 CameraController::CameraController(Transform* cameraTransform, GLFWwindow* window)
 {
