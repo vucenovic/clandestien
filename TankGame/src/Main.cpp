@@ -440,6 +440,8 @@ int main(int argc, char** argv)
 			myCameraController.HandleInputs(scrollOffset, forward, backward, left, right, deltaTime);
 			glm::vec3 moveCharNew = myCameraController.getPivotPosition();
 			glm::vec3 moveChar = moveCharNew - moveCharOld; // getting the movement vector 
+			gScene->simulate(1.0f / 60.0f);
+			gScene->fetchResults(true);
 			PxControllerFilters filters(NULL, NULL, NULL);
 			PxControllerCollisionFlags collFlags = c->move(PxVec3(moveChar[0], moveChar[1], moveChar[2]), 0.0, deltaTime, filters, NULL);
 			PxControllerState state;
