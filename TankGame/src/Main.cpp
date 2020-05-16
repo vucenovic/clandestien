@@ -447,6 +447,7 @@ int main(int argc, char** argv)
 			PxControllerState state;
 			c->getState(state);
 			PxExtendedVec3 newPos = c->getPosition();
+			myCameraController.setPivotPosition(glm::vec3(newPos[0], newPos[1], newPos[2]));
 
 			
 

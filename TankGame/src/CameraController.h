@@ -26,6 +26,7 @@ public:
 	void HandleInputs(const float &scrollOffset, char forward, char backward, char left, char right, float frametime);
 	int MapKeys(char key);
 	glm::vec3 getPivotPosition();
+	void setPivotPosition(glm::vec3 pos);
 
 	CameraController(Transform* cameraTransform, GLFWwindow* window);
 	~CameraController();

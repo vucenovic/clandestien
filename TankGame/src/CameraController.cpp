@@ -62,6 +62,11 @@ glm::vec3 CameraController::getPivotPosition()
 	return this->pivotPostion;
 }
 
+void CameraController::setPivotPosition(glm::vec3 pos)
+{
+	cameraTransform->SetPostion(pos);
+}
+
 
 CameraController::CameraController(Transform* cameraTransform, GLFWwindow* window)
 {
