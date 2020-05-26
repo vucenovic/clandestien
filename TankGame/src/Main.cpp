@@ -133,10 +133,7 @@ int main(int argc, char** argv)
 	// TODO: use raycasts to move ape object (add dynamic bounding box for it)
 
 
-	// load HUD
-
-	HUD hudManager;
-	hudManager.addHUD("res/textures/hud_test.bmp");
+	
 
 
 	int width = reader.Get<int>("gfx", "width", 800);
@@ -247,6 +244,7 @@ int main(int argc, char** argv)
 		//Meshes
 		
 		std::shared_ptr<Mesh> gameStageMesh = OBJLoader::LoadOBJ("res/models/GameScene.obj");
+		std::shared_ptr<Mesh> gargoyleMesh = OBJLoader::LoadOBJ("res/models/Gargoyle.obj");
 		std::shared_ptr<Mesh> myTestMesh = OBJLoader::LoadOBJ("res/models/monkey.obj");
 		std::shared_ptr<Mesh> myPortalTestMesh = MeshBuilder::Quad();
 
@@ -284,11 +282,17 @@ int main(int argc, char** argv)
 
 		//Objects
 
-		std::unique_ptr<GameObject> testobject = std::make_unique<GameObject>();
+		/*std::unique_ptr<GameObject> testobject = std::make_unique<GameObject>();
 		testobject->mesh = myTestMesh.get();
 		testobject->material = &devMaterial;
 		testobject->GetTransform().SetPostion(glm::vec3(3, 1.5f, 0));
-		testobject->name = "test";
+		testobject->name = "test";*/
+
+		std::unique_ptr<GameObject> gargoyle = std::make_unique<GameObject>();
+		gargoyle->mesh = gargoyleMesh.get();
+		gargoyle->material = &devMaterial;
+		gargoyle->GetTransform().SetPostion(glm::vec3(-1.2, 0.0, 0.0));
+		gargoyle->name = "gargoyle";
 
 		std::unique_ptr<GameObject> gameStage = std::make_unique<GameObject>();
 		gameStage->mesh = gameStageMesh.get();
@@ -340,7 +344,8 @@ int main(int argc, char** argv)
 
 		Scene myScene = Scene();
 
-		myScene.AddObject(testobject);
+		// myScene.AddObject(testobject);
+		myScene.AddObject(gargoyle);
 		myScene.AddObject(gameStage);
 
 		//Particles
@@ -451,11 +456,11 @@ int main(int argc, char** argv)
 
 			
 
-			GameObject * test = myScene.GetObject("test");
+			/*GameObject * test = myScene.GetObject("test");
 			test->GetTransform().Rotate((glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) * 0.01f,(glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS) * 0.01f,(glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) * 0.01f);
 			myCameraController.pivotPostion.y += ((glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS) - (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS)) * 0.01f;
 			if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
-				test->GetTransform().SetRotation(glm::vec3());
+				test->GetTransform().SetRotation(glm::vec3());*/
 
 			//Set ViewProjectionMatrix
 
@@ -484,27 +489,6 @@ int main(int argc, char** argv)
 
 				myScene.DrawScene(true);
 			}
-
-			//gScene->simulate(1.0f / 60.0f);
-			//gScene->fetchResults();
-			
-			// PhysX DEBUG
-			//const PxRenderBuffer& rb = gScene->getRenderBuffer();
-			//for (PxU32 i = 0; i < rb.getNbLines(); i++)
-			//{
-				//const PxDebugLine& line = rb.getLines()[i];
-				/*GLfloat lineVertices[] = {
-					line.pos0[0], line.pos0[1], line.pos0[2],
-					line.pos1[0], line.pos1[1], line.pos0[2]
-				};*/
-				// render the line
-				/*glBegin(GL_LINES);
-				glColor3f(line.color0, line.color1, 0.0);
-				glVertex3f(line.pos0[0], line.pos0[1], line.pos0[2]);
-				glVertex3f(line.pos1[0], line.pos1[1], line.pos0[2]);
-				glEnd();
-			}*/
-			// PhysX DEBUG END
 			
 
 			{ //TODO move into particle system class and particle sytemrenderer
@@ -594,7 +578,7 @@ int main(int argc, char** argv)
 
 			// draw HUD
 
-			hudManager.drawHUDquad(width, height);
+			// hudManager.drawHUDquad(width, height);
 
 			//Reset Renderstate
 			if (wireframeMode) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
