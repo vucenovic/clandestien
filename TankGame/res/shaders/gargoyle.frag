@@ -22,7 +22,7 @@ struct SpotLight{
 
 uniform vec4 flatColor;
 uniform vec4 material;
-uniform sampler2D shadowMap;
+uniform sampler2DShadow shadowMap;
 
 layout (binding = 0 ) uniform sampler2D albedoTex;
 layout (binding = 1 ) uniform sampler2D materialTex;

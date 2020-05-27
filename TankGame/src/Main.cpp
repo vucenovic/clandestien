@@ -268,6 +268,7 @@ int main(int argc, char** argv)
 		Material gargoyleMaterial = Material(GargoyleShader);
 		gargoyleMaterial.SetProperty4f("material", glm::vec4(0.1f, 0.7f, 1, 8));
 		gargoyleMaterial.SetProperty4f("flatColor", glm::vec4(1, 1, 1, 0.15f));
+		gargoyleMaterial.SetPropertyf("shadowMap", 0);
 		gargoyleMaterial.SetTexture(devDiff, 0);
 		gargoyleMaterial.SetTexture(whiteTex, 1);
 		gargoyleMaterial.SetTexture(devNorm, 2);
@@ -277,6 +278,7 @@ int main(int argc, char** argv)
 		Material tilesMaterial = Material(GargoyleShader);
 		tilesMaterial.SetProperty4f("material", glm::vec4(0.1f, 0.7f, 1, 8));
 		tilesMaterial.SetProperty4f("flatColor", glm::vec4(1, 1, 1, 0.15f));
+		gargoyleMaterial.SetPropertyf("shadowMap", 0);
 		tilesMaterial.SetTexture(tilesDiff, 0);
 		tilesMaterial.SetTexture(tilesSpec, 1);
 		tilesMaterial.SetTexture(tilesNorm, 2);
@@ -285,6 +287,7 @@ int main(int argc, char** argv)
 		Material devMaterial = Material(GargoyleShader);
 		devMaterial.SetProperty4f("material", glm::vec4(0.05f,0.5f,1,8));
 		devMaterial.SetProperty4f("flatColor", glm::vec4(0.7f, 0.7f, 0.7f, 2));
+		gargoyleMaterial.SetPropertyf("shadowMap", 0);
 		devMaterial.SetTexture(devDiff, 0);
 		devMaterial.SetTexture(whiteTex, 1);
 		devMaterial.SetTexture(devNorm, 2);
@@ -293,6 +296,7 @@ int main(int argc, char** argv)
 		Material woodMaterial = Material(GargoyleShader);
 		woodMaterial.SetProperty4f("material", glm::vec4(0.1f, 0.7f, 0.1f, 2));
 		woodMaterial.SetProperty4f("flatColor", glm::vec4(1, 1, 1, 0.15f));
+		gargoyleMaterial.SetPropertyf("shadowMap", 0);
 		woodMaterial.SetTexture(woodDiff, 0);
 		woodMaterial.SetTexture(whiteTex, 1);
 		woodMaterial.SetTexture(purpleTex, 2);
