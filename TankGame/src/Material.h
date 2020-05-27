@@ -15,6 +15,14 @@ public:
 	virtual void Set(GLuint location) = 0;
 };
 
+class MaterialPropertyMatrix4f : public MaterialProperty {
+	glm::mat4 val;
+
+	public:
+	MaterialPropertyMatrix4f(glm::mat4 v) : val(v) {};
+	virtual void Set(GLuint location) override;
+};
+
 class MaterialPropertyf : public MaterialProperty {
 	GLfloat val;
 public:
@@ -62,6 +70,7 @@ public:
 	void SetPropertyf(const std::string & name, GLfloat val);
 	void SetProperty3f(const std::string & name, glm::vec3 val);
 	void SetProperty4f(const std::string & name, glm::vec4 val);
+	void SetPropertyMatrix4f(const std::string & name, glm::mat4 val);
 	void SetPropertyi(const std::string & name, GLint val);
 
 	void SetTexture(std::shared_ptr<Texture> texture, GLuint textureUnit);

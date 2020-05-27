@@ -44,6 +44,11 @@ void Material::SetProperty4f(const std::string & name, glm::vec4 val)
 	properties[shader->GetUniformLocation(name)] = std::make_unique<MaterialProperty4f>(val);
 }
 
+void Material::SetPropertyMatrix4f(const std::string & name, glm::mat4 val)
+{
+	properties[shader->GetUniformLocation(name)] = std::make_unique<MaterialPropertyMatrix4f>(val);
+}
+
 void Material::SetPropertyi(const std::string & name, GLint val)
 {
 	properties[shader->GetUniformLocation(name)] = std::make_unique<MaterialPropertyi>(val);
@@ -67,6 +72,11 @@ void MaterialProperty3f::Set(GLuint location)
 void MaterialProperty4f::Set(GLuint location)
 {
 	glUniform4fv(location, 1, glm::value_ptr(val));
+}
+
+void MaterialPropertyMatrix4f::Set(GLuint location)
+{
+	glUniformMatrix4fv(location, 1, false ,  glm::value_ptr(val));
 }
 
 void MaterialInstance::Use()

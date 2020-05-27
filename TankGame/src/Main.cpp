@@ -205,7 +205,7 @@ int main(int argc, char** argv)
 	glfwSetScrollCallback(window, scroll_callback);
 
 	{
-		std::shared_ptr<ShaderProgram> standardShader,unifiedPBR, myShaderProgram, debugShader, particleShader, pp_demultAlpha, pp_gammaCorrect, pp_blur, pp_bloom, unlitShader, SSDepthReset, DebugDepthSS;
+		std::shared_ptr<ShaderProgram> standardShader,unifiedPBR, myShaderProgram, debugShader, particleShader, pp_demultAlpha, pp_gammaCorrect, pp_blur, pp_bloom, unlitShader, SSDepthReset, DebugDepthSS, GargoyleShader, DepthShader;
 		try
 		{
 			myShaderProgram = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/common.vert", "res/shaders/LitPhong.frag"));
@@ -220,6 +220,8 @@ int main(int argc, char** argv)
 			unlitShader = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/common.vert", "res/shaders/Unlit.frag"));
 			SSDepthReset = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/screenspace.vert", "res/shaders/DepthReset.frag"));
 			DebugDepthSS = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/screenspace.vert", "res/shaders/depthToColor.frag"));
+			GargoyleShader = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/gargoyle.vert", "res/shaders/gargoyle.frag"));
+			DepthShader = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/depth.vert", "res/shaders/depth.frag"));
 		}
 		catch (const std::invalid_argument&)
 		{
@@ -261,7 +263,18 @@ int main(int argc, char** argv)
 		Material debugMaterial = Material(debugShader);
 		debugMaterial.SetPropertyi("mode",2);
 
-		Material tilesMaterial = Material(standardShader);
+		Material depthMaterial = Material(DepthShader);
+
+		Material gargoyleMaterial = Material(GargoyleShader);
+		gargoyleMaterial.SetProperty4f("material", glm::vec4(0.1f, 0.7f, 1, 8));
+		gargoyleMaterial.SetProperty4f("flatColor", glm::vec4(1, 1, 1, 0.15f));
+		gargoyleMaterial.SetTexture(devDiff, 0);
+		gargoyleMaterial.SetTexture(whiteTex, 1);
+		gargoyleMaterial.SetTexture(devNorm, 2);
+		gargoyleMaterial.SetTexture(blackTex, 3);
+	
+
+		Material tilesMaterial = Material(GargoyleShader);
 		tilesMaterial.SetProperty4f("material", glm::vec4(0.1f, 0.7f, 1, 8));
 		tilesMaterial.SetProperty4f("flatColor", glm::vec4(1, 1, 1, 0.15f));
 		tilesMaterial.SetTexture(tilesDiff, 0);
@@ -269,7 +282,7 @@ int main(int argc, char** argv)
 		tilesMaterial.SetTexture(tilesNorm, 2);
 		tilesMaterial.SetTexture(cubeMap, 3);
 
-		Material devMaterial = Material(standardShader);
+		Material devMaterial = Material(GargoyleShader);
 		devMaterial.SetProperty4f("material", glm::vec4(0.05f,0.5f,1,8));
 		devMaterial.SetProperty4f("flatColor", glm::vec4(0.7f, 0.7f, 0.7f, 2));
 		devMaterial.SetTexture(devDiff, 0);
@@ -277,7 +290,7 @@ int main(int argc, char** argv)
 		devMaterial.SetTexture(devNorm, 2);
 		devMaterial.SetTexture(blackTex, 3);
 
-		Material woodMaterial = Material(standardShader);
+		Material woodMaterial = Material(GargoyleShader);
 		woodMaterial.SetProperty4f("material", glm::vec4(0.1f, 0.7f, 0.1f, 2));
 		woodMaterial.SetProperty4f("flatColor", glm::vec4(1, 1, 1, 0.15f));
 		woodMaterial.SetTexture(woodDiff, 0);
@@ -316,7 +329,7 @@ int main(int argc, char** argv)
 		{
 			myLightManager.lightsUsed.point = 4;
 			myLightManager.lightsUsed.directional = 1;
-			myLightManager.lightsUsed.spot = 1;
+			myLightManager.lightsUsed.spot = 2;
 
 			myLightManager.ambientLight = glm::vec3(1, 1, 1);
 
@@ -338,6 +351,11 @@ int main(int argc, char** argv)
 
 			myLightManager.directionalLights[1].SetDirection(glm::vec3(0, -1, 1));
 			myLightManager.directionalLights[1].SetColor(0.1f, 0.1f, 0.1f);
+
+			myLightManager.spotLights[1].SetPosition(glm::vec3(0.0, 0.0, 0.0));
+			myLightManager.spotLights[1].SetDirection(glm::vec3(-1.0f, 0.0f, 0.0f));
+			myLightManager.spotLights[1].SetAttenuation(0.2f, 0.01f, 0.05f);
+			myLightManager.spotLights[1].SetRadialFalloffDegrees(5, 15);
 
 			myLightManager.spotLights[0].SetPosition(glm::vec3(4.6f,-2.4f,-4.3f));
 			myLightManager.spotLights[0].SetDirection(glm::vec3(-0.7f, 0.15f, 0.62f));
@@ -399,6 +417,10 @@ int main(int argc, char** argv)
 		const float bloomScale = 4;
 		ColorFrameBuffer ppFBOb = ColorFrameBuffer(width / bloomScale, height / bloomScale); //smaller scale frame buffers *just for the bloom* I don't really like it
 		ColorFrameBuffer ppFBOb2 = ColorFrameBuffer(width / bloomScale, height / bloomScale); //but this was the obvious solution to the sampling problem
+
+		/* Shadow Map Frame Buffer for Spotlights */
+
+		ShadowMapSpotFrameBuffer shadowspotFBO = ShadowMapSpotFrameBuffer(width, height);
 
 		double lastFrameTime = 0;
 		double nextSecond = 1;
@@ -471,12 +493,35 @@ int main(int argc, char** argv)
 			if (status && actionKey) {
 				//gargoyle->GetTransform().SetPostion(glm::vec3(1.0, 1.0, 0.0));
 			}
+
+			// SHADOW MAPS: render depth 
+
+			// change view-projection matrix according to spotlight parameters
+
+			glm::vec3 spotPosition = glm::vec3(0.0, 0.0, 0.0);
+			glm::vec3 lightInverse = glm::vec3(0.0, 1.0, 0.0);
+			glm::mat4 depthProjectionMatrix = glm::perspective<float>(glm::radians(45.0f), 1.0f, 2.0f, 50.0f);
+			glm::mat4 depthViewMatrix = glm::lookAt(spotPosition, spotPosition - lightInverse, glm::vec3(0, 1, 0));
+			glm::mat4 biasMatrix(
+				0.5, 0.0, 0.0, 0.0,
+				0.0, 0.5, 0.0, 0.0,
+				0.0, 0.0, 0.5, 0.0,
+				0.5, 0.5, 0.5, 1.0
+			);
+			glm::mat4 depthBiasMatrix = biasMatrix * depthViewMatrix * depthProjectionMatrix;
+			Camera::SetViewParameters(viewDataBuffer, depthViewMatrix, depthProjectionMatrix);
+
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			depthMaterial.Use();
+			depthMaterial.SetPropertyMatrix4f("DepthBiasMatrix", depthBiasMatrix);
+			shadowspotFBO.Bind();
+			myScene.DrawOpaqueObjects(depthMaterial);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
 
 			//Set ViewProjectionMatrix
 
 			renderFBO.Bind();
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			//glEnable(GL_MULTISAMPLE);
 			glEnable(GL_DEPTH_TEST);
 			
@@ -500,6 +545,10 @@ int main(int argc, char** argv)
 
 				myScene.DrawScene(true);
 			}
+
+
+
+
 			
 
 			{ //TODO move into particle system class and particle sytemrenderer

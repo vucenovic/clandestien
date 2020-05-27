@@ -28,6 +28,23 @@ public:
 	~ColorFrameBuffer();
 };
 
+class ShadowMapPointFrameBuffer : public FrameBuffer
+{	
+	public:
+		ShadowMapPointFrameBuffer(GLuint width, GLuint height);
+		~ShadowMapPointFrameBuffer();
+};
+
+class ShadowMapSpotFrameBuffer : public FrameBuffer
+{
+	public:
+
+		GLuint depthMap;
+
+		ShadowMapSpotFrameBuffer(GLuint width, GLuint height);
+		~ShadowMapSpotFrameBuffer();
+};
+
 class RenderFrameBuffer : public FrameBuffer
 {
 public:
