@@ -268,7 +268,6 @@ int main(int argc, char** argv)
 		Material gargoyleMaterial = Material(GargoyleShader);
 		gargoyleMaterial.SetProperty4f("material", glm::vec4(0.1f, 0.7f, 1, 8));
 		gargoyleMaterial.SetProperty4f("flatColor", glm::vec4(1, 1, 1, 0.15f));
-		gargoyleMaterial.SetPropertyf("shadowMap", 0);
 		gargoyleMaterial.SetTexture(devDiff, 0);
 		gargoyleMaterial.SetTexture(whiteTex, 1);
 		gargoyleMaterial.SetTexture(devNorm, 2);
@@ -278,7 +277,6 @@ int main(int argc, char** argv)
 		Material tilesMaterial = Material(GargoyleShader);
 		tilesMaterial.SetProperty4f("material", glm::vec4(0.1f, 0.7f, 1, 8));
 		tilesMaterial.SetProperty4f("flatColor", glm::vec4(1, 1, 1, 0.15f));
-		gargoyleMaterial.SetPropertyf("shadowMap", 0);
 		tilesMaterial.SetTexture(tilesDiff, 0);
 		tilesMaterial.SetTexture(tilesSpec, 1);
 		tilesMaterial.SetTexture(tilesNorm, 2);
@@ -287,7 +285,6 @@ int main(int argc, char** argv)
 		Material devMaterial = Material(GargoyleShader);
 		devMaterial.SetProperty4f("material", glm::vec4(0.05f,0.5f,1,8));
 		devMaterial.SetProperty4f("flatColor", glm::vec4(0.7f, 0.7f, 0.7f, 2));
-		gargoyleMaterial.SetPropertyf("shadowMap", 0);
 		devMaterial.SetTexture(devDiff, 0);
 		devMaterial.SetTexture(whiteTex, 1);
 		devMaterial.SetTexture(devNorm, 2);
@@ -296,7 +293,6 @@ int main(int argc, char** argv)
 		Material woodMaterial = Material(GargoyleShader);
 		woodMaterial.SetProperty4f("material", glm::vec4(0.1f, 0.7f, 0.1f, 2));
 		woodMaterial.SetProperty4f("flatColor", glm::vec4(1, 1, 1, 0.15f));
-		gargoyleMaterial.SetPropertyf("shadowMap", 0);
 		woodMaterial.SetTexture(woodDiff, 0);
 		woodMaterial.SetTexture(whiteTex, 1);
 		woodMaterial.SetTexture(purpleTex, 2);
@@ -331,9 +327,9 @@ int main(int argc, char** argv)
 		myLightManager.BindToPort(1);
 
 		{
-			myLightManager.lightsUsed.point = 4;
-			myLightManager.lightsUsed.directional = 1;
-			myLightManager.lightsUsed.spot = 2;
+			myLightManager.lightsUsed.point = 0;
+			myLightManager.lightsUsed.directional = 0;
+			myLightManager.lightsUsed.spot = 1;
 
 			myLightManager.ambientLight = glm::vec3(1, 1, 1);
 
@@ -356,15 +352,15 @@ int main(int argc, char** argv)
 			myLightManager.directionalLights[1].SetDirection(glm::vec3(0, -1, 1));
 			myLightManager.directionalLights[1].SetColor(0.1f, 0.1f, 0.1f);
 
-			myLightManager.spotLights[1].SetPosition(glm::vec3(0.0, 0.0, 0.0));
-			myLightManager.spotLights[1].SetDirection(glm::vec3(-1.0f, 0.0f, 0.0f));
-			myLightManager.spotLights[1].SetAttenuation(0.2f, 0.01f, 0.05f);
-			myLightManager.spotLights[1].SetRadialFalloffDegrees(5, 15);
-
-			myLightManager.spotLights[0].SetPosition(glm::vec3(4.6f,-2.4f,-4.3f));
-			myLightManager.spotLights[0].SetDirection(glm::vec3(-0.7f, 0.15f, 0.62f));
+			myLightManager.spotLights[0].SetPosition(glm::vec3(2.0, 1.0, -1.0));
+			myLightManager.spotLights[0].SetDirection(glm::vec3(-1.0f, 0.0f, 0.0f));
 			myLightManager.spotLights[0].SetAttenuation(0.2f, 0.01f, 0.05f);
 			myLightManager.spotLights[0].SetRadialFalloffDegrees(5, 15);
+
+			//myLightManager.spotLights[0].SetPosition(glm::vec3(4.6f,-2.4f,-4.3f));
+			//myLightManager.spotLights[0].SetDirection(glm::vec3(-0.7f, 0.15f, 0.62f));
+			//myLightManager.spotLights[0].SetAttenuation(0.2f, 0.01f, 0.05f);
+			//myLightManager.spotLights[0].SetRadialFalloffDegrees(5, 15);
 		}
 
 		myLightManager.UpdateBuffer();
@@ -495,37 +491,46 @@ int main(int argc, char** argv)
 
 			bool status = gScene->raycast(origin, unitDir, maxDistance, hit, PxHitFlag::eDEFAULT, filterData);
 			if (status && actionKey) {
-				//gargoyle->GetTransform().SetPostion(glm::vec3(1.0, 1.0, 0.0));
+				auto &transform = myScene.GetObject("gargoyle")->GetTransform();
+				transform.Translate(glm::vec3(1, 0, 0));
 			}
 
 			// SHADOW MAPS: render depth 
 
 			// change view-projection matrix according to spotlight parameters
 
-			glm::vec3 spotPosition = glm::vec3(0.0, 0.0, 0.0);
-			glm::vec3 lightInverse = glm::vec3(0.0, 1.0, 0.0);
+			glEnable(GL_DEPTH_TEST);
+
+			glm::vec3 spotPosition = glm::vec3(2.0, 1.0, -1.0);
+			glm::vec3 lightInverse = glm::vec3(1.0, 0.0, 0.0);
 			glm::mat4 depthProjectionMatrix = glm::perspective<float>(glm::radians(45.0f), 1.0f, 2.0f, 50.0f);
 			glm::mat4 depthViewMatrix = glm::lookAt(spotPosition, spotPosition - lightInverse, glm::vec3(0, 1, 0));
 			glm::mat4 biasMatrix(
-				0.5, 0.0, 0.0, 0.0,
-				0.0, 0.5, 0.0, 0.0,
-				0.0, 0.0, 0.5, 0.0,
-				0.5, 0.5, 0.5, 1.0
+				1, 0.0, 0.0, 0.0,
+				0.0, 1, 0.0, 0.0,
+				0.0, 0.0, 1, 0.0,
+				0.05, 0.05, 0.05, 1.0
 			);
-			glm::mat4 depthBiasMatrix = biasMatrix * depthViewMatrix * depthProjectionMatrix;
+			glm::mat4 depthBiasMatrix =  biasMatrix *  depthProjectionMatrix * depthViewMatrix;
 			Camera::SetViewParameters(viewDataBuffer, depthViewMatrix, depthProjectionMatrix);
 
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			depthMaterial.Use();
-			depthMaterial.SetPropertyMatrix4f("DepthBiasMatrix", depthBiasMatrix);
+
 			shadowspotFBO.Bind();
+			glClear(GL_DEPTH_BUFFER_BIT);
+			depthMaterial.SetPropertyMatrix4f("DepthBiasMatrix", depthBiasMatrix);
+			depthMaterial.Use();
+			glCullFace(GL_FRONT);
 			myScene.DrawOpaqueObjects(depthMaterial);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		
+			glCullFace(GL_BACK);
+			glActiveTexture(GL_TEXTURE4);
+			glBindTexture(GL_TEXTURE_2D, shadowspotFBO.depthMap);
 
 			//Set ViewProjectionMatrix
 
+			GargoyleShader->UseProgram();
+			glUniformMatrix4fv(glGetUniformLocation(GargoyleShader->GetProgramHandle(), "DepthBiasMatrix"), 1, false, glm::value_ptr(depthBiasMatrix));
 			renderFBO.Bind();
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			//glEnable(GL_MULTISAMPLE);
 			glEnable(GL_DEPTH_TEST);
 			
@@ -546,7 +551,6 @@ int main(int argc, char** argv)
 				myScene.DrawOpaqueObjects(debugMaterial);
 			}
 			else {
-
 				myScene.DrawScene(true);
 			}
 
@@ -581,8 +585,10 @@ int main(int argc, char** argv)
 				if (drawDepth) { //draw depthbuffer to screen for debug purposes
 					FrameBuffer::Unbind();
 					glActiveTexture(GL_TEXTURE0);
-					glBindTexture(GL_TEXTURE_2D, renderFBO.depthStencil);
+					//glBindTexture(GL_TEXTURE_2D, renderFBO.depthStencil);
+					glBindTexture(GL_TEXTURE_2D, shadowspotFBO.depthMap);
 					DebugDepthSS->UseProgram();
+					glUniform1f(0, 1);
 					glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 				}
 				else

@@ -43,19 +43,6 @@ void Scene::DrawOpaqueObjects(const Material & material)
 	material.Use();
 	GLuint modelMatrixLocation = material.shader->GetUniformLocation("modelMatrix");
 	GLuint normalMatrixLocation = material.shader->GetUniformLocation("modelNormalMatrix");
-	GLuint depthMatrixLocation = material.shader->GetUniformLocation("DepthBiasMatrix");
-
-	glm::vec3 spotPosition = glm::vec3(0.0, 0.0, 0.0);
-	glm::vec3 lightInverse = glm::vec3(0.0, 1.0, 0.0);
-	glm::mat4 depthProjectionMatrix = glm::perspective<float>(glm::radians(45.0f), 1.0f, 2.0f, 50.0f);
-	glm::mat4 depthViewMatrix = glm::lookAt(spotPosition, spotPosition - lightInverse, glm::vec3(0, 1, 0));
-	glm::mat4 biasMatrix(
-		0.5, 0.0, 0.0, 0.0,
-		0.0, 0.5, 0.0, 0.0,
-		0.0, 0.0, 0.5, 0.0,
-		0.5, 0.5, 0.5, 1.0
-	);
-	glm::mat4 depthBiasMatrix = biasMatrix * depthViewMatrix * depthProjectionMatrix;
 
 	for (std::pair<ShaderProgram*, std::unordered_map<Material*, std::unordered_map<Mesh*, std::vector<GameObject*>>>> shaderGroup : renderGroups)
 	{
@@ -67,7 +54,6 @@ void Scene::DrawOpaqueObjects(const Material & material)
 				{
 					glUniformMatrix4fv(modelMatrixLocation, 1, GL_FALSE, glm::value_ptr(gameObject->GetTransform().ToMatrix()));
 					glUniformMatrix4fv(normalMatrixLocation, 1, GL_FALSE, glm::value_ptr(gameObject->GetTransform().ToNormalMatrix()));
-					glUniformMatrix4fv(depthMatrixLocation, 1, GL_FALSE, glm::value_ptr(depthBiasMatrix));
 					GameObjects.first->Draw();
 				}
 			}

@@ -22,12 +22,12 @@ struct SpotLight{
 
 uniform vec4 flatColor;
 uniform vec4 material;
-uniform sampler2DShadow shadowMap;
 
 layout (binding = 0 ) uniform sampler2D albedoTex;
 layout (binding = 1 ) uniform sampler2D materialTex;
 layout (binding = 2 ) uniform sampler2D normalTex;
 layout (binding = 3 ) uniform samplerCube cubemapTex;
+layout (binding = 4 ) uniform sampler2DShadow shadowMap;
 
 layout (binding = 1, std140) uniform LightData{
 	vec4 ambientColor;
@@ -85,8 +85,9 @@ void main()
 		doSpotLight(lights.spotLights[i]);
 	}
 
-	float shadow = texture(shadowMap, (vertex.shadow_Position.xy/vertex.shadow_Position.w)).z  <  (vertex.shadow_Position.z-0.5/vertex.shadow_Position.w) ? 1.0 : 0.0;
-	color = vec4(flatColor.xyz * texture(albedoTex, vertex.texCoord).xyz * (lights.ambientColor.xyz + (1.0 - shadow)  * material.x + lightDiffuse * material.y) + (lightSpecular + texture(cubemapTex, -reflectDir).xyz * flatColor.w) * material.z * texture(materialTex,vertex.texCoord).x,1);
+	float shadow = texture(shadowMap, vertex.shadow_Position.xyz/vertex.shadow_Position.w / 2 + 0.5);
+	shadow = max(shadow, 0.2);
+	color = vec4(flatColor.xyz * texture(albedoTex, vertex.texCoord).xyz * (lights.ambientColor.xyz * material.x + lightDiffuse * shadow * material.y) + (lightSpecular * shadow + texture(cubemapTex, -reflectDir).xyz * flatColor.w) * material.z * texture(materialTex,vertex.texCoord).x,1);
 }
 
 
