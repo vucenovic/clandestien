@@ -152,6 +152,7 @@ int main(int argc, char** argv)
 	char backward = reader.Get<char>("controls", "backwards", 'S');
 	char left = reader.Get<char>("controls", "left", 'A');
 	char right = reader.Get<char>("controls", "right", 'D');
+	char interaction = reader.Get<char>("controls", "interaction", 'E');
 
 	std::string window_title = "Clandestien";
 	float FOV = 60;
@@ -484,16 +485,22 @@ int main(int argc, char** argv)
 			/* PHYSX */
 			
 			PxVec3 origin = PxVec3(newPos[0], newPos[1], newPos[2]);            // [in] Ray origin
-			glm::vec3 viewVector = glm::normalize(glm::vec3(camera.getViewMatrix()[2][0], camera.getViewMatrix()[2][1], camera.getViewMatrix()[2][2]));
+			glm::vec3 viewVector = glm::normalize(camera.GetForward());
 			PxVec3 unitDir = PxVec3(viewVector.x ,viewVector.y, viewVector.z);             // [in] Normalized ray direction
-			PxReal maxDistance = 0.1;            // [in] Raycast max distance
+			PxReal maxDistance = 0.01;            // [in] Raycast max distance
 			PxQueryFilterData filterData(PxQueryFlag::eDYNAMIC);
 			PxRaycastBuffer hit;
 
 			bool status = gScene->raycast(origin, unitDir, maxDistance, hit, PxHitFlag::eDEFAULT, filterData);
-			if (status && actionKey) {
+			if (status && (glfwGetKey(window, (int)interaction) == GLFW_PRESS)) {
 				auto &transform = myScene.GetObject("gargoyle")->GetTransform();
-				transform.Translate(glm::vec3(1.0, 0.0, 0.0));
+				if (glfwGetKey(window, (int)forward) == GLFW_PRESS) {
+					transform.Translate(glm::vec3(viewVector.x * -2.0 * deltaTime, 0.0, viewVector.z * -2.0 * deltaTime));
+				}
+				else if (glfwGetKey(window, (int)backward) == GLFW_PRESS) {
+					transform.Translate(glm::vec3(viewVector.x * 2.0 * deltaTime, 0.0, viewVector.z * 2.0 * deltaTime));
+				}
+					
 			}
 
 			// SHADOW MAPS: render depth 
@@ -703,19 +710,8 @@ static void MyKeyCallback(GLFWwindow * window, int key, int scancode, int action
 			break;
 		}
 	}
-
-	if (action == GLFW_REPEAT) {
-		switch (key)
-		{
-			case GLFW_KEY_E:
-				actionKey = !actionKey;
-				break;
-			default:
-				break;
-		}
-		
-	}
 }
+
 
 static void APIENTRY DebugCallback(GLenum source, GLenum type, GLuint id, GLenum severity,	GLsizei length, const GLchar* message, const GLvoid* userParam)
 {
