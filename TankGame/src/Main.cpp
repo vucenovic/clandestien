@@ -487,7 +487,7 @@ int main(int argc, char** argv)
 			PxVec3 origin = PxVec3(newPos[0], newPos[1], newPos[2]);            // [in] Ray origin
 			glm::vec3 viewVector = glm::normalize(camera.GetForward());
 			PxVec3 unitDir = PxVec3(viewVector.x ,viewVector.y, viewVector.z);             // [in] Normalized ray direction
-			PxReal maxDistance = 0.01;            // [in] Raycast max distance
+			PxReal maxDistance = 0.1;            // [in] Raycast max distance
 			PxQueryFilterData filterData(PxQueryFlag::eDYNAMIC);
 			PxRaycastBuffer hit;
 
@@ -498,13 +498,12 @@ int main(int argc, char** argv)
 				if (glfwGetKey(window, (int)forward) == GLFW_PRESS) {
 					transform.Translate(glm::vec3(viewVector.x * -2.0 * deltaTime, 0.0, viewVector.z * -2.0 * deltaTime));
 					auto &transform = myScene.GetObject("gargoyle")->GetTransform();
-					gargyoleBox->setGlobalPose(PxTransform(transform.GetPosition()[0], transform.GetPosition()[1], transform.GetPosition()[2]));
+					gargyoleBox->setGlobalPose(PxTransform(transform.GetPosition()[0] - 0.75, transform.GetPosition()[1], transform.GetPosition()[2]- 1.20)); // NO IDEA WHY i have to subtract, position just doesnt fit without 
 				}
 				else if (glfwGetKey(window, (int)backward) == GLFW_PRESS) {
 					transform.Translate(glm::vec3(viewVector.x * 2.0 * deltaTime, 0.0, viewVector.z * 2.0 * deltaTime));
 					auto &transform = myScene.GetObject("gargoyle")->GetTransform();
-					gargyoleBox->setGlobalPose(PxTransform(transform.GetPosition()[0], transform.GetPosition()[1], transform.GetPosition()[2]));
-					//gargyoleBox->setKinematicTarget(PxTransform(gargyoleBox->getGlobalPose().p[0] + viewVector.x * 2.0 * deltaTime, 0.0, gargyoleBox->getGlobalPose().p[1] +  viewVector.z * 2.0 * deltaTime));
+					gargyoleBox->setGlobalPose(PxTransform(transform.GetPosition()[0] - 0.75, transform.GetPosition()[1], transform.GetPosition()[2] - 1.20)); // NO IDEA WHY i have to subtract, position just doesnt fit without 
 				}
 					
 			}
