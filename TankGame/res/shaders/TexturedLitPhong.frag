@@ -37,6 +37,8 @@ layout (binding = 1, std140) uniform LightData{
 	DirectionalLight[5] directionalLights;
 
 	SpotLight[3] spotLights;
+
+	SpotLight shadowLight;
 } lights;
 
 in VertexData

@@ -89,7 +89,7 @@ int main(int argc, char** argv)
 
 	// initialize geomentry for bounding boxes of game scene
 
-	//agg.addStaticBox(PxTransform(0.0, 1.25, 2.5), PxBoxGeometry(4.0, 1.25, 2.5)); faulty
+	agg.addStaticBox(PxTransform(0.0, 1.25, 2.5), PxBoxGeometry(4.0, 2.5, 0.5));
 	agg.addStaticBox(PxTransform(4.5, 2.75, -2.0), PxBoxGeometry(0.5, 2.75, 4.4));
 	agg.addStaticBox(PxTransform(-4.5, 4.0, -2.0), PxBoxGeometry(0.5, 1.5, 4.4));
 	agg.addStaticBox(PxTransform(-4.5, 1.25, -3.25), PxBoxGeometry(0.5, 1.25, 2.75));
@@ -197,7 +197,6 @@ int main(int argc, char** argv)
 		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 	#endif
 
-	glViewport(0, 0, width, height);
 	glClearColor(0, 0, 0, 1);
 	glEnable(GL_CULL_FACE);
 	glfwSwapInterval(vsync);
@@ -328,35 +327,24 @@ int main(int argc, char** argv)
 		myLightManager.BindToPort(1);
 
 		{
-			myLightManager.lightsUsed.point = 4;
-			myLightManager.lightsUsed.directional = 2;
-			myLightManager.lightsUsed.spot = 1;
-
 			myLightManager.ambientLight = glm::vec3(1, 1, 1);
 
-			myLightManager.pointLights[0].SetPosition(glm::vec3());
-			myLightManager.pointLights[0].SetAttenuation(1, 0.4f, 0.1f);
+			myLightManager.pointLights.push_back(PointLight(glm::vec3(), glm::vec3(1, 1, 1), glm::vec4(1, 0.4f, 0.1f, 100)));
+			myLightManager.pointLights.push_back(PointLight(glm::vec3(2.2f, 1, 0), glm::vec3(50, 0, 0), glm::vec4(1, 1, 1, 100)));
+			myLightManager.pointLights.push_back(PointLight(glm::vec3(-5, 1, 0), glm::vec3(1, 1, 1), glm::vec4(1, 0.4f, 0.3f, 100)));
+			myLightManager.pointLights.push_back(PointLight(glm::vec3(5, 1, 0), glm::vec3(1, 1, 1), glm::vec4(1, 0.4f, 0.3f, 100)));
 
-			myLightManager.pointLights[3].SetPosition(glm::vec3(2.2f,1,0));
-			myLightManager.pointLights[3].SetColor(50,0,0);
-			myLightManager.pointLights[3].SetAttenuation(1, 1, 1);
+			myLightManager.directionalLights.push_back(DirectionalLight(glm::vec3(0, -1, -1), glm::vec3(0.8f, 0.8f, 0.8f)));
+			myLightManager.directionalLights.push_back(DirectionalLight(glm::vec3(0, -1, 1), glm::vec3(0.1f, 0.1f, 0.1f)));
 
-			myLightManager.pointLights[1].SetPosition(glm::vec3(-5,1,0));
-			myLightManager.pointLights[1].SetAttenuation(1, 0.4f, 0.3f);
-
-			myLightManager.pointLights[2].SetPosition(glm::vec3(5, 1, 0));
-			myLightManager.pointLights[2].SetAttenuation(1, 0.4f, 0.3f);
-
-			myLightManager.directionalLights[0].SetDirection(glm::vec3(0,-1,-1));
-			myLightManager.directionalLights[0].SetColor(0.8f,0.8f,0.8f);
-
-			myLightManager.directionalLights[1].SetDirection(glm::vec3(0, -1, 1));
-			myLightManager.directionalLights[1].SetColor(0.1f, 0.1f, 0.1f);
-
-			myLightManager.spotLights[0].SetPosition(glm::vec3(2.0, 1.0, -1.0));
-			myLightManager.spotLights[0].SetDirection(glm::vec3(-1.0f, 0.0f, 0.0f));
-			myLightManager.spotLights[0].SetAttenuation(0.2f, 0.01f, 0.05f);
-			myLightManager.spotLights[0].SetRadialFalloffDegrees(5, 15);
+			myLightManager.shadowLight = SpotLight(
+				glm::vec3(2.0, 1.0, -1.0),
+				glm::vec3(-1.0f, 0.0f, 0.0f),
+				glm::vec2(glm::cos(glm::radians(5.0)), glm::cos(glm::radians(15.0))),
+				glm::vec3(1, 1, 1),
+				glm::vec4(0.2f, 0.01f, 0.05f, 100)
+			);
+			myLightManager.shadowLightUsed = true;
 
 			//myLightManager.spotLights[0].SetPosition(glm::vec3(4.6f,-2.4f,-4.3f));
 			//myLightManager.spotLights[0].SetDirection(glm::vec3(-0.7f, 0.15f, 0.62f));
@@ -421,7 +409,7 @@ int main(int argc, char** argv)
 
 		/* Shadow Map Frame Buffer for Spotlights */
 
-		DepthFrameBuffer shadowspotFBO = DepthFrameBuffer(width, height);
+		DepthFrameBuffer shadowspotFBO = DepthFrameBuffer(256, 256);
 
 		double lastFrameTime = 0;
 		double nextSecond = 1;
@@ -528,6 +516,7 @@ int main(int argc, char** argv)
 			Camera::SetViewParameters(viewDataBuffer, depthViewMatrix, depthProjectionMatrix);
 
 			shadowspotFBO.Bind();
+			glViewport(0, 0, 256, 256);
 			glClear(GL_DEPTH_BUFFER_BIT);
 			depthMaterial.SetPropertyMatrix4f("DepthBiasMatrix", depthBiasMatrix);
 			depthMaterial.Use();
@@ -541,9 +530,9 @@ int main(int argc, char** argv)
 
 			GargoyleShader->UseProgram();
 			glUniformMatrix4fv(glGetUniformLocation(GargoyleShader->GetProgramHandle(), "DepthBiasMatrix"), 1, false, glm::value_ptr(depthBiasMatrix));
+
 			renderFBO.Bind();
-
-
+			glViewport(0, 0, width, height);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			//glEnable(GL_MULTISAMPLE);
 			glEnable(GL_DEPTH_TEST);
@@ -596,10 +585,9 @@ int main(int argc, char** argv)
 				if (drawDepth) { //draw depthbuffer to screen for debug purposes
 					FrameBuffer::Unbind();
 					glActiveTexture(GL_TEXTURE0);
-					//glBindTexture(GL_TEXTURE_2D, renderFBO.depthStencil);
-					glBindTexture(GL_TEXTURE_2D, shadowspotFBO.depthMap);
+					glBindTexture(GL_TEXTURE_2D, renderFBO.depthStencil);
 					DebugDepthSS->UseProgram();
-					glUniform1f(0, 1);
+					//glUniform1f(0, 1);
 					glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 				}
 				else

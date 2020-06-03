@@ -3,39 +3,21 @@
 
 PointLight::PointLight(const PointLight & o)
 {
-	memcpy(val_ptr, o.val_ptr, sizeof(PointLight));
-}
-
-PointLight::PointLight()
-{
-	position.x = 0;
-	position.y = 0;
-	position.z = 0;
-	color.red = 1;
-	color.green = 1;
-	color.blue = 1;
-	falloff.constant = 1;
-	falloff.linear = 0;
-	falloff.square = 1;
-	falloff.cutoffDistance = 10;
+	memcpy(this, &o, sizeof(PointLight));
 }
 
 PointLight::~PointLight()
 {
 }
 
-void PointLight::SetPosition(glm::vec3 pos)
+void PointLight::SetPosition(const glm::vec3 pos)
 {
-	position.x = pos.x;
-	position.y = pos.y;
-	position.z = pos.z;
+	position = pos;
 }
 
-void PointLight::SetColor(GLfloat r, GLfloat g, GLfloat b)
+void PointLight::SetColor(const glm::vec3 col)
 {
-	color.red = r;
-	color.green = g;
-	color.blue = b;
+	color = col;
 }
 
 void PointLight::SetAttenuation(GLfloat constant, GLfloat linear, GLfloat squared, GLfloat cutoffDistance)
@@ -48,17 +30,7 @@ void PointLight::SetAttenuation(GLfloat constant, GLfloat linear, GLfloat square
 
 DirectionalLight::DirectionalLight(const DirectionalLight & o)
 {
-	memcpy(val_ptr, o.val_ptr, sizeof(DirectionalLight));
-}
-
-DirectionalLight::DirectionalLight()
-{
-	direction.x = 0;
-	direction.y = -1;
-	direction.z = 0;
-	color.red = 1;
-	color.green = 1;
-	color.blue = 1;
+	memcpy(this, &o, sizeof(DirectionalLight));
 }
 
 DirectionalLight::~DirectionalLight()
@@ -67,67 +39,36 @@ DirectionalLight::~DirectionalLight()
 
 void DirectionalLight::SetDirection(glm::vec3 dir)
 {
-	glm::vec3 d = glm::normalize(dir);
-	direction.x = d.x;
-	direction.y = d.y;
-	direction.z = d.z;
+	direction = glm::normalize(dir);
 }
 
-void DirectionalLight::SetColor(GLfloat r, GLfloat g, GLfloat b)
+void DirectionalLight::SetColor(const glm::vec3 col)
 {
-	color.red = r;
-	color.green = g;
-	color.blue = b;
+	color = col;
 }
 
 SpotLight::SpotLight(const SpotLight & o)
 {
-	memcpy(val_ptr, o.val_ptr, sizeof(SpotLight));
-}
-
-SpotLight::SpotLight()
-{
-	position.x = 0;
-	position.y = 0;
-	position.z = 0;
-	direction.x = 0;
-	direction.y = -1;
-	direction.z = 0;
-	position.radialInner = 0.9;
-	direction.radialOuter = 0.85;
-	color.red = 1;
-	color.green = 1;
-	color.blue = 1;
-	falloff.constant = 1;
-	falloff.linear = 0;
-	falloff.square = 1;
-	falloff.cutoffDistance = 10;
+	memcpy(this, &o, sizeof(SpotLight));
 }
 
 SpotLight::~SpotLight()
 {
 }
 
-void SpotLight::SetPosition(glm::vec3 pos)
+void SpotLight::SetPosition(const glm::vec3 pos)
 {
-	position.x = pos.x;
-	position.y = pos.y;
-	position.z = pos.z;
+	position = pos;
 }
 
-void SpotLight::SetDirection(glm::vec3 dir)
+void SpotLight::SetDirection(const glm::vec3 dir)
 {
-	glm::vec3 d = glm::normalize(dir);
-	direction.x = d.x;
-	direction.y = d.y;
-	direction.z = d.z;
+	direction = glm::normalize(dir);
 }
 
-void SpotLight::SetColor(GLfloat r, GLfloat g, GLfloat b)
+void SpotLight::SetColor(const glm::vec3 col)
 {
-	color.red = r;
-	color.green = g;
-	color.blue = b;
+	color = col;
 }
 
 void SpotLight::SetAttenuation(GLfloat constant, GLfloat linear, GLfloat squared, GLfloat cutoffDistance)
@@ -140,6 +81,6 @@ void SpotLight::SetAttenuation(GLfloat constant, GLfloat linear, GLfloat squared
 
 void SpotLight::SetRadialFalloffDegrees(GLfloat inner, GLfloat outer)
 {
-	position.radialInner = glm::cos(glm::radians(inner));
-	direction.radialOuter = glm::cos(glm::radians(outer));
+	radialInner = glm::cos(glm::radians(inner));
+	radialOuter = glm::cos(glm::radians(outer));
 }

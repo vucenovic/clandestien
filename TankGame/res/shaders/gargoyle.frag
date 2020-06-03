@@ -38,6 +38,8 @@ layout (binding = 1, std140) uniform LightData{
 	DirectionalLight[5] directionalLights;
 
 	SpotLight[3] spotLights;
+
+	SpotLight shadowLight;
 } lights;
 
 in VertexData
@@ -72,6 +74,11 @@ void main()
 	
 	lightDiffuse = vec3(0);
 	lightSpecular = vec3(0);
+
+	doSpotLight(lights.shadowLight);
+	float shadow = texture(shadowMap, vertex.shadow_Position.xyz/vertex.shadow_Position.w / 2 + 0.5);
+	lightDiffuse *= shadow;
+	lightSpecular *= shadow;
 
 	for(int i=0;i<lights.lightCounts.x;i++){ //do PointLights
 		doPointLight(lights.pointLights[i]);
@@ -126,9 +133,6 @@ void doSpotLight(SpotLight light){
 	float facDiff = max(dot(worldNormal,lightDir),0);
 	float facSpec = facDiff>0 ? max(-dot(reflectDir,lightDir),0) : 0;
 
-	float shadow = texture(shadowMap, vertex.shadow_Position.xyz/vertex.shadow_Position.w / 2 + 0.5);
 	lightDiffuse += facDiff * light.color.xyz * falloff; //Diffuse
 	lightSpecular += facDiff * pow(facSpec,material.w) * light.color.xyz * falloff; //Specular
-	lightDiffuse *= shadow;
-	lightSpecular *= shadow;
 }

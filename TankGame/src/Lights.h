@@ -5,63 +5,60 @@
 class PointLight
 {
 public:
-	union {
-		struct { //padded to vec4(s)
-			struct alignas(16) { GLfloat x, y, z;} position;
-			struct alignas(16) { GLfloat red, green, blue; } color;
+	struct { //padded to vec4(s)
+		alignas(16) glm::vec3 position;
+		alignas(16) glm::vec3 color;
+		union {
 			struct alignas(16) { GLfloat constant, linear, square, cutoffDistance; } falloff;
+			glm::vec4 attenuation;
 		};
-		GLfloat val_ptr[12];
 	};
 public:
 	PointLight(const PointLight &o);
-	PointLight();
+	PointLight(const glm::vec3 pos = glm::vec3(0,0,0), const glm::vec3 col = glm::vec3(1,1,1), const glm::vec4 att = glm::vec4(1, 0, 1, 100)) : position(pos), color(col), attenuation(att) {};
 	~PointLight();
 
-	void SetPosition(glm::vec3 pos);
-	void SetColor(GLfloat r, GLfloat g, GLfloat b);
+	void SetPosition(const glm::vec3 pos);
+	void SetColor(const glm::vec3 col);
 	void SetAttenuation(GLfloat constant, GLfloat linear, GLfloat squared, GLfloat cutoffDistance = -1);
 };
 
 class DirectionalLight
 {
 public:
-	union {
-		struct {
-			struct alignas(16) { GLfloat x, y, z; } direction;
-			struct alignas(16) { GLfloat red, green, blue; } color;
-		};
-		GLfloat val_ptr[8];
+	struct {
+		alignas(16) glm::vec3 direction;
+		alignas(16) glm::vec3 color;
 	};
 public:
 	DirectionalLight(const DirectionalLight &o);
-	DirectionalLight();
+	DirectionalLight(const glm::vec3 dir = glm::vec3(0, -1, 0), const glm::vec3 col = glm::vec3(1, 1, 1)) : direction(dir), color(col) {};
 	~DirectionalLight();
 
-	void SetDirection(glm::vec3 dir);
-	void SetColor(GLfloat r, GLfloat g, GLfloat b);
+	void SetDirection(const glm::vec3 dir);
+	void SetColor(const glm::vec3 col);
 };
 
 class SpotLight
 {
 public:
-	union {
-		struct {
-			struct alignas(16) { GLfloat x, y, z, radialInner; } position;
-			struct alignas(16) { GLfloat x, y, z, radialOuter; } direction;
-			struct alignas(16) { GLfloat red, green, blue; } color;
+	struct {
+		struct alignas(16) { glm::vec3 position; GLfloat radialInner; };
+		struct alignas(16) { glm::vec3 direction; GLfloat radialOuter; };
+		alignas(16) glm::vec3 color;
+		union {
 			struct alignas(16) { GLfloat constant, linear, square, cutoffDistance; } falloff;
+			glm::vec4 attenuation;
 		};
-		GLfloat val_ptr[16];
 	};
 public:
 	SpotLight(const SpotLight &o);
-	SpotLight();
+	SpotLight(const glm::vec3 pos = glm::vec3(0, 0, 0), const glm::vec3 dir = glm::vec3(0, -1, 0), const glm::vec2 radial = glm::vec2(0.9f, 0.85f), const glm::vec3 col = glm::vec3(1, 1, 1), const glm::vec4 att = glm::vec4(1, 0, 1, 100)) : position(pos), direction(dir), radialInner(radial.x), radialOuter(radial.y), color(col), attenuation(att) {};
 	~SpotLight();
 
-	void SetPosition(glm::vec3 pos);
-	void SetDirection(glm::vec3 dir);
-	void SetColor(GLfloat r, GLfloat g, GLfloat b);
+	void SetPosition(const glm::vec3 pos);
+	void SetDirection(const glm::vec3 dir);
+	void SetColor(const glm::vec3 col);
 	void SetAttenuation(GLfloat constant, GLfloat linear, GLfloat squared, GLfloat cutoffDistance = -1);
 	void SetRadialFalloffDegrees(GLfloat inner, GLfloat outer);
 };

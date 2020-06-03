@@ -4,12 +4,14 @@
 #include "UniformBuffer.h"
 #include "ShaderProgram.h"
 #include <glm/glm.hpp>
+#include <memory>
+#include <vector>
 
 //specific to the current implementation
 class LightManager
 {
 public:
-	struct LightCounts { GLuint point, directional, spot; };
+	struct LightCounts { size_t point, directional, spot, shadow; };
 private:
 	LightCounts lightMaxes;
 	
@@ -22,11 +24,12 @@ public:
 
 	void UpdateBuffer();
 
-	LightCounts lightsUsed;
 	glm::vec3 ambientLight;
-	PointLight * pointLights;
-	DirectionalLight * directionalLights;
-	SpotLight * spotLights;
+	std::vector<PointLight> pointLights;
+	std::vector<DirectionalLight> directionalLights;
+	std::vector<SpotLight> spotLights;
+	SpotLight shadowLight;
+	bool shadowLightUsed = false;
 
 	const LightCounts & getMaximums() const;
 };

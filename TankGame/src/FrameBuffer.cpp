@@ -124,6 +124,7 @@ ColorFrameBuffer::~ColorFrameBuffer()
 DepthFrameBuffer::DepthFrameBuffer(GLuint width, GLuint height)
 {
 	glGenFramebuffers(1, &fboHandle);
+	Bind();
 
 	glGenTextures(1, &depthMap);
 	glBindTexture(GL_TEXTURE_2D, depthMap);
@@ -135,9 +136,9 @@ DepthFrameBuffer::DepthFrameBuffer(GLuint width, GLuint height)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
 
-
-	Bind();
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
 	glDrawBuffer(GL_NONE);
 	glReadBuffer(GL_NONE);
 
