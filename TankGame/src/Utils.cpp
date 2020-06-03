@@ -26,6 +26,19 @@ const glm::mat4 & Transform::ToMatrix() const
 	return cachedMatrix;
 }
 
+void Transform::LookAt(const glm::vec3 eye, const glm::vec3 pos)
+{
+
+}
+
+void Transform::LookDir(const glm::vec3 dir)
+{
+	float pitch = glm::acos(dir.y);
+	float invPitch = glm::sin(pitch);
+	float yaw = glm::acos(dir.z) * (dir.x >= 0 ? 1 : -1);
+	SetRotation(glm::vec3(pitch,yaw,0));
+}
+
 BoundingBox::BoundingBox(const GLfloat * points, const size_t & count, size_t stride) : min(std::numeric_limits<float>::max()), max(std::numeric_limits<float>::lowest())
 {
 	size_t len = count * stride;
