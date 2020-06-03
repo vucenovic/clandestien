@@ -494,11 +494,17 @@ int main(int argc, char** argv)
 			bool status = gScene->raycast(origin, unitDir, maxDistance, hit, PxHitFlag::eDEFAULT, filterData);
 			if (status && (glfwGetKey(window, (int)interaction) == GLFW_PRESS)) {
 				auto &transform = myScene.GetObject("gargoyle")->GetTransform();
+				gargyoleBox->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
 				if (glfwGetKey(window, (int)forward) == GLFW_PRESS) {
 					transform.Translate(glm::vec3(viewVector.x * -2.0 * deltaTime, 0.0, viewVector.z * -2.0 * deltaTime));
+					auto &transform = myScene.GetObject("gargoyle")->GetTransform();
+					gargyoleBox->setGlobalPose(PxTransform(transform.GetPosition()[0], transform.GetPosition()[1], transform.GetPosition()[2]));
 				}
 				else if (glfwGetKey(window, (int)backward) == GLFW_PRESS) {
 					transform.Translate(glm::vec3(viewVector.x * 2.0 * deltaTime, 0.0, viewVector.z * 2.0 * deltaTime));
+					auto &transform = myScene.GetObject("gargoyle")->GetTransform();
+					gargyoleBox->setGlobalPose(PxTransform(transform.GetPosition()[0], transform.GetPosition()[1], transform.GetPosition()[2]));
+					//gargyoleBox->setKinematicTarget(PxTransform(gargyoleBox->getGlobalPose().p[0] + viewVector.x * 2.0 * deltaTime, 0.0, gargyoleBox->getGlobalPose().p[1] +  viewVector.z * 2.0 * deltaTime));
 				}
 					
 			}
