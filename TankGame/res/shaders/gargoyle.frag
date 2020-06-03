@@ -85,8 +85,7 @@ void main()
 		doSpotLight(lights.spotLights[i]);
 	}
 
-	float shadow = texture(shadowMap, vertex.shadow_Position.xyz/vertex.shadow_Position.w / 2 + 0.5);
-	color = vec4(flatColor.xyz * texture(albedoTex, vertex.texCoord).xyz * (lights.ambientColor.xyz * material.x + lightDiffuse * shadow * material.y) + (lightSpecular * shadow + texture(cubemapTex, -reflectDir).xyz * flatColor.w) * material.z * texture(materialTex,vertex.texCoord).x,1);
+	color = vec4(flatColor.xyz * texture(albedoTex, vertex.texCoord).xyz * (lights.ambientColor.xyz * material.x + lightDiffuse  * material.y) + (lightSpecular  + texture(cubemapTex, -reflectDir).xyz * flatColor.w) * material.z * texture(materialTex,vertex.texCoord).x,1);
 }
 
 
@@ -127,6 +126,9 @@ void doSpotLight(SpotLight light){
 	float facDiff = max(dot(worldNormal,lightDir),0);
 	float facSpec = facDiff>0 ? max(-dot(reflectDir,lightDir),0) : 0;
 
+	float shadow = texture(shadowMap, vertex.shadow_Position.xyz/vertex.shadow_Position.w / 2 + 0.5);
 	lightDiffuse += facDiff * light.color.xyz * falloff; //Diffuse
 	lightSpecular += facDiff * pow(facSpec,material.w) * light.color.xyz * falloff; //Specular
+	lightDiffuse *= shadow;
+	lightSpecular *= shadow;
 }

@@ -327,8 +327,8 @@ int main(int argc, char** argv)
 		myLightManager.BindToPort(1);
 
 		{
-			myLightManager.lightsUsed.point = 0;
-			myLightManager.lightsUsed.directional = 0;
+			myLightManager.lightsUsed.point = 4;
+			myLightManager.lightsUsed.directional = 2;
 			myLightManager.lightsUsed.spot = 1;
 
 			myLightManager.ambientLight = glm::vec3(1, 1, 1);
@@ -420,7 +420,7 @@ int main(int argc, char** argv)
 
 		/* Shadow Map Frame Buffer for Spotlights */
 
-		ShadowMapSpotFrameBuffer shadowspotFBO = ShadowMapSpotFrameBuffer(width, height);
+		DepthFrameBuffer shadowspotFBO = DepthFrameBuffer(width, height);
 
 		double lastFrameTime = 0;
 		double nextSecond = 1;
@@ -484,7 +484,8 @@ int main(int argc, char** argv)
 			/* PHYSX */
 			
 			PxVec3 origin = PxVec3(newPos[0], newPos[1], newPos[2]);            // [in] Ray origin
-			PxVec3 unitDir = PxVec3(1.0, 0.0, 0.0);             // [in] Normalized ray direction
+			glm::vec3 viewVector = glm::normalize(glm::vec3(camera.getViewMatrix()[2][0], camera.getViewMatrix()[2][1], camera.getViewMatrix()[2][2]));
+			PxVec3 unitDir = PxVec3(viewVector.x ,viewVector.y, viewVector.z);             // [in] Normalized ray direction
 			PxReal maxDistance = 0.1;            // [in] Raycast max distance
 			PxQueryFilterData filterData(PxQueryFlag::eDYNAMIC);
 			PxRaycastBuffer hit;
@@ -492,7 +493,7 @@ int main(int argc, char** argv)
 			bool status = gScene->raycast(origin, unitDir, maxDistance, hit, PxHitFlag::eDEFAULT, filterData);
 			if (status && actionKey) {
 				auto &transform = myScene.GetObject("gargoyle")->GetTransform();
-				transform.Translate(glm::vec3(1, 0, 0));
+				transform.Translate(glm::vec3(1.0, 0.0, 0.0));
 			}
 
 			// SHADOW MAPS: render depth 
@@ -529,6 +530,8 @@ int main(int argc, char** argv)
 			GargoyleShader->UseProgram();
 			glUniformMatrix4fv(glGetUniformLocation(GargoyleShader->GetProgramHandle(), "DepthBiasMatrix"), 1, false, glm::value_ptr(depthBiasMatrix));
 			renderFBO.Bind();
+
+
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			//glEnable(GL_MULTISAMPLE);
 			glEnable(GL_DEPTH_TEST);
@@ -552,9 +555,6 @@ int main(int argc, char** argv)
 			else {
 				myScene.DrawScene(true);
 			}
-
-
-
 
 			
 
