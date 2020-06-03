@@ -86,7 +86,6 @@ void main()
 	}
 
 	float shadow = texture(shadowMap, vertex.shadow_Position.xyz/vertex.shadow_Position.w / 2 + 0.5);
-	shadow = max(shadow, 0.2);
 	color = vec4(flatColor.xyz * texture(albedoTex, vertex.texCoord).xyz * (lights.ambientColor.xyz * material.x + lightDiffuse * shadow * material.y) + (lightSpecular * shadow + texture(cubemapTex, -reflectDir).xyz * flatColor.w) * material.z * texture(materialTex,vertex.texCoord).x,1);
 }
 

@@ -514,7 +514,6 @@ int main(int argc, char** argv)
 			glm::mat4 depthBiasMatrix =  biasMatrix *  depthProjectionMatrix * depthViewMatrix;
 			Camera::SetViewParameters(viewDataBuffer, depthViewMatrix, depthProjectionMatrix);
 
-
 			shadowspotFBO.Bind();
 			glClear(GL_DEPTH_BUFFER_BIT);
 			depthMaterial.SetPropertyMatrix4f("DepthBiasMatrix", depthBiasMatrix);
