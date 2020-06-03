@@ -70,6 +70,8 @@ int main(int argc, char** argv)
 	sceneDesc.gravity = PxVec3(0.0f, -9.81f, 0.0f);
 	PxDefaultCpuDispatcher* gDispatcher = PxDefaultCpuDispatcherCreate(2);
 	sceneDesc.cpuDispatcher = gDispatcher;
+	//https://docs.nvidia.com/gameworks/content/gameworkslibrary/physx/apireference/files/group__extensions.html#g587ba12f90f77543c3e4452abeb0f22f
+	//https://github.com/NVIDIAGameWorks/PhysX/blob/4.1/physx/source/physxextensions/src/ExtDefaultSimulationFilterShader.cpp
 	sceneDesc.filterShader = PxDefaultSimulationFilterShader;
 	PxScene* gScene = gPhysics->createScene(sceneDesc);
 
@@ -124,6 +126,9 @@ int main(int argc, char** argv)
 	desc.climbingMode = PxCapsuleClimbingMode::eCONSTRAINED;
 	PxController* c = manager->createController(desc);
 	manager->setOverlapRecoveryModule(true); 
+	//https://docs.nvidia.com/gameworks/content/gameworkslibrary/physx/apireference/files/structPxFilterData.html
+	
+	PxSetGroup(*c->getActor(), 1);
 
 	// add debug visualization parameters
 
@@ -136,10 +141,7 @@ int main(int argc, char** argv)
 	PxRigidDynamic* gargyoleBox = gPhysics->createRigidDynamic(PxTransform(-0.84, 0.754, -1.831));
 	PxShape* gargoyleBoxShape = PxRigidActorExt::createExclusiveShape(*gargyoleBox, PxBoxGeometry(0.75, 0.75, 0.6), *gargoyleMaterial);
 	gScene->addActor(*gargyoleBox);
-
-
-	
-
+	PxSetGroup(*gargyoleBox, 2);
 
 	int width = reader.Get<int>("gfx", "width", 800);
 	int height = reader.Get<int>("gfx", "height", 800);
@@ -476,11 +478,13 @@ int main(int argc, char** argv)
 			glm::vec3 viewVector = glm::normalize(camera.GetForward());
 			PxVec3 unitDir = PxVec3(viewVector.x ,viewVector.y, viewVector.z);             // [in] Normalized ray direction
 			PxReal maxDistance = 0.1;            // [in] Raycast max distance
-			PxQueryFilterData filterData(PxQueryFlag::eDYNAMIC);
+			PxQueryFilterData filterData(PxFilterData(0,0,0,0), PxQueryFlag::eDYNAMIC);
 			PxRaycastBuffer hit;
 
+			//Nutz das "Userdata" attribute von PxActor um eine 1:1 beziehung mit dem Gameobject oder was auch immer zu erzeugen.
 			bool status = gScene->raycast(origin, unitDir, maxDistance, hit, PxHitFlag::eDEFAULT, filterData);
 			if (status && (glfwGetKey(window, (int)interaction) == GLFW_PRESS)) {
+				std::cout << hit.block.actor << std::endl;
 				auto &transform = myScene.GetObject("gargoyle")->GetTransform();
 				gargyoleBox->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
 				if (glfwGetKey(window, (int)forward) == GLFW_PRESS) {

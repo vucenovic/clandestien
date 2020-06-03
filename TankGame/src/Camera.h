@@ -21,7 +21,7 @@ public:
 	static glm::mat4 MakeOblique(glm::mat4 mat, glm::vec4 clipPlane);
 	glm::vec4 toLocalClipplane(glm::vec4 clip) const;
 
-	glm::vec3 GetForward() const { return transform.ToMatrix()*glm::vec4(0, 0, 1, 0); }
+	glm::vec3 GetForward() const { return transform.GetForward(); }
 
 	void UseCamera(const UniformBuffer & viewDataBuffer);
 	static void SetViewParameters(const UniformBuffer & viewDataBuffer, const glm::mat4 & view, const glm::mat4 & projection);

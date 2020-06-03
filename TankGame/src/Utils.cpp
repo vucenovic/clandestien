@@ -28,14 +28,15 @@ const glm::mat4 & Transform::ToMatrix() const
 
 void Transform::LookAt(const glm::vec3 eye, const glm::vec3 pos)
 {
-
+	SetPostion(eye);
+	LookDir(glm::normalize(pos - eye));
 }
 
 void Transform::LookDir(const glm::vec3 dir)
 {
 	float pitch = glm::acos(dir.y);
 	float invPitch = glm::sin(pitch);
-	float yaw = glm::acos(dir.z) * (dir.x >= 0 ? 1 : -1);
+	float yaw = glm::acos(dir.z / invPitch) * (dir.x >= 0 ? 1 : -1);
 	SetRotation(glm::vec3(pitch,yaw,0));
 }
 

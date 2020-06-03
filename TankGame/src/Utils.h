@@ -84,14 +84,15 @@ public:
 	const glm::mat4 ToInverseMatrix() const { return glm::inverse(ToMatrix()); }
 	const glm::mat4 ToNormalMatrix() const { return glm::transpose(ToInverseMatrix()); }
 	
-	glm::vec3 GetForward() {
+	glm::vec3 GetForward() const {
 		glm::vec4 dir = glm::vec4(0, 0, scale.z, 0);
 		dir = ToMatrix() * dir;
 		return glm::vec3(dir.x, dir.y, dir.z);
 	}
-	glm::vec3 GetRight() {
+	glm::vec3 GetRight() const {
 		return glm::cross(glm::vec3(0, 1, 0), GetForward());
 	}
+
 	void LookAt(const glm::vec3 eye, const glm::vec3 pos);
 	void LookDir(const glm::vec3 dir);
 };
