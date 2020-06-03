@@ -699,11 +699,21 @@ static void MyKeyCallback(GLFWwindow * window, int key, int scancode, int action
 		case GLFW_KEY_2:
 			drawBloom = !drawBloom;
 			break;
-		case GLFW_KEY_E:
-			actionKey = !actionKey;
 		default:
 			break;
 		}
+	}
+
+	if (action == GLFW_REPEAT) {
+		switch (key)
+		{
+			case GLFW_KEY_E:
+				actionKey = !actionKey;
+				break;
+			default:
+				break;
+		}
+		
 	}
 }
 
