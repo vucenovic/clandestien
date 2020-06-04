@@ -488,12 +488,12 @@ int main(int argc, char** argv)
 				auto &transform = myScene.GetObject("gargoyle")->GetTransform();
 				gargyoleBox->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
 				if (glfwGetKey(window, (int)forward) == GLFW_PRESS) {
-					transform.Translate(glm::vec3(viewVector.x * -2.0 * deltaTime, 0.0, viewVector.z * -2.0 * deltaTime));
+					transform.Translate(glm::vec3(viewVector.x * 2.0 * deltaTime, 0.0, viewVector.z * 2.0 * deltaTime));
 					auto &transform = myScene.GetObject("gargoyle")->GetTransform();
 					gargyoleBox->setGlobalPose(PxTransform(transform.GetPosition()[0] - 0.75, transform.GetPosition()[1], transform.GetPosition()[2]- 1.20)); // NO IDEA WHY i have to subtract, position just doesnt fit without 
 				}
 				else if (glfwGetKey(window, (int)backward) == GLFW_PRESS) {
-					transform.Translate(glm::vec3(viewVector.x * 2.0 * deltaTime, 0.0, viewVector.z * 2.0 * deltaTime));
+					transform.Translate(glm::vec3(viewVector.x * -2.0 * deltaTime, 0.0, viewVector.z * -2.0 * deltaTime));
 					auto &transform = myScene.GetObject("gargoyle")->GetTransform();
 					gargyoleBox->setGlobalPose(PxTransform(transform.GetPosition()[0] - 0.75, transform.GetPosition()[1], transform.GetPosition()[2] - 1.20)); // NO IDEA WHY i have to subtract, position just doesnt fit without 
 				}
