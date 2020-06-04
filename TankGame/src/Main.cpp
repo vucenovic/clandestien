@@ -336,8 +336,8 @@ int main(int argc, char** argv)
 			myLightManager.pointLights.push_back(PointLight(glm::vec3(-5, 1, 0), glm::vec3(1, 1, 1), glm::vec4(1, 0.4f, 0.3f, 100)));
 			myLightManager.pointLights.push_back(PointLight(glm::vec3(5, 1, 0), glm::vec3(1, 1, 1), glm::vec4(1, 0.4f, 0.3f, 100)));
 
-			myLightManager.directionalLights.push_back(DirectionalLight(glm::vec3(0, -1, -1), glm::vec3(50, 50, 50)));
-			myLightManager.directionalLights.push_back(DirectionalLight(glm::vec3(0, -1, 1), glm::vec3(0.1f, 0.1f, 0.1f)));
+			myLightManager.directionalLights.push_back(DirectionalLight(glm::vec3(0, -1, 0), glm::vec3(50, 50, 50)));
+			//myLightManager.directionalLights.push_back(DirectionalLight(glm::vec3(0, -1, 1), glm::vec3(0.1f, 0.1f, 0.1f)));
 
 			myLightManager.shadowLight = SpotLight(
 				glm::vec3(2.0, 1.0, -1.0),

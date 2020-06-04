@@ -108,7 +108,7 @@ void doPointLight(PointLight light){
 	float facSpec = facDiff>0 ? max(-dot(reflectDir,lightDir),0) : 0;
 
 	lightDiffuse += facDiff * light.color.xyz * falloff; //Diffuse
-	lightSpecular += facDiff * pow(facSpec,material.w) * light.color.xyz * falloff; //Specular
+	lightSpecular += facSpec * pow(facSpec,material.w) * light.color.xyz * falloff; //Specular
 }
 
 void doDirectionalLight(DirectionalLight light){
@@ -116,7 +116,7 @@ void doDirectionalLight(DirectionalLight light){
 	float facSpec = facDiff>0 ? max(-dot(reflectDir,-light.direction.xyz),0) : 0;
 
 	lightDiffuse += facDiff * light.color.xyz; //Diffuse
-	lightSpecular += facDiff * pow(facSpec,material.w) * light.color.xyz; //Specular
+	lightSpecular += facSpec * pow(facSpec,material.w) * light.color.xyz; //Specular
 }
 
 void doSpotLight(SpotLight light){
@@ -134,5 +134,5 @@ void doSpotLight(SpotLight light){
 	float facSpec = facDiff>0 ? max(-dot(reflectDir,lightDir),0) : 0;
 
 	lightDiffuse += facDiff * light.color.xyz * falloff; //Diffuse
-	lightSpecular += facDiff * pow(facSpec,material.w) * light.color.xyz * falloff; //Specular
+	lightSpecular += facSpec * pow(facSpec,material.w) * light.color.xyz * falloff; //Specular
 }
