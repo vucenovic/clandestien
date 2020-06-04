@@ -1,11 +1,6 @@
 #include "Lights.h"
 #include <glm\gtc\matrix_transform.hpp>
 
-PointLight::PointLight(const PointLight & o)
-{
-	memcpy(this, &o, sizeof(PointLight));
-}
-
 PointLight::~PointLight()
 {
 }
@@ -28,11 +23,6 @@ void PointLight::SetAttenuation(GLfloat constant, GLfloat linear, GLfloat square
 	falloff.cutoffDistance = cutoffDistance == -1 ? 100 : cutoffDistance;
 }
 
-DirectionalLight::DirectionalLight(const DirectionalLight & o)
-{
-	memcpy(this, &o, sizeof(DirectionalLight));
-}
-
 DirectionalLight::~DirectionalLight()
 {
 }
@@ -45,11 +35,6 @@ void DirectionalLight::SetDirection(glm::vec3 dir)
 void DirectionalLight::SetColor(const glm::vec3 col)
 {
 	color = col;
-}
-
-SpotLight::SpotLight(const SpotLight & o)
-{
-	memcpy(this, &o, sizeof(SpotLight));
 }
 
 SpotLight::~SpotLight()

@@ -14,7 +14,6 @@ public:
 		};
 	};
 public:
-	PointLight(const PointLight &o);
 	PointLight(const glm::vec3 pos = glm::vec3(0,0,0), const glm::vec3 col = glm::vec3(1,1,1), const glm::vec4 att = glm::vec4(1, 0, 1, 100)) : position(pos), color(col), attenuation(att) {};
 	~PointLight();
 
@@ -31,7 +30,6 @@ public:
 		alignas(16) glm::vec3 color;
 	};
 public:
-	DirectionalLight(const DirectionalLight &o);
 	DirectionalLight(const glm::vec3 dir = glm::vec3(0, -1, 0), const glm::vec3 col = glm::vec3(1, 1, 1)) : direction(dir), color(col) {};
 	~DirectionalLight();
 
@@ -52,7 +50,6 @@ public:
 		};
 	};
 public:
-	SpotLight(const SpotLight &o);
 	SpotLight(const glm::vec3 pos = glm::vec3(0, 0, 0), const glm::vec3 dir = glm::vec3(0, -1, 0), const glm::vec2 radial = glm::vec2(0.9f, 0.85f), const glm::vec3 col = glm::vec3(1, 1, 1), const glm::vec4 att = glm::vec4(1, 0, 1, 100)) : position(pos), direction(dir), radialInner(radial.x), radialOuter(radial.y), color(col), attenuation(att) {};
 	~SpotLight();
 
