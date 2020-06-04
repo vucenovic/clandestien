@@ -113,17 +113,17 @@ int main(int argc, char** argv)
 	PxControllerManager* manager = PxCreateControllerManager(*gScene);
 	PxCapsuleControllerDesc desc;
 	PxMaterial* controllerMaterial = gPhysics->createMaterial(0.8f, 0.8f, 0.9f);
-	desc.stepOffset = 0.001;
+	desc.stepOffset = 0.000;
 	desc.contactOffset = 0.05;
 	desc.material = controllerMaterial;
 	desc.density = 10.0;
 	desc.isValid();
 	desc.scaleCoeff = 0.95;
 	desc.volumeGrowth = 1.5f;
-	desc.position = PxExtendedVec3(0.0, 1.5, 0.0);
+	desc.position = PxExtendedVec3(1.0, 1.5, 0.0);
 	desc.radius = 0.5;
 	desc.height = 2.0;
-	desc.climbingMode = PxCapsuleClimbingMode::eCONSTRAINED;
+	desc.climbingMode = PxCapsuleClimbingMode::eLAST;
 	PxController* c = manager->createController(desc);
 	manager->setOverlapRecoveryModule(true); 
 	//https://docs.nvidia.com/gameworks/content/gameworkslibrary/physx/apireference/files/structPxFilterData.html
@@ -132,17 +132,19 @@ int main(int argc, char** argv)
 
 	// add debug visualization parameters
 
+	enum ActiveGroup
+	{
+		GROUP1 = (1 << 0),
+		GROUP2 = (1 << 1),
+		GROUP3 = (1 << 2),
+		GROUP4 = (1 << 3),
+	};
+
 	gScene->setVisualizationParameter(PxVisualizationParameter::eSCALE, 1.0f);
 	gScene->setVisualizationParameter(PxVisualizationParameter::eCOLLISION_AABBS, 1.0);
 	gScene->setVisualizationParameter(PxVisualizationParameter::eCOLLISION_SHAPES, 1.0);
 
-	// TODO: use raycasts to move ape object (add dynamic bounding box for it)
-	PxMaterial* gargoyleMaterial = gPhysics->createMaterial(0.5f, 0.5f, 0.6f);
-	PxRigidDynamic* gargyoleBox = gPhysics->createRigidDynamic(PxTransform(-0.84, 0.754, -1.831));
-	PxShape* gargoyleBoxShape = PxRigidActorExt::createExclusiveShape(*gargyoleBox, PxBoxGeometry(0.75, 0.75, 0.6), *gargoyleMaterial);
-	gScene->addActor(*gargyoleBox);
-	PxSetGroup(*gargyoleBox, 2);
-
+	
 	int width = reader.Get<int>("gfx", "width", 800);
 	int height = reader.Get<int>("gfx", "height", 800);
 	int targetFPS = reader.Get<int>("gfx", "refresh_rate", 60);
@@ -249,6 +251,7 @@ int main(int argc, char** argv)
 		camera.SetPerspective(FOV, (float)width / (float)height, nearPlane, farPlane);
 
 		CameraController myCameraController(&camera.GetTransform(),window);
+		myCameraController.setPivotPosition(glm::vec3(1.0, 1.5, 0.0));
 
 		//Meshes
 		
@@ -314,6 +317,7 @@ int main(int argc, char** argv)
 		gargoyle->GetTransform().SetPostion(glm::vec3(0.0, 0.0, 0.0));
 		gargoyle->name = "gargoyle";
 
+
 		std::unique_ptr<GameObject> gameStage = std::make_unique<GameObject>();
 		gameStage->mesh = gameStageMesh.get();
 		gameStage->material = &devMaterial;
@@ -361,6 +365,21 @@ int main(int argc, char** argv)
 		// myScene.AddObject(testobject);
 		myScene.AddObject(gargoyle);
 		myScene.AddObject(gameStage);
+
+		// Dynamics
+
+		//gargoyle
+		PxMaterial* gargoyleMat = gPhysics->createMaterial(0.5f, 0.5f, 0.6f);
+		auto &transform = myScene.GetObject("gargoyle")->GetTransform();
+		auto &gargPos = transform.GetPosition();
+		PxRigidDynamic* gargyoleBox = gPhysics->createRigidDynamic(PxTransform(gargPos[0] - 0.75, gargPos[1],gargPos[2] - 1.2));
+		PxShape* gargoyleBoxShape = PxRigidActorExt::createExclusiveShape(*gargyoleBox, PxBoxGeometry(0.75, 0.7, 0.6), *gargoyleMat);
+		gScene->addActor(*gargyoleBox);
+		PxSetGroup(*gargyoleBox, 2);
+		PxFilterData filterData;
+		filterData.word0 = GROUP1;
+		gargoyleBoxShape->setQueryFilterData(filterData);
+		
 
 		//Particles
 
@@ -477,25 +496,31 @@ int main(int argc, char** argv)
 			PxVec3 origin = PxVec3(newPos[0], newPos[1], newPos[2]);            // [in] Ray origin
 			glm::vec3 viewVector = glm::normalize(camera.GetForward());
 			PxVec3 unitDir = PxVec3(viewVector.x ,viewVector.y, viewVector.z);             // [in] Normalized ray direction
-			PxReal maxDistance = 0.1;            // [in] Raycast max distance
-			PxQueryFilterData filterData(PxFilterData(0,0,0,0), PxQueryFlag::eDYNAMIC);
+			PxReal maxDistance = 1.0;            // [in] Raycast max distance
 			PxRaycastBuffer hit;
 
+			PxQueryFilterData filterData = PxQueryFilterData();
+			filterData.data.word0 = GROUP1;
+			const PxHitFlags outputFlags = PxHitFlag::eDEFAULT | PxHitFlag::ePOSITION | PxHitFlag::eNORMAL;
+
 			//Nutz das "Userdata" attribute von PxActor um eine 1:1 beziehung mit dem Gameobject oder was auch immer zu erzeugen.
-			bool status = gScene->raycast(origin, unitDir, maxDistance, hit, PxHitFlag::eDEFAULT, filterData);
+			bool status = gScene->raycast(origin, unitDir, maxDistance, hit, outputFlags, filterData);
 			if (status && (glfwGetKey(window, (int)interaction) == GLFW_PRESS)) {
 				std::cout << hit.block.actor << std::endl;
 				auto &transform = myScene.GetObject("gargoyle")->GetTransform();
 				gargyoleBox->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
 				if (glfwGetKey(window, (int)forward) == GLFW_PRESS) {
-					transform.Translate(glm::vec3(viewVector.x * 2.0 * deltaTime, 0.0, viewVector.z * 2.0 * deltaTime));
 					auto &transform = myScene.GetObject("gargoyle")->GetTransform();
-					gargyoleBox->setGlobalPose(PxTransform(transform.GetPosition()[0] - 0.75, transform.GetPosition()[1], transform.GetPosition()[2]- 1.20)); // NO IDEA WHY i have to subtract, position just doesnt fit without 
+					//gargyoleBox->setGlobalPose(PxTransform(viewVector.x * 2.0 * deltaTime, 0.0, viewVector.z * 2.0 * deltaTime));// NO IDEA WHY i have to subtract, position just doesnt fit without 
+					gargyoleBox->setKinematicTarget(PxTransform(transform.GetPosition()[0], transform.GetPosition()[1], transform.GetPosition()[2]));
+					transform.Translate(glm::vec3(gargyoleBox->getGlobalPose().p[0], gargyoleBox->getGlobalPose().p[1], gargyoleBox->getGlobalPose().p[2]));
 				}
 				else if (glfwGetKey(window, (int)backward) == GLFW_PRESS) {
-					transform.Translate(glm::vec3(viewVector.x * -2.0 * deltaTime, 0.0, viewVector.z * -2.0 * deltaTime));
 					auto &transform = myScene.GetObject("gargoyle")->GetTransform();
-					gargyoleBox->setGlobalPose(PxTransform(transform.GetPosition()[0] - 0.75, transform.GetPosition()[1], transform.GetPosition()[2] - 1.20)); // NO IDEA WHY i have to subtract, position just doesnt fit without 
+					//gargyoleBox->setGlobalPose(PxTransform(viewVector.x * -2.0 * deltaTime, 0.0, viewVector.z * -2.0 * deltaTime)); // NO IDEA WHY i have to subtract, position just doesnt fit without 
+					gargyoleBox->setKinematicTarget(PxTransform(viewVector.x * -2.0 * deltaTime, 0.0, viewVector.z * -2.0 * deltaTime));
+					transform.Translate(glm::vec3(gargyoleBox->getGlobalPose().p[0], gargyoleBox->getGlobalPose().p[1], gargyoleBox->getGlobalPose().p[2]));
+					
 				}
 					
 			}
