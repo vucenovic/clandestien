@@ -512,13 +512,18 @@ int main(int argc, char** argv)
 				if (glfwGetKey(window, (int)forward) == GLFW_PRESS) {
 					auto &transform = myScene.GetObject("gargoyle")->GetTransform();
 					//gargyoleBox->setGlobalPose(PxTransform(viewVector.x * 2.0 * deltaTime, 0.0, viewVector.z * 2.0 * deltaTime));// NO IDEA WHY i have to subtract, position just doesnt fit without 
-					gargyoleBox->setKinematicTarget(PxTransform(transform.GetPosition()[0], transform.GetPosition()[1], transform.GetPosition()[2]));
+					gargyoleBox->setKinematicTarget(PxTransform(viewVector.x * 2.0 * deltaTime, 0.0, viewVector.z * 2.0 * deltaTime));
+					gScene->simulate(1.0f / 60.0f);
+					gScene->fetchResults(true);
 					transform.Translate(glm::vec3(gargyoleBox->getGlobalPose().p[0], gargyoleBox->getGlobalPose().p[1], gargyoleBox->getGlobalPose().p[2]));
+					
 				}
 				else if (glfwGetKey(window, (int)backward) == GLFW_PRESS) {
 					auto &transform = myScene.GetObject("gargoyle")->GetTransform();
 					//gargyoleBox->setGlobalPose(PxTransform(viewVector.x * -2.0 * deltaTime, 0.0, viewVector.z * -2.0 * deltaTime)); // NO IDEA WHY i have to subtract, position just doesnt fit without 
 					gargyoleBox->setKinematicTarget(PxTransform(viewVector.x * -2.0 * deltaTime, 0.0, viewVector.z * -2.0 * deltaTime));
+					gScene->simulate(1.0f / 60.0f);
+					gScene->fetchResults(true);
 					transform.Translate(glm::vec3(gargyoleBox->getGlobalPose().p[0], gargyoleBox->getGlobalPose().p[1], gargyoleBox->getGlobalPose().p[2]));
 					
 				}
