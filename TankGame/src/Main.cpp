@@ -517,7 +517,7 @@ int main(int argc, char** argv)
 					//gargyoleBox->addForce(PxVec3(0.001, 0.001, 0.001), PxForceMode::eFORCE);
 					gScene->simulate(1.0f / 60.0f);
 					gScene->fetchResults(true);
-					transform.Translate(glm::vec3(gargyoleBox->getGlobalPose().p[0], gargyoleBox->getGlobalPose().p[1], gargyoleBox->getGlobalPose().p[2]));
+					transform.SetPostion(glm::vec3(gargyoleBox->getGlobalPose().p[0], gargyoleBox->getGlobalPose().p[1], gargyoleBox->getGlobalPose().p[2]));
 					
 					
 				}
@@ -528,7 +528,7 @@ int main(int argc, char** argv)
 					//gargyoleBox->addForce(PxVec3(viewVector.x * 2.0 * deltaTime, 0.0, viewVector.z * 2.0 * deltaTime), PxForceMode::eFORCE);
 					gScene->simulate(1.0f / 60.0f);
 					gScene->fetchResults(true);
-					transform.Translate(glm::vec3(gargyoleBox->getGlobalPose().p[0], gargyoleBox->getGlobalPose().p[1], gargyoleBox->getGlobalPose().p[2]));
+					transform.SetPostion(glm::vec3(gargyoleBox->getGlobalPose().p[0], gargyoleBox->getGlobalPose().p[1], gargyoleBox->getGlobalPose().p[2]));
 					
 				}
 					
