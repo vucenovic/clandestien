@@ -122,9 +122,13 @@ void Scene::RenderPortal(const Portal * portal)
 	glDepthFunc(GL_LESS);
 
 	//SetViewParameters
-	activeCamera->toLocalClipplane(glm::vec4(1, 0, 0, -4));
 	glm::mat4 view = glm::inverse(portal->getOffsetMatrix() * activeCamera->GetTransform().ToMatrix());
-	glm::mat4 projection = activeCamera->getProjectionMatrix();
+
+	glm::vec3 dir = -portal->targetTransform.GetForward();
+	glm::vec4 C = glm::vec4(dir, glm::dot(-dir, portal->targetTransform.GetPosition()));
+	C = glm::transpose(glm::inverse(view)) * C;
+
+	glm::mat4 projection = activeCamera->GetObliqueProjection(C);
 	Camera::SetViewParameters(*viewDataBuffer, view, projection);
 
 	//draw scene from the portal

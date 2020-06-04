@@ -85,7 +85,7 @@ public:
 	const glm::mat4 ToNormalMatrix() const { return glm::transpose(ToInverseMatrix()); }
 	
 	glm::vec3 GetForward() const {
-		glm::vec4 dir = glm::vec4(0, 0, scale.z, 0);
+		glm::vec4 dir = glm::vec4(0, 0, -scale.z, 0);
 		dir = ToMatrix() * dir;
 		return glm::vec3(dir.x, dir.y, dir.z);
 	}

@@ -18,8 +18,10 @@ public:
 	void SetPerspective(float FOV, float aspect, float near, float far);
 	void SetOrtho(float left, float right, float top, float bottom);
 
-	static glm::mat4 MakeOblique(glm::mat4 mat, glm::vec4 clipPlane);
-	glm::vec4 toLocalClipplane(glm::vec4 clip) const;
+	static glm::mat4 Camera::GetObliqueProjection(float FOV, float aspect, float near, float far, glm::vec4 clipPlane);
+	//Only works with projection matrix
+	glm::mat4 Camera::GetObliqueProjection(glm::vec4 clipPlane);
+	glm::vec4 toLocalClipplane(glm::vec4 clip) const { return glm::transpose(transform.ToMatrix()) * clip; };
 
 	glm::vec3 GetForward() const { return transform.GetForward(); }
 
