@@ -40,6 +40,7 @@ layout (binding = 1, std140) uniform LightData{
 	SpotLight[3] spotLights;
 
 	SpotLight shadowLight;
+	mat4 shadowMatrix;
 } lights;
 
 in VertexData

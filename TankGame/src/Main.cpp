@@ -555,17 +555,7 @@ int main(int argc, char** argv)
 			// SHADOW MAPS: render depth 
 			{
 				// change view-projection matrix according to spotlight parameters
-				glm::vec3 lightPosition = myLightManager.shadowLight.position; //move dis shit into the light manager and the UBO
-				glm::vec3 lightDirection = myLightManager.shadowLight.direction;
-				glm::mat4 depthProjectionMatrix = glm::perspective<float>(glm::radians(45.0f), 1.0f, 2.0f, 50.0f);
-				glm::mat4 depthViewMatrix = glm::lookAt(lightPosition, lightPosition + lightDirection, glm::vec3(0, 1, 0));
-				glm::mat4 biasMatrix(
-					1, 0.0, 0.0, 0.0,
-					0.0, 1, 0.0, 0.0,
-					0.0, 0.0, 1, 0.0,
-					0.05, 0.05, 0.05, 1.0
-				);
-				Camera::SetViewParameters(viewDataBuffer, depthViewMatrix, biasMatrix * depthProjectionMatrix);
+				Camera::SetViewParameters(viewDataBuffer, myLightManager.shadowView(), myLightManager.shadowProjection());
 
 				shadowspotFBO.Bind();
 				glViewport(0, 0, 256, 256);
@@ -578,10 +568,6 @@ int main(int argc, char** argv)
 
 				glActiveTexture(GL_TEXTURE4);
 				glBindTexture(GL_TEXTURE_2D, shadowspotFBO.depthMap);
-
-				//TODO move into lightmanager
-				GargoyleShader->UseProgram();
-				glUniformMatrix4fv(glGetUniformLocation(GargoyleShader->GetProgramHandle(), "DepthBiasMatrix"), 1, false, glm::value_ptr(biasMatrix * depthProjectionMatrix * depthViewMatrix));
 			}
 
 			//Render Scene

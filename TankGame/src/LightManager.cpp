@@ -4,7 +4,7 @@
 
 LightManager::LightManager(const ShaderProgram & program)
 {
-	lightDataBuffer = new UniformBuffer(program, std::string("LightData"), { "LightData.ambientColor", "LightData.lightCounts","LightData.pointLights[0].position","LightData.directionalLights[0].direction","LightData.spotLights[0].position","LightData.shadowLight.position", }, 6);
+	lightDataBuffer = new UniformBuffer(program, std::string("LightData"), { "LightData.ambientColor", "LightData.lightCounts","LightData.pointLights[0].position","LightData.directionalLights[0].direction","LightData.spotLights[0].position","LightData.shadowLight.position", "LightData.shadowMatrix"}, 7);
 
 	const std::vector<GLuint> & offsets = lightDataBuffer->GetOffsets();
 
@@ -42,6 +42,7 @@ void LightManager::UpdateBuffer()
 	glBufferSubData(GL_UNIFORM_BUFFER, offsets[3], sizeof(DirectionalLight) * counts.directional, (GLfloat *)directionalLights.data());
 	glBufferSubData(GL_UNIFORM_BUFFER, offsets[4], sizeof(SpotLight) * counts.spot, (GLfloat *)spotLights.data());
 	glBufferSubData(GL_UNIFORM_BUFFER, offsets[5], sizeof(SpotLight) * counts.shadow, &shadowLight);
+	glBufferSubData(GL_UNIFORM_BUFFER, offsets[6], sizeof(glm::mat4) * counts.shadow, glm::value_ptr(shadowProjection() * shadowView()));
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
