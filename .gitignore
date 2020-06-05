@@ -1,6 +1,7 @@
 .vs/
 x64/
 Debug/
+exports/
 
 redist/
 *.blend1

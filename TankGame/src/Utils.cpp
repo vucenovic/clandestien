@@ -6,7 +6,7 @@ Transform::Transform() : position(glm::vec3(0, 0, 0)), rotation(glm::vec3(0, 0, 
 {
 }
 
-Transform::Transform(glm::vec3 pos, glm::vec3 rot, glm::vec3 scl) : position(pos), rotation(rot), scale(scl), dirtyBit(true)
+Transform::Transform(glm::vec3 pos, glm::vec3 rot, glm::vec3 scl) : position(pos), rotation(glm::quat(rot)), scale(scl), dirtyBit(true)
 {
 }
 

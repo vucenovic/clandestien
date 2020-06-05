@@ -24,7 +24,7 @@ public:
 	Mesh * mesh;
 	Material * material;
 
-	GameObject() : transform(Transform()), mesh(nullptr), material(nullptr) {};
+	GameObject(const Transform transform = Transform(), Mesh * mesh = nullptr, Material * material = nullptr, const std::string name = "") : transform(transform), mesh(mesh), material(material), name(name) {};
 	~GameObject();
 
 	//virtual const GameObjectType & GetType() const { return GameObjectType::Object; }
