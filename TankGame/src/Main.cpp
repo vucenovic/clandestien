@@ -512,6 +512,8 @@ int main(int argc, char** argv)
 			}
 
 			/* PHYSX */
+
+			// Gargyole Movement
 			{
 				glm::vec3 camPos = camera.GetTransform().GetPosition();
 				PxVec3 origin = PxVec3(camPos.x, camPos.y, camPos.z);            // [in] Ray origin
@@ -536,19 +538,49 @@ int main(int argc, char** argv)
 					auto &transform = myScene.GetObject("gargoyle")->GetTransform();
 					if (glfwGetKey(window, (int)forward) == GLFW_PRESS) {
 						auto &transform = myScene.GetObject("gargoyle")->GetTransform();
-						gargyoleBox->setGlobalPose(PxTransform(viewVector.x * 2.0 * deltaTime, 0.0, viewVector.z * 2.0 * deltaTime));// NO IDEA WHY i have to subtract, position just doesnt fit without 
+						gargyoleBox->setGlobalPose(PxTransform(viewVector.x * 2.0 * deltaTime, 0.0, viewVector.z * 2.0 * deltaTime));
 						gargyoleBox->setKinematicTarget(PxTransform(viewVector.x * 2.0 * deltaTime, 0.0, viewVector.z * 2.0 * deltaTime));
 						//gargyoleBox->addForce(PxVec3(0.001, 0.001, 0.001), PxForceMode::eFORCE);
 						transform.SetPostion(glm::vec3(gargyoleBox->getGlobalPose().p[0], gargyoleBox->getGlobalPose().p[1], gargyoleBox->getGlobalPose().p[2]));
 					}
 					else if (glfwGetKey(window, (int)backward) == GLFW_PRESS) {
 						auto &transform = myScene.GetObject("gargoyle")->GetTransform();
-						gargyoleBox->setGlobalPose(PxTransform(viewVector.x * -2.0 * deltaTime, 0.0, viewVector.z * -2.0 * deltaTime)); // NO IDEA WHY i have to subtract, position just doesnt fit without 
+						gargyoleBox->setGlobalPose(PxTransform(viewVector.x * -2.0 * deltaTime, 0.0, viewVector.z * -2.0 * deltaTime)); 
 						gargyoleBox->setKinematicTarget(PxTransform(viewVector.x * -2.0 * deltaTime, 0.0, viewVector.z * -2.0 * deltaTime));
 						//gargyoleBox->addForce(PxVec3(viewVector.x * 2.0 * deltaTime, 0.0, viewVector.z * 2.0 * deltaTime), PxForceMode::eFORCE);
 						transform.SetPostion(glm::vec3(gargyoleBox->getGlobalPose().p[0], gargyoleBox->getGlobalPose().p[1], gargyoleBox->getGlobalPose().p[2]));
 					}
 					
+				}
+			}
+
+			// Portal teleportation
+
+			{
+				//Portal 1
+				auto &portalPos = myTestPortal.transform.GetPosition();
+				PxExtendedVec3 portalPosPx = PxExtendedVec3(portalPos.x, portalPos.y, portalPos.z);
+				auto &portalPos2 = myTestPortal2.transform.GetPosition();
+				PxExtendedVec3 portalPos2Px = PxExtendedVec3(portalPos2.x, portalPos2.y - 0.8, portalPos2.z + 0.1); // y wert weil man sonst nicht am boden landet, 0.1z wegen endlessloop
+				if (c->getFootPosition().x < portalPosPx.x) {
+					c->setFootPosition(portalPos2Px);
+					auto newPos = c->getFootPosition();
+					myCameraController.cameraTransform->SetRotationDegrees(90.0, 0.0, 90.0);
+					myCameraController.cameraTransform->SetPostion(glm::vec3(newPos[0], newPos[1] + characterEyeHeight, newPos[2]));
+				}
+
+				//Portal 2
+				{
+					auto &portalPos = myTestPortal2.transform.GetPosition();
+					PxExtendedVec3 portalPosPx = PxExtendedVec3(portalPos.x, portalPos.y, portalPos.z);
+					auto &portalPos2 = myTestPortal.transform.GetPosition();
+					PxExtendedVec3 portalPos2Px = PxExtendedVec3(portalPos2.x + 0.1, portalPos2.y - 0.8, portalPos2.z);  // y wert weil man sonst nicht am boden landet, 0.1x wegen endlessloop
+					if (c->getFootPosition().z < portalPosPx.z) {
+						c->setFootPosition(portalPos2Px);
+						auto newPos = c->getFootPosition();
+						myCameraController.cameraTransform->SetRotationDegrees(90.0, 0.0, 90.0);
+						myCameraController.cameraTransform->SetPostion(glm::vec3(newPos[0], newPos[1] + characterEyeHeight, newPos[2]));
+					}
 				}
 			}
 
