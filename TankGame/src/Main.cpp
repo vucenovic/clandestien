@@ -120,20 +120,18 @@ int main(int argc, char** argv)
 	glfwSetKeyCallback(window, MyKeyCallback);
 	glfwSetScrollCallback(window, scroll_callback);
 
+	// initialize PhysX engine as documented by Nvidia PhysX SDK Documentary
+	PxDefaultAllocator		gAllocator;
+	PxDefaultErrorCallback	gErrorCallback;
+	PxFoundation* gFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, gAllocator, gErrorCallback);
+	if (!gFoundation) {
+		glfwTerminate();
+		std::cerr << "Failed to initialize PhysX Foundation";
+		return 1;
+	}
+
 	{
-		// initialize PhysX engine as documented by Nvidia PhysX SDK Documentary
-
-		using namespace physx;
-		PxDefaultAllocator		gAllocator;
-		PxDefaultErrorCallback	gErrorCallback;
-
-		PxFoundation* gFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, gAllocator, gErrorCallback);
-		if (!gFoundation) {
-			std::cerr << "Failed to initialize PhysX Foundation";
-		}
-
 		// initialize physics and scene
-
 		PxPhysics* gPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *gFoundation, PxTolerancesScale(), true, NULL);
 
 		PxSceneDesc sceneDesc(gPhysics->getTolerancesScale());
@@ -495,7 +493,7 @@ int main(int argc, char** argv)
 				myCameraController.HandleInputs();
 
 				glm::vec3 forwardVector = camera.GetTransform().GetForward();
-				forwardVector.y = 0;
+				forwardVector.y = 0; //clamp movement to horizonal plane
 				forwardVector = glm::normalize(forwardVector);
 				glm::vec3 rightVector = glm::cross(forwardVector, glm::vec3(0, 1, 0));
 
@@ -557,7 +555,7 @@ int main(int argc, char** argv)
 			// SHADOW MAPS: render depth 
 			{
 				// change view-projection matrix according to spotlight parameters
-				glm::vec3 lightPosition = myLightManager.shadowLight.position;
+				glm::vec3 lightPosition = myLightManager.shadowLight.position; //move dis shit into the light manager and the UBO
 				glm::vec3 lightDirection = myLightManager.shadowLight.direction;
 				glm::mat4 depthProjectionMatrix = glm::perspective<float>(glm::radians(45.0f), 1.0f, 2.0f, 50.0f);
 				glm::mat4 depthViewMatrix = glm::lookAt(lightPosition, lightPosition + lightDirection, glm::vec3(0, 1, 0));
