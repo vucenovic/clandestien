@@ -560,9 +560,8 @@ int main(int argc, char** argv)
 						glm::vec4 portalPlane = glm::vec4(portal.transform.GetForward(), glm::dot(-portal.transform.GetForward(), portal.transform.GetPosition()));
 
 						glm::vec4 pos = glm::vec4(charPos, 1);
-						float dist = glm::dot(portalPlane, pos);
 
-						if (dist > 0) {
+						if (glm::dot(portalPlane, pos) > 0) {
 							glm::vec3 newPos = portal.getOffsetMatrix() * pos;
 							camera.GetTransform().GetForward();
 							glm::vec3 newDir = portal.getOffsetMatrix() * glm::vec4(-camera.GetTransform().GetForward(), 0);
