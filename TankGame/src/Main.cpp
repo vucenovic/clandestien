@@ -47,6 +47,12 @@ bool debugDraw = false;
 int debugDrawmode = 0;
 bool actionKey = false;
 
+//TODO move somewhere sane -> group with remaining physX stuff
+physx::PxQuat fromEuler(glm::vec3 e) {
+	glm::quat q = glm::quat(e);
+	return physx::PxQuat(q.x,q.y,q.z,q.w);
+}
+
 int main(int argc, char** argv)
 {
 	INIReader reader("res/settings.ini");
@@ -147,33 +153,32 @@ int main(int argc, char** argv)
 			pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_SCENEQUERIES, true);
 		}
 
-
 		// initialize aggregate for gamescene for optimization
 
-		PxU32 nActors = 16;
-		GameSceneAggregateBuilder agg = GameSceneAggregateBuilder(16, false, gPhysics);
-
-		// initialize geomentry for bounding boxes of game scene
+		//StaticColliders
+		const PxU32 staticColliderCount = 32;
+		GameSceneAggregateBuilder agg = GameSceneAggregateBuilder(staticColliderCount, false, gPhysics);
 		{
-			agg.addStaticBox(PxTransform(0.0f, 1.25f, 2.5f), PxBoxGeometry(4.0f, 1.25f, 0.5f));
-			agg.addStaticBox(PxTransform(4.5f, 2.75f, -2.0f), PxBoxGeometry(0.5f, 2.75f, 4.4f));
+			agg.addStaticBox(PxTransform(0, 1.25f, 2.5f), PxBoxGeometry(4.0f, 1.25f, 0.5f));
+			agg.addStaticBox(PxTransform(4.5f, 2.75f, 0), PxBoxGeometry(0.5f, 2.75f, 2.4f));
 			agg.addStaticBox(PxTransform(-4.5f, 4.0f, -2.0f), PxBoxGeometry(0.5f, 1.5f, 4.4f));
-			agg.addStaticBox(PxTransform(-4.5f, 1.25f, -3.25f), PxBoxGeometry(0.5f, 1.25f, 2.75f));
+			agg.addStaticBox(PxTransform(-4.5f, 1.25f, -1.5f), PxBoxGeometry(0.5f, 1.25f, 1.0f));
 			agg.addStaticBox(PxTransform(-4.5f, 1.25f, 1.75f), PxBoxGeometry(0.5f, 1.25f, 1.25f));
-			agg.addStaticBox(PxTransform(0.0f, 1.25f, -4.5f), PxBoxGeometry(4.0f, 1.25f, 2.5f));
-			agg.addStaticBox(PxTransform(0.0f, -0.5f, -0.0f), PxBoxGeometry(5.0f, 0.5f, 2.0f));
-			agg.addStaticBox(PxTransform(-4.5f, 2.25f, -0.0f), PxBoxGeometry(0.5f, 0.25f, 0.5f));
+			agg.addStaticBox(PxTransform(0, -0.5f, -5.5f), PxBoxGeometry(8.0f, 0.5f, 8.0f));
+			agg.addStaticBox(PxTransform(-4.5f, 2.25f, 0), PxBoxGeometry(0.5f, 0.25f, 0.5f));
 			agg.addStaticBox(PxTransform(-2.25f, 4.0f, -6.5f), PxBoxGeometry(1.75f, 1.5f, 0.5f));
 			agg.addStaticBox(PxTransform(2.25f, 4.0f, -6.5f), PxBoxGeometry(1.75f, 1.5f, 0.5f));
-			agg.addStaticBox(PxTransform(0.0f, 5.0f, -6.5f), PxBoxGeometry(0.5f, 0.5f, 0.5f));
-			//agg.addStaticBox(PxTransform(0.0f, 4.3f, 0.8f), PxBoxGeometry(4.0f, 3.0f, 0.45f)); needs rotation
-			agg.addStaticBox(PxTransform(0.0f, 6.0f, -3.5f), PxBoxGeometry(4.0f, 0.5f, 2.5f));
-			agg.addStaticBox(PxTransform(0.0f, 3.061f, -2.15f), PxBoxGeometry(4.227f, 0.549f, 0.13f));
-			agg.addStaticBox(PxTransform(2.0f, 0.89f, -0.0f), PxBoxGeometry(0.49f, 0.118f, 0.49f));
-			agg.addStaticBox(PxTransform(2.0f, 0.441f, -0.0f), PxBoxGeometry(0.222f, 0.345f, 0.222f));
-			agg.addStaticBox(PxTransform(2.0f, 0.021f, -0.0f), PxBoxGeometry(0.416f, 0.061f, 0.416f));
+			agg.addStaticBox(PxTransform(0, 5.0f, -6.5f), PxBoxGeometry(0.5f, 0.5f, 0.5f));
+			agg.addStaticBox(PxTransform(PxVec3(0, 4.3f, 0.8f), fromEuler(glm::vec3(-0.7854f, 0, 0))), PxBoxGeometry(4.0f, 3.0f, 0.45f));
+			agg.addStaticBox(PxTransform(0, 6.0f, -3.5f), PxBoxGeometry(4.0f, 0.5f, 2.5f));
+			agg.addStaticBox(PxTransform(0, 3.061f, -2.15f), PxBoxGeometry(4.227f, 0.549f, 0.13f));
+			agg.addStaticBox(PxTransform(2.0f, 0.89f, 0), PxBoxGeometry(0.49f, 0.118f, 0.49f));
+			agg.addStaticBox(PxTransform(2.0f, 0.441f, 0), PxBoxGeometry(0.222f, 0.345f, 0.222f));
+			agg.addStaticBox(PxTransform(2.0f, 0.021f, 0), PxBoxGeometry(0.416f, 0.061f, 0.416f));
+			agg.addStaticBox(PxTransform(0, 2.375f, -4.5f), PxBoxGeometry(4.0f, 0.125f, 2.5f));
+			agg.addStaticBox(PxTransform(0, 1.25f, -2.25f), PxBoxGeometry(4.0f, 1.25f, 0.25f));
+			agg.addStaticBox(PxTransform(4.5f, 4.0f, -4.2f), PxBoxGeometry(0.5f, 1.7f, 2.2f));
 		}
-
 		gScene->addAggregate(*agg.gameSceneAggregate);
 
 		// add kinematic capsule character controller (experimental parameters)
@@ -186,7 +191,7 @@ int main(int argc, char** argv)
 		PxControllerManager* manager = PxCreateControllerManager(*gScene);
 		PxCapsuleControllerDesc desc;
 		PxMaterial* controllerMaterial = gPhysics->createMaterial(0.8f, 0.8f, 0.9f);
-		desc.stepOffset = 0.000;
+		desc.stepOffset = 0.1f;
 		desc.contactOffset = 0.05;
 		desc.material = controllerMaterial;
 		desc.density = 10.0;

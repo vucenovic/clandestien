@@ -1,10 +1,10 @@
 #include "GameSceneAggregateBuilder.h"
 
 
-void GameSceneAggregateBuilder::addStaticBox(PxTransform pos, PxBoxGeometry scale)
+void GameSceneAggregateBuilder::addStaticBox(PxTransform transform, PxBoxGeometry scale)
 {
 	PxMaterial* boxMaterial = this->physics->createMaterial(0.5f, 0.5f, 0.6f);	// create a material for the bounding box
-	PxRigidStatic* gameSceneActor = this->physics->createRigidStatic(pos);	// create static body and transform via position output of blender script
+	PxRigidStatic* gameSceneActor = this->physics->createRigidStatic(transform);	// create static body and transform via position output of blender script
 	PxShape* aBoxShape = PxRigidActorExt::createExclusiveShape(*gameSceneActor,
 		scale, *boxMaterial);
 	gameSceneAggregate->addActor(*gameSceneActor);

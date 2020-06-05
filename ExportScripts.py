@@ -1,5 +1,5 @@
 import bpy
-import mathutils
+from mathutils import Euler, Vector, Quaternion
 from math import *
 
 class Transform():
@@ -8,6 +8,12 @@ class Transform():
         self.rot = obj.rotation_euler
         self.scale = obj.scale
         self.parent = obj.parent
+    
+    def hasRotation(self):
+        return not (self.rot.x==0 and self.rot.y == 0 and self.rot.z == 0)
+    
+    def hasPosition(self):
+        return not (self.pos.length_squared==0)
     
     def toC(self):
         return ("Transform(" +
@@ -19,7 +25,7 @@ class Transform():
     def __repr__(self):
         return self.toC()
 
-class StaticColliderDef:
+class ColliderDef:
     def __init__(self,collider):
         self.transform = Transform(collider)
         if(collider.type == "EMPTY"):
@@ -32,8 +38,12 @@ class StaticColliderDef:
     def toC(self):
         if(self.tpe == "CUBE"):
             return ("agg.addStaticBox(" +
-            vectorToC(self.transform.pos,cl="PxTransform") + ", " +
-            vectorToC(self.transform.scale,cl="PxBoxGeometry") + ");"
+            (
+                (vectorToC(self.transform.pos,cl="PxTransform"))
+                if not self.transform.hasRotation() else
+                ("PxTransform(" + vectorToC(self.transform.pos,cl="PxVec3") + ",fromEuler(" + eulerToC(self.transform.rot) + "))")
+            ) + ", " +
+            vectorToC(self.transform.scale,cl="PxBoxGeometry",s=1) + ");"
             )
         else:
             return ""
@@ -112,7 +122,7 @@ class LightDef():
         self.lightData = obj.data
         self.type = obj.data.type
         self.color = obj.data.energy * obj.data.color
-        self.direction = mathutils.Vector((0.0, 0.0, -1.0))
+        self.direction = Vector((0.0, 0.0, -1.0))
         self.direction.rotate(obj.rotation_euler)
     
     def toC(self):
@@ -143,6 +153,7 @@ class LightDef():
 
 #float to c
 def ftc(f):
+    if(f==0): return "0"
     return str(f) + "f"
 
 #string to c
@@ -159,11 +170,16 @@ def vectorToC(vector, decim = 3, cl = "glm::vec3", s = -1):
     t = vector.to_tuple(decim)
     return cl + "(" + ftc(t[0]) + "," + ftc(t[2]) + "," + ftc(s * t[1]) + ")"
 
-def eulerToC(euler, decim = 5):
+def eulerToQuatC(euler, decim = 3, cl = "glm::quat"):
+    quat = Euler((euler.x,euler.z,-euler.y)).to_quaternion()
+    t = (round(quat.x,decim),round(quat.y,decim),round(quat.z,decim),round(quat.w,decim))
+    return cl + "(" + ftc(t[0]) + "," + ftc(t[1]) + "," + ftc(t[2]) + "," + ftc(t[3]) + ")"
+
+def eulerToC(euler, decim = 5, cl = "glm::vec3"):
     if(euler.x==0 and euler.y == 0 and euler.z == 0):
-        return "glm::vec3" + "()"
+        return cl + "()"
     t = (round(euler.x,decim),round(euler.y,decim),round(euler.z,decim))
-    return "(" + ftc(t[0]) + "," + ftc(t[1]) + "," + ftc(t[2]) + ")"
+    return cl + "(" + ftc(t[0]) + "," + ftc(t[2]) + "," + ftc(-t[1]) + ")"
 
 def ScopeLines(table, newline = True):
     nl = "\n" if newline else ""
@@ -179,9 +195,12 @@ def ExportStaticColliders():
 
     ColDefs = []
     for collider in staticColliders:
-        ColDefs.append(StaticColliderDef(collider))
+        ColDefs.append(ColliderDef(collider))
 
-    return "//StaticColliders\n" + ScopeLines(ColDefs)
+    return ("//StaticColliders\n" + 
+    "PxU32 staticColliderCount = " + str(len(staticColliders)) + ";\n" +
+    ScopeLines(ColDefs)
+    )
 
 def ExportVisualStaticDefs():
     objects = bpy.data.collections["VisualStatic"].objects
@@ -197,7 +216,8 @@ def ExportGameObjectDefs():
 
     ObjDefs = []
     for obj in objects:
-        ObjDefs.append(GameObjectDef(obj))
+        if obj.parent == None:
+            ObjDefs.append(GameObjectDef(obj))
 
     return "//GameObjects\n" + ScopeLines(ObjDefs)
 
@@ -235,28 +255,31 @@ def SelectCollection(coll):
     for obj in bpy.data.collections[coll].all_objects:
         obj.select_set(True)
 
-def ExportDefs():
-    print(ExportStaticColliders())
-    print(ExportVisualStaticDefs())
-    print(ExportStaticLights())
-    
-    if True:
+def ExportDefs(asFile=False):
+    if asFile:
         print("Writing Defs ... ", end ='')
         CheckFolder(basePath)
         f = open(basePath + "defs.txt","w")
         f.write(ExportStaticColliders() + "\n")
         f.write(ExportVisualStaticDefs() + "\n")
         f.write(ExportStaticLights() + "\n")
+        f.write(ExportGameObjectDefs() + "\n")
         f.close()
         print("done")
+    else:
+        print(ExportStaticColliders())
+        print(ExportVisualStaticDefs())
+        print(ExportStaticLights())
+        print(ExportGameObjectDefs())
 
 def Export():
     bpy.ops.object.select_all(action="DESELECT")
     SelectCollection("VisualStatic") 
     CheckFolder(basePath)
     ExportSelectedObjects(basePath + "GameScene.obj")
+    bpy.ops.object.select_all(action="DESELECT")
 
 basePath = bpy.path.abspath("//exports\\")
 #Export()
-ExportDefs()
+ExportDefs(False)
 #ExportMeshes(MeshDef.meshes, "models\\")
