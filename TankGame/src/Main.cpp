@@ -518,7 +518,6 @@ int main(int argc, char** argv)
 				glm::vec3 camPos = camera.GetTransform().GetPosition();
 				PxVec3 origin = PxVec3(camPos.x, camPos.y, camPos.z);            // [in] Ray origin
 				glm::vec3 viewVector = camera.GetTransform().GetForward();
-				viewVector.y = 0;
 				viewVector = glm::normalize(viewVector);
 
 				PxVec3 unitDir = PxVec3(viewVector.x ,viewVector.y, viewVector.z);             // [in] Normalized ray direction
@@ -565,7 +564,7 @@ int main(int argc, char** argv)
 				if (c->getFootPosition().x < portalPosPx.x) {
 					c->setFootPosition(portalPos2Px);
 					auto newPos = c->getFootPosition();
-					myCameraController.cameraTransform->SetRotationDegrees(90.0, 0.0, 90.0);
+					myCameraController.cameraTransform->SetRotationDegrees(0.0, 0.0, 90.0);
 					myCameraController.cameraTransform->SetPostion(glm::vec3(newPos[0], newPos[1] + characterEyeHeight, newPos[2]));
 				}
 
@@ -578,7 +577,7 @@ int main(int argc, char** argv)
 					if (c->getFootPosition().z < portalPosPx.z) {
 						c->setFootPosition(portalPos2Px);
 						auto newPos = c->getFootPosition();
-						myCameraController.cameraTransform->SetRotationDegrees(90.0, 0.0, 90.0);
+						myCameraController.cameraTransform->SetRotationDegrees(0.0, 0.0, 90.0);
 						myCameraController.cameraTransform->SetPostion(glm::vec3(newPos[0], newPos[1] + characterEyeHeight, newPos[2]));
 					}
 				}
