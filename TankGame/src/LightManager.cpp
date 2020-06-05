@@ -29,10 +29,10 @@ void LightManager::UpdateBuffer()
 {
 	const std::vector<GLuint> & offsets = lightDataBuffer->GetOffsets();
 	LightManager::LightCounts counts;
-	counts.point = std::min(pointLights.size(), lightMaxes.point);
-	counts.directional = std::min(directionalLights.size(), lightMaxes.directional);
-	counts.spot = std::min(spotLights.size(), lightMaxes.spot);
-	counts.shadow = std::min((size_t)shadowLightUsed, lightMaxes.shadow);
+	counts.point = std::min((GLuint)pointLights.size(), lightMaxes.point);
+	counts.directional = std::min((GLuint)directionalLights.size(), lightMaxes.directional);
+	counts.spot = std::min((GLuint)spotLights.size(), lightMaxes.spot);
+	counts.shadow = std::min((GLuint)shadowLightUsed, lightMaxes.shadow);
 
 	glBindBuffer(GL_UNIFORM_BUFFER, lightDataBuffer->GetHandle());
 	glBufferSubData(GL_UNIFORM_BUFFER, offsets[0], sizeof(glm::vec3), glm::value_ptr(ambientLight));

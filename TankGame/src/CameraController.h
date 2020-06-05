@@ -6,28 +6,19 @@
 class CameraController
 {
 private:
-	Transform* cameraTransform;
-	GLFWwindow* window;
-
 	float lastX, lastY;
-
 public:
-	glm::vec3 pivotPostion;
-	float pivotRadius;
-	float pivotYaw;
-	float pivotPitch;
-	float strafeSpeed;
-	float moveSpeed;
-	float horizontalAngle;
-	float verticalAngle;
+	GLFWwindow* window;
+	Transform* cameraTransform;
+	glm::vec3 position = glm::vec3();
+	float yaw = 0;
+	float pitch = 0;
 
-	float horizontalSensitivity, verticalSensitivity, scrollSensitivity;
+	float horizontalSensitivity = -0.25f;
+	float verticalSensitivity = -0.25f;
 
-	void HandleInputs(const float &scrollOffset, char forward, char backward, char left, char right, float frametime);
-	int MapKeys(char key);
-	glm::vec3 getPivotPosition();
-	void setPivotPosition(glm::vec3 pos);
+	void HandleInputs();
 
-	CameraController(Transform* cameraTransform, GLFWwindow* window);
-	~CameraController();
+	CameraController(Transform* cameraTransform, GLFWwindow* window) : window(window), cameraTransform(cameraTransform) {};
+	~CameraController() {};
 };

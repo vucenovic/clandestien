@@ -11,7 +11,7 @@
 class LightManager
 {
 public:
-	struct LightCounts { size_t point, directional, spot, shadow; };
+	struct LightCounts { GLuint point, directional, spot, shadow; };
 private:
 	LightCounts lightMaxes;
 	

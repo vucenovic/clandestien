@@ -50,100 +50,6 @@ bool actionKey = false;
 int main(int argc, char** argv)
 {
 	INIReader reader("res/settings.ini");
-
-	// initialize PhysX engine as documented by Nvidia PhysX SDK Documentary
-	
-	using namespace physx;
-	PxDefaultAllocator		gAllocator;
-	PxDefaultErrorCallback	gErrorCallback;
-
-	PxFoundation* gFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, gAllocator, gErrorCallback);
-	if (!gFoundation) {
-		std::cerr << "Failed to initialize PhysX Foundation";
-	}
-
-	// initialize physics and scene
-
-	PxPhysics* gPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *gFoundation, PxTolerancesScale(), true, NULL);
-
-	PxSceneDesc sceneDesc(gPhysics->getTolerancesScale());
-	sceneDesc.gravity = PxVec3(0.0f, -9.81f, 0.0f);
-	PxDefaultCpuDispatcher* gDispatcher = PxDefaultCpuDispatcherCreate(2);
-	sceneDesc.cpuDispatcher = gDispatcher;
-	//https://docs.nvidia.com/gameworks/content/gameworkslibrary/physx/apireference/files/group__extensions.html#g587ba12f90f77543c3e4452abeb0f22f
-	//https://github.com/NVIDIAGameWorks/PhysX/blob/4.1/physx/source/physxextensions/src/ExtDefaultSimulationFilterShader.cpp
-	sceneDesc.filterShader = PxDefaultSimulationFilterShader;
-	PxScene* gScene = gPhysics->createScene(sceneDesc);
-
-	PxPvdSceneClient* pvdClient = gScene->getScenePvdClient();
-	if (pvdClient)
-	{
-		pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_CONSTRAINTS, true);
-		pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_CONTACTS, true);
-		pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_SCENEQUERIES, true);
-	}
-
-
-	// initialize aggregate for gamescene for optimization
-
-	PxU32 nActors = 16;
-	GameSceneAggregateBuilder agg = GameSceneAggregateBuilder(16, false, gPhysics);
-
-	// initialize geomentry for bounding boxes of game scene
-
-	agg.addStaticBox(PxTransform(0.0, 1.25, 2.5), PxBoxGeometry(4.0, 2.5, 0.5));
-	agg.addStaticBox(PxTransform(4.5, 2.75, -2.0), PxBoxGeometry(0.5, 2.75, 4.4));
-	agg.addStaticBox(PxTransform(-4.5, 4.0, -2.0), PxBoxGeometry(0.5, 1.5, 4.4));
-	agg.addStaticBox(PxTransform(-4.5, 1.25, -3.25), PxBoxGeometry(0.5, 1.25, 2.75));
-	agg.addStaticBox(PxTransform(-4.5, 1.25, 1.75), PxBoxGeometry(0.5, 1.25, 1.25));
-	agg.addStaticBox(PxTransform(0.0, 1.25, -4.5), PxBoxGeometry(4.0, 1.25, 2.5)); // faulty
-	agg.addStaticBox(PxTransform(0.0, -0.5, -0.0), PxBoxGeometry(5.0, 0.5, 2.0));
-	agg.addStaticBox(PxTransform(-4.5, 2.25, -0.0), PxBoxGeometry(0.5, 0.25, 0.5));
-	agg.addStaticBox(PxTransform(-2.25, 4.0, -6.5), PxBoxGeometry(1.75, 1.5, 0.5));
-	agg.addStaticBox(PxTransform(2.25, 4.0, -6.5), PxBoxGeometry(1.75, 1.5, 0.5));
-	agg.addStaticBox(PxTransform(0.0, 5.0, -6.5), PxBoxGeometry(0.5, 0.5, 0.5));
-	//agg.addStaticBox(PxTransform(0.0, 4.3, 0.8), PxBoxGeometry(4.0, 3.0, 0.45));	//TODO: rotate, faulty as it is!
-	agg.addStaticBox(PxTransform(0.0, 6.0, -3.5), PxBoxGeometry(4.0, 0.5, 2.5));
-	agg.addStaticBox(PxTransform(0.0, 3.061, -2.15), PxBoxGeometry(4.227, 0.549, 0.13));
-
-	gScene->addAggregate(*agg.gameSceneAggregate);
-
-	// add kinematic capsule character controller (experimental parameters)
-
-	PxControllerManager* manager = PxCreateControllerManager(*gScene);
-	PxCapsuleControllerDesc desc;
-	PxMaterial* controllerMaterial = gPhysics->createMaterial(0.8f, 0.8f, 0.9f);
-	desc.stepOffset = 0.000;
-	desc.contactOffset = 0.05;
-	desc.material = controllerMaterial;
-	desc.density = 10.0;
-	desc.isValid();
-	desc.scaleCoeff = 0.95;
-	desc.volumeGrowth = 1.5f;
-	desc.position = PxExtendedVec3(1.0, 1.5, 0.0);
-	desc.radius = 0.5;
-	desc.height = 2.0;
-	desc.climbingMode = PxCapsuleClimbingMode::eLAST;
-	PxController* c = manager->createController(desc);
-	manager->setOverlapRecoveryModule(true); 
-	//https://docs.nvidia.com/gameworks/content/gameworkslibrary/physx/apireference/files/structPxFilterData.html
-	
-	PxSetGroup(*c->getActor(), 1);
-
-	// add debug visualization parameters
-
-	enum ActiveGroup
-	{
-		GROUP1 = (1 << 0),
-		GROUP2 = (1 << 1),
-		GROUP3 = (1 << 2),
-		GROUP4 = (1 << 3),
-	};
-
-	gScene->setVisualizationParameter(PxVisualizationParameter::eSCALE, 1.0f);
-	gScene->setVisualizationParameter(PxVisualizationParameter::eCOLLISION_AABBS, 1.0);
-	gScene->setVisualizationParameter(PxVisualizationParameter::eCOLLISION_SHAPES, 1.0);
-
 	
 	int width = reader.Get<int>("gfx", "width", 800);
 	int height = reader.Get<int>("gfx", "height", 800);
@@ -209,6 +115,108 @@ int main(int argc, char** argv)
 	glfwSetScrollCallback(window, scroll_callback);
 
 	{
+		// initialize PhysX engine as documented by Nvidia PhysX SDK Documentary
+
+		using namespace physx;
+		PxDefaultAllocator		gAllocator;
+		PxDefaultErrorCallback	gErrorCallback;
+
+		PxFoundation* gFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, gAllocator, gErrorCallback);
+		if (!gFoundation) {
+			std::cerr << "Failed to initialize PhysX Foundation";
+		}
+
+		// initialize physics and scene
+
+		PxPhysics* gPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *gFoundation, PxTolerancesScale(), true, NULL);
+
+		PxSceneDesc sceneDesc(gPhysics->getTolerancesScale());
+		sceneDesc.gravity = PxVec3(0.0f, -9.81f, 0.0f);
+		PxDefaultCpuDispatcher* gDispatcher = PxDefaultCpuDispatcherCreate(2);
+		sceneDesc.cpuDispatcher = gDispatcher;
+		//https://docs.nvidia.com/gameworks/content/gameworkslibrary/physx/apireference/files/group__extensions.html#g587ba12f90f77543c3e4452abeb0f22f
+		//https://github.com/NVIDIAGameWorks/PhysX/blob/4.1/physx/source/physxextensions/src/ExtDefaultSimulationFilterShader.cpp
+		sceneDesc.filterShader = PxDefaultSimulationFilterShader;
+		PxScene* gScene = gPhysics->createScene(sceneDesc);
+
+		PxPvdSceneClient* pvdClient = gScene->getScenePvdClient();
+		if (pvdClient)
+		{
+			pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_CONSTRAINTS, true);
+			pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_CONTACTS, true);
+			pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_SCENEQUERIES, true);
+		}
+
+
+		// initialize aggregate for gamescene for optimization
+
+		PxU32 nActors = 16;
+		GameSceneAggregateBuilder agg = GameSceneAggregateBuilder(16, false, gPhysics);
+
+		// initialize geomentry for bounding boxes of game scene
+		{
+			agg.addStaticBox(PxTransform(0.0f, 1.25f, 2.5f), PxBoxGeometry(4.0f, 1.25f, 0.5f));
+			agg.addStaticBox(PxTransform(4.5f, 2.75f, -2.0f), PxBoxGeometry(0.5f, 2.75f, 4.4f));
+			agg.addStaticBox(PxTransform(-4.5f, 4.0f, -2.0f), PxBoxGeometry(0.5f, 1.5f, 4.4f));
+			agg.addStaticBox(PxTransform(-4.5f, 1.25f, -3.25f), PxBoxGeometry(0.5f, 1.25f, 2.75f));
+			agg.addStaticBox(PxTransform(-4.5f, 1.25f, 1.75f), PxBoxGeometry(0.5f, 1.25f, 1.25f));
+			agg.addStaticBox(PxTransform(0.0f, 1.25f, -4.5f), PxBoxGeometry(4.0f, 1.25f, 2.5f));
+			agg.addStaticBox(PxTransform(0.0f, -0.5f, -0.0f), PxBoxGeometry(5.0f, 0.5f, 2.0f));
+			agg.addStaticBox(PxTransform(-4.5f, 2.25f, -0.0f), PxBoxGeometry(0.5f, 0.25f, 0.5f));
+			agg.addStaticBox(PxTransform(-2.25f, 4.0f, -6.5f), PxBoxGeometry(1.75f, 1.5f, 0.5f));
+			agg.addStaticBox(PxTransform(2.25f, 4.0f, -6.5f), PxBoxGeometry(1.75f, 1.5f, 0.5f));
+			agg.addStaticBox(PxTransform(0.0f, 5.0f, -6.5f), PxBoxGeometry(0.5f, 0.5f, 0.5f));
+			//agg.addStaticBox(PxTransform(0.0f, 4.3f, 0.8f), PxBoxGeometry(4.0f, 3.0f, 0.45f)); needs rotation
+			agg.addStaticBox(PxTransform(0.0f, 6.0f, -3.5f), PxBoxGeometry(4.0f, 0.5f, 2.5f));
+			agg.addStaticBox(PxTransform(0.0f, 3.061f, -2.15f), PxBoxGeometry(4.227f, 0.549f, 0.13f));
+			agg.addStaticBox(PxTransform(2.0f, 0.89f, -0.0f), PxBoxGeometry(0.49f, 0.118f, 0.49f));
+			agg.addStaticBox(PxTransform(2.0f, 0.441f, -0.0f), PxBoxGeometry(0.222f, 0.345f, 0.222f));
+			agg.addStaticBox(PxTransform(2.0f, 0.021f, -0.0f), PxBoxGeometry(0.416f, 0.061f, 0.416f));
+		}
+
+		gScene->addAggregate(*agg.gameSceneAggregate);
+
+		// add kinematic capsule character controller (experimental parameters)
+
+		float characterHeight = 1.8f;
+		float characterRadius = 0.25f;
+		float characterEyeHeight = 1.7f;
+		float characterMoveSpeed = 2.0f;
+
+		PxControllerManager* manager = PxCreateControllerManager(*gScene);
+		PxCapsuleControllerDesc desc;
+		PxMaterial* controllerMaterial = gPhysics->createMaterial(0.8f, 0.8f, 0.9f);
+		desc.stepOffset = 0.000;
+		desc.contactOffset = 0.05;
+		desc.material = controllerMaterial;
+		desc.density = 10.0;
+		desc.isValid();
+		desc.scaleCoeff = 0.95;
+		desc.volumeGrowth = 1.5f;
+		desc.position = PxExtendedVec3(1.0, characterHeight / 2, 0.0);
+		desc.radius = characterRadius;
+		desc.height = characterHeight - characterRadius * 2; //height = distance between sphere centers on capsule
+		desc.climbingMode = PxCapsuleClimbingMode::eLAST;
+		PxController* c = manager->createController(desc);
+		manager->setOverlapRecoveryModule(true);
+		//https://docs.nvidia.com/gameworks/content/gameworkslibrary/physx/apireference/files/structPxFilterData.html
+
+		PxSetGroup(*c->getActor(), 1);
+
+		// add debug visualization parameters
+
+		enum ActiveGroup
+		{
+			GROUP1 = (1 << 0),
+			GROUP2 = (1 << 1),
+			GROUP3 = (1 << 2),
+			GROUP4 = (1 << 3),
+		};
+
+		gScene->setVisualizationParameter(PxVisualizationParameter::eSCALE, 1.0f);
+		gScene->setVisualizationParameter(PxVisualizationParameter::eCOLLISION_AABBS, 1.0);
+		gScene->setVisualizationParameter(PxVisualizationParameter::eCOLLISION_SHAPES, 1.0);
+
 		std::shared_ptr<ShaderProgram> standardShader,unifiedPBR, myShaderProgram, debugShader, particleShader, pp_demultAlpha, pp_gammaCorrect, pp_blur, pp_bloom, unlitShader, SSDepthReset, DebugDepthSS, GargoyleShader, DepthShader;
 		try
 		{
@@ -225,7 +233,7 @@ int main(int argc, char** argv)
 			SSDepthReset = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/screenspace.vert", "res/shaders/DepthReset.frag"));
 			DebugDepthSS = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/screenspace.vert", "res/shaders/depthToColor.frag"));
 			GargoyleShader = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/gargoyle.vert", "res/shaders/gargoyle.frag"));
-			DepthShader = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/depth.vert", "res/shaders/depth.frag"));
+			//DepthShader = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/depth.vert", "res/shaders/depth.frag"));
 		}
 		catch (const std::invalid_argument&)
 		{
@@ -251,14 +259,13 @@ int main(int argc, char** argv)
 		camera.SetPerspective(FOV, (float)width / (float)height, nearPlane, farPlane);
 
 		CameraController myCameraController(&camera.GetTransform(),window);
-		myCameraController.setPivotPosition(glm::vec3(1.0, 1.5, 0.0));
 
 		//Meshes
 		
 		std::shared_ptr<Mesh> gameStageMesh = OBJLoader::LoadOBJ("res/models/GameScene.obj");
 		std::shared_ptr<Mesh> gargoyleMesh = OBJLoader::LoadOBJ("res/models/Gargoyle.obj");
 		std::shared_ptr<Mesh> myTestMesh = OBJLoader::LoadOBJ("res/models/monkey.obj");
-		std::shared_ptr<Mesh> myPortalTestMesh = MeshBuilder::Quad();
+		std::shared_ptr<Mesh> myPortalTestMesh = OBJLoader::LoadOBJ("res/models/Portal.obj");
 
 		//Materials
 
@@ -268,7 +275,7 @@ int main(int argc, char** argv)
 		Material debugMaterial = Material(debugShader);
 		debugMaterial.SetPropertyi("mode",2);
 
-		Material depthMaterial = Material(DepthShader);
+		Material depthMaterial = Material(unlitShader);
 
 		Material gargoyleMaterial = Material(GargoyleShader);
 		gargoyleMaterial.SetProperty4f("material", glm::vec4(0.1f, 0.7f, 1, 8));
@@ -305,12 +312,6 @@ int main(int argc, char** argv)
 
 		//Objects
 
-		/*std::unique_ptr<GameObject> testobject = std::make_unique<GameObject>();
-		testobject->mesh = myTestMesh.get();
-		testobject->material = &devMaterial;
-		testobject->GetTransform().SetPostion(glm::vec3(3, 1.5f, 0));
-		testobject->name = "test";*/
-
 		std::unique_ptr<GameObject> gargoyle = std::make_unique<GameObject>();
 		gargoyle->mesh = gargoyleMesh.get();
 		gargoyle->material = &devMaterial;
@@ -340,7 +341,7 @@ int main(int argc, char** argv)
 			myLightManager.pointLights.push_back(PointLight(glm::vec3(-5, 1, 0), glm::vec3(1, 1, 1), glm::vec4(1, 0.4f, 0.3f, 100)));
 			myLightManager.pointLights.push_back(PointLight(glm::vec3(5, 1, 0), glm::vec3(1, 1, 1), glm::vec4(1, 0.4f, 0.3f, 100)));
 
-			myLightManager.directionalLights.push_back(DirectionalLight(glm::vec3(0, -1, 0), glm::vec3(50, 50, 50)));
+			myLightManager.directionalLights.push_back(DirectionalLight(glm::vec3(0, -1, 0), glm::vec3(0.1f, 0.1f, 0.1f)));
 			//myLightManager.directionalLights.push_back(DirectionalLight(glm::vec3(0, -1, 1), glm::vec3(0.1f, 0.1f, 0.1f)));
 
 			myLightManager.shadowLight = SpotLight(
@@ -362,7 +363,6 @@ int main(int argc, char** argv)
 
 		Scene myScene = Scene();
 
-		// myScene.AddObject(testobject);
 		myScene.AddObject(gargoyle);
 		myScene.AddObject(gameStage);
 
@@ -372,14 +372,11 @@ int main(int argc, char** argv)
 		PxMaterial* gargoyleMat = gPhysics->createMaterial(0.5f, 0.5f, 0.6f);
 		auto &transform = myScene.GetObject("gargoyle")->GetTransform();
 		auto &gargPos = transform.GetPosition();
-		PxRigidDynamic* gargyoleBox = gPhysics->createRigidDynamic(PxTransform(gargPos[0] - 0.75, gargPos[1],gargPos[2] - 1.2));
+		PxRigidDynamic* gargyoleBox = gPhysics->createRigidDynamic(PxTransform(gargPos[0] - 0.75, gargPos[1]+0.7,gargPos[2] - 1.2));
 		PxShape* gargoyleBoxShape = PxRigidActorExt::createExclusiveShape(*gargyoleBox, PxBoxGeometry(0.75, 0.7, 0.6), *gargoyleMat);
 		gScene->addActor(*gargyoleBox);
 		PxSetGroup(*gargyoleBox, 2);
-		PxFilterData filterData;
-		filterData.word0 = GROUP1;
-		gargoyleBoxShape->setQueryFilterData(filterData);
-		
+		gargoyleBoxShape->setQueryFilterData(PxFilterData(GROUP1, 0, 0, 0));
 
 		//Particles
 
@@ -449,22 +446,26 @@ int main(int argc, char** argv)
 		myTestPortal.transform.SetRotationDegrees(0,90,0);
 		myTestPortal.transform.SetPostion(glm::vec3(-3.999f, 1, 0));
 		myTestPortal.targetTransform.SetRotationDegrees(0, 0, 0);
-		myTestPortal.targetTransform.SetPostion(glm::vec3(0, 1, -1.999f));
+		myTestPortal.targetTransform.SetPostion(glm::vec3(0, 3.5f, -5.999f));
 		myScene.renderPortals.push_back(myTestPortal);
 
 		Portal myTestPortal2 = Portal();
 		myTestPortal2.portalMesh = myPortalTestMesh;
 		myTestPortal2.transform.SetRotationDegrees(0, 0, 0);
-		myTestPortal2.transform.SetPostion(glm::vec3(0, 1, -1.999f));
+		myTestPortal2.transform.SetPostion(glm::vec3(0, 3.5f, -5.999f));
 		myTestPortal2.targetTransform.SetRotationDegrees(0, 90, 0);
 		myTestPortal2.targetTransform.SetPostion(glm::vec3(-3.999f, 1, 0));
 		myScene.renderPortals.push_back(myTestPortal2);
+
+		const float physTimeStep = 1.0f / 60.0f;
+		float physTimeAccumulator = 0;
 
 		//Render Loop
 		while (!glfwWindowShouldClose(window))
 		{
 			double currentFrametime = glfwGetTime();
 			float deltaTime = (float)(currentFrametime - lastFrameTime);
+			physTimeAccumulator += deltaTime;
 			lastFrameTime = currentFrametime;
 			//DISPLAY FRAMES PER SECOND
 			frameCount++;
@@ -474,112 +475,124 @@ int main(int argc, char** argv)
 				nextSecond = currentFrametime + 1;
 			}
 
-			// Handle Inputs
+			//Poll
 			glfwPollEvents();
 
+			//Do Physics steps
+			while (physTimeAccumulator > physTimeStep) {
+				gScene->simulate(physTimeStep);
+				gScene->fetchResults(true);
+				physTimeAccumulator -= physTimeStep;
+			}
+
 			// Move character and camera
-			glm::vec3 moveCharOld = myCameraController.getPivotPosition();
-			myCameraController.HandleInputs(scrollOffset, forward, backward, left, right, deltaTime);
-			glm::vec3 moveCharNew = myCameraController.getPivotPosition();
-			glm::vec3 moveChar = moveCharNew - moveCharOld; // getting the movement vector 
-			gScene->simulate(1.0f / 60.0f);
-			gScene->fetchResults(true);
-			PxControllerFilters filters(NULL, NULL, NULL);
-			PxControllerCollisionFlags collFlags = c->move(PxVec3(moveChar[0], moveChar[1], moveChar[2]), 0.0, deltaTime, filters, NULL);
-			PxControllerState state;
-			c->getState(state);
-			PxExtendedVec3 newPos = c->getPosition();
-			myCameraController.setPivotPosition(glm::vec3(newPos[0], newPos[1], newPos[2]));
+			{
+				myCameraController.HandleInputs();
+
+				glm::vec3 forwardVector = camera.GetTransform().GetForward();
+				forwardVector.y = 0;
+				forwardVector = glm::normalize(forwardVector);
+				glm::vec3 rightVector = glm::cross(forwardVector, glm::vec3(0, 1, 0));
+
+				glm::vec3 moveDir = forwardVector * (float)((glfwGetKey(window, (int)forward) == GLFW_PRESS) - (glfwGetKey(window, (int)backward) == GLFW_PRESS)) +
+					rightVector * (float)((glfwGetKey(window, (int)right) == GLFW_PRESS) - (glfwGetKey(window, (int)left) == GLFW_PRESS));
+				moveDir *= characterMoveSpeed * deltaTime;
+				moveDir.y = -0.01f;
+
+				PxControllerFilters filters(NULL, NULL, NULL);
+				PxControllerCollisionFlags collFlags = c->move(PxVec3(moveDir.x, moveDir.y, moveDir.z), 0.0, deltaTime, filters, NULL);
+
+				PxControllerState state;
+				c->getState(state);
+				PxExtendedVec3 newPos = c->getFootPosition();
+				myCameraController.cameraTransform->SetPostion(glm::vec3(newPos[0], newPos[1] + characterEyeHeight, newPos[2]));
+			}
 
 			/* PHYSX */
-			
-			PxVec3 origin = PxVec3(newPos[0], newPos[1], newPos[2]);            // [in] Ray origin
-			glm::vec3 viewVector = glm::normalize(camera.GetForward());
-			PxVec3 unitDir = PxVec3(viewVector.x ,viewVector.y, viewVector.z);             // [in] Normalized ray direction
-			PxReal maxDistance = 1.0;            // [in] Raycast max distance
-			PxRaycastBuffer hit;
-			gargyoleBox->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, false);
+			{
+				glm::vec3 camPos = camera.GetTransform().GetPosition();
+				PxVec3 origin = PxVec3(camPos.x, camPos.y, camPos.z);            // [in] Ray origin
+				glm::vec3 viewVector = camera.GetTransform().GetForward();
+				viewVector.y = 0;
+				viewVector = glm::normalize(viewVector);
 
-			PxQueryFilterData filterData = PxQueryFilterData();
-			filterData.data.word0 = GROUP1;
-			const PxHitFlags outputFlags = PxHitFlag::eDEFAULT | PxHitFlag::ePOSITION | PxHitFlag::eNORMAL;
+				PxVec3 unitDir = PxVec3(viewVector.x ,viewVector.y, viewVector.z);             // [in] Normalized ray direction
+				PxReal maxDistance = 1.0;            // [in] Raycast max distance
+				PxRaycastBuffer hit;
+				gargyoleBox->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, false); //TODO dont set in loop
 
-			//Nutz das "Userdata" attribute von PxActor um eine 1:1 beziehung mit dem Gameobject oder was auch immer zu erzeugen.
-			bool status = gScene->raycast(origin, unitDir, maxDistance, hit, outputFlags, filterData);
-			if (status && (glfwGetKey(window, (int)interaction) == GLFW_PRESS)) {
-				gargyoleBox->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
-				std::cout << hit.block.actor << std::endl;
-				auto &transform = myScene.GetObject("gargoyle")->GetTransform();
-				if (glfwGetKey(window, (int)forward) == GLFW_PRESS) {
+				PxQueryFilterData filterData = PxQueryFilterData(); //TODO dont set in loop
+				filterData.data.word0 = GROUP1; //TODO dont set in loop
+				const PxHitFlags outputFlags = PxHitFlag::eDEFAULT | PxHitFlag::ePOSITION | PxHitFlag::eNORMAL;
+
+				//Nutz das "Userdata" attribute von PxActor um eine 1:1 beziehung mit dem Gameobject oder was auch immer zu erzeugen.
+				bool status = gScene->raycast(origin, unitDir, maxDistance, hit, outputFlags, filterData);
+				if (status && (glfwGetKey(window, (int)interaction) == GLFW_PRESS)) {
+					gargyoleBox->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true); //TODO dont set in loop
+					std::cout << hit.block.actor << std::endl;
 					auto &transform = myScene.GetObject("gargoyle")->GetTransform();
-					gargyoleBox->setGlobalPose(PxTransform(viewVector.x * 2.0 * deltaTime, 0.0, viewVector.z * 2.0 * deltaTime));// NO IDEA WHY i have to subtract, position just doesnt fit without 
-					gargyoleBox->setKinematicTarget(PxTransform(viewVector.x * 2.0 * deltaTime, 0.0, viewVector.z * 2.0 * deltaTime));
-					//gargyoleBox->addForce(PxVec3(0.001, 0.001, 0.001), PxForceMode::eFORCE);
-					gScene->simulate(1.0f / 60.0f);
-					gScene->fetchResults(true);
-					transform.SetPostion(glm::vec3(gargyoleBox->getGlobalPose().p[0], gargyoleBox->getGlobalPose().p[1], gargyoleBox->getGlobalPose().p[2]));
-					
+					if (glfwGetKey(window, (int)forward) == GLFW_PRESS) {
+						auto &transform = myScene.GetObject("gargoyle")->GetTransform();
+						gargyoleBox->setGlobalPose(PxTransform(viewVector.x * 2.0 * deltaTime, 0.0, viewVector.z * 2.0 * deltaTime));// NO IDEA WHY i have to subtract, position just doesnt fit without 
+						gargyoleBox->setKinematicTarget(PxTransform(viewVector.x * 2.0 * deltaTime, 0.0, viewVector.z * 2.0 * deltaTime));
+						//gargyoleBox->addForce(PxVec3(0.001, 0.001, 0.001), PxForceMode::eFORCE);
+						transform.SetPostion(glm::vec3(gargyoleBox->getGlobalPose().p[0], gargyoleBox->getGlobalPose().p[1], gargyoleBox->getGlobalPose().p[2]));
+					}
+					else if (glfwGetKey(window, (int)backward) == GLFW_PRESS) {
+						auto &transform = myScene.GetObject("gargoyle")->GetTransform();
+						gargyoleBox->setGlobalPose(PxTransform(viewVector.x * -2.0 * deltaTime, 0.0, viewVector.z * -2.0 * deltaTime)); // NO IDEA WHY i have to subtract, position just doesnt fit without 
+						gargyoleBox->setKinematicTarget(PxTransform(viewVector.x * -2.0 * deltaTime, 0.0, viewVector.z * -2.0 * deltaTime));
+						//gargyoleBox->addForce(PxVec3(viewVector.x * 2.0 * deltaTime, 0.0, viewVector.z * 2.0 * deltaTime), PxForceMode::eFORCE);
+						transform.SetPostion(glm::vec3(gargyoleBox->getGlobalPose().p[0], gargyoleBox->getGlobalPose().p[1], gargyoleBox->getGlobalPose().p[2]));
+					}
 					
 				}
-				else if (glfwGetKey(window, (int)backward) == GLFW_PRESS) {
-					auto &transform = myScene.GetObject("gargoyle")->GetTransform();
-					gargyoleBox->setGlobalPose(PxTransform(viewVector.x * -2.0 * deltaTime, 0.0, viewVector.z * -2.0 * deltaTime)); // NO IDEA WHY i have to subtract, position just doesnt fit without 
-					gargyoleBox->setKinematicTarget(PxTransform(viewVector.x * -2.0 * deltaTime, 0.0, viewVector.z * -2.0 * deltaTime));
-					//gargyoleBox->addForce(PxVec3(viewVector.x * 2.0 * deltaTime, 0.0, viewVector.z * 2.0 * deltaTime), PxForceMode::eFORCE);
-					gScene->simulate(1.0f / 60.0f);
-					gScene->fetchResults(true);
-					transform.SetPostion(glm::vec3(gargyoleBox->getGlobalPose().p[0], gargyoleBox->getGlobalPose().p[1], gargyoleBox->getGlobalPose().p[2]));
-					
-				}
-					
 			}
 
 			// SHADOW MAPS: render depth 
+			{
+				// change view-projection matrix according to spotlight parameters
+				glm::vec3 lightPosition = myLightManager.shadowLight.position;
+				glm::vec3 lightDirection = myLightManager.shadowLight.direction;
+				glm::mat4 depthProjectionMatrix = glm::perspective<float>(glm::radians(45.0f), 1.0f, 2.0f, 50.0f);
+				glm::mat4 depthViewMatrix = glm::lookAt(lightPosition, lightPosition + lightDirection, glm::vec3(0, 1, 0));
+				glm::mat4 biasMatrix(
+					1, 0.0, 0.0, 0.0,
+					0.0, 1, 0.0, 0.0,
+					0.0, 0.0, 1, 0.0,
+					0.05, 0.05, 0.05, 1.0
+				);
+				Camera::SetViewParameters(viewDataBuffer, depthViewMatrix, biasMatrix * depthProjectionMatrix);
 
-			// change view-projection matrix according to spotlight parameters
+				shadowspotFBO.Bind();
+				glViewport(0, 0, 256, 256);
+				glClear(GL_DEPTH_BUFFER_BIT);
 
-			glEnable(GL_DEPTH_TEST);
+				glEnable(GL_DEPTH_TEST);
+				glCullFace(GL_FRONT);
+				myScene.DrawOpaqueObjects(depthMaterial);
+				glCullFace(GL_BACK);
 
-			glm::vec3 spotPosition = glm::vec3(2.0, 1.0, -1.0);
-			glm::vec3 lightInverse = glm::vec3(1.0, 0.0, 0.0);
-			glm::mat4 depthProjectionMatrix = glm::perspective<float>(glm::radians(45.0f), 1.0f, 2.0f, 50.0f);
-			glm::mat4 depthViewMatrix = glm::lookAt(spotPosition, spotPosition - lightInverse, glm::vec3(0, 1, 0));
-			glm::mat4 biasMatrix(
-				1, 0.0, 0.0, 0.0,
-				0.0, 1, 0.0, 0.0,
-				0.0, 0.0, 1, 0.0,
-				0.05, 0.05, 0.05, 1.0
-			);
-			glm::mat4 depthBiasMatrix =  biasMatrix *  depthProjectionMatrix * depthViewMatrix;
-			Camera::SetViewParameters(viewDataBuffer, depthViewMatrix, depthProjectionMatrix);
+				glActiveTexture(GL_TEXTURE4);
+				glBindTexture(GL_TEXTURE_2D, shadowspotFBO.depthMap);
 
-			shadowspotFBO.Bind();
-			glViewport(0, 0, 256, 256);
-			glClear(GL_DEPTH_BUFFER_BIT);
-			depthMaterial.SetPropertyMatrix4f("DepthBiasMatrix", depthBiasMatrix);
-			depthMaterial.Use();
-			glCullFace(GL_FRONT);
-			myScene.DrawOpaqueObjects(depthMaterial);
-			glCullFace(GL_BACK);
-			glActiveTexture(GL_TEXTURE4);
-			glBindTexture(GL_TEXTURE_2D, shadowspotFBO.depthMap);
+				//TODO move into lightmanager
+				GargoyleShader->UseProgram();
+				glUniformMatrix4fv(glGetUniformLocation(GargoyleShader->GetProgramHandle(), "DepthBiasMatrix"), 1, false, glm::value_ptr(biasMatrix * depthProjectionMatrix * depthViewMatrix));
+			}
 
-			//Set ViewProjectionMatrix
-
-			GargoyleShader->UseProgram();
-			glUniformMatrix4fv(glGetUniformLocation(GargoyleShader->GetProgramHandle(), "DepthBiasMatrix"), 1, false, glm::value_ptr(depthBiasMatrix));
-
+			//Render Scene
 			renderFBO.Bind();
 			glViewport(0, 0, width, height);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			//glEnable(GL_MULTISAMPLE);
 			glEnable(GL_DEPTH_TEST);
-			
+
 			{
 				pSystem.Update(deltaTime);
 				glBindBuffer(GL_ARRAY_BUFFER, pmmanager.GetBufferHandle());
 				void * buf = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-				glm::vec3 forward = camera.GetForward();
+				glm::vec3 forward = camera.GetTransform().GetForward();
 				pSystem.SortParticles(forward); // sort particles that use alpha blending instead of additive blending
 				pSystem.WriteMesh((Particle*)buf, 0, 150);
 				glUnmapBuffer(GL_ARRAY_BUFFER);
@@ -594,8 +607,6 @@ int main(int argc, char** argv)
 			else {
 				myScene.DrawScene(true);
 			}
-
-			
 
 			{ //TODO move into particle system class and particle sytemrenderer
 				ParticleSystem::PrepareDraw();
@@ -694,8 +705,8 @@ int main(int argc, char** argv)
 			else glDisable(GL_CULL_FACE);
 
 			//Flip Buffers
-			glfwSwapBuffers(window);
-			glFlush();
+			glfwSwapBuffers(window);//To enforce Vsync
+			glFlush();//To actually draw to screen
 			scrollOffset = 0;
 		}
 

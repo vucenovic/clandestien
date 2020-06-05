@@ -1,7 +1,7 @@
 #include "CameraController.h"
 #include <iostream>
 
-void CameraController::HandleInputs(const float &scrolloffset, char forward, char backward, char left, char right, float frametime)
+void CameraController::HandleInputs()
 {
 	double xd, yd;
 	glfwGetCursorPos(window,&xd,&yd);
@@ -9,85 +9,18 @@ void CameraController::HandleInputs(const float &scrolloffset, char forward, cha
 
 	float dx = x - lastX, dy = y - lastY;
 
-	horizontalAngle += horizontalSensitivity * frametime * float(800 / 2 - xd);
-	verticalAngle += verticalSensitivity * frametime * float(800 / 2 - yd);
-
-	glm::mat3 rotmatrix = glm::toMat4(cameraTransform->GetRotation());
-
-	glm::vec3 rightVector = rotmatrix * glm::vec3(1, 0, 0);
-	glm::vec3 forwardVector = glm::cross(rightVector, glm::vec3(0,1,0));
-
-	// Move forward
-	if (glfwGetKey(window, (int)forward) == GLFW_PRESS) {
-		pivotPostion[2] += forwardVector[2] * frametime * moveSpeed;
-		pivotPostion[0] += forwardVector[0] * frametime * moveSpeed;
-	}
-	// Move backward
-	if (glfwGetKey(window, (int)backward) == GLFW_PRESS) {
-		pivotPostion[2] -= forwardVector[2] * frametime * moveSpeed;
-		pivotPostion[0] -= forwardVector[0] * frametime * moveSpeed;
-	}
-	// Strafe right
-	if (glfwGetKey(window, (int)right) == GLFW_PRESS) {
-		pivotPostion[2] -= rightVector[2] * frametime * moveSpeed;
-		pivotPostion[0] -= rightVector[0] * frametime * moveSpeed;
-	}
-	// Strafe left
-	if (glfwGetKey(window, (int)left) == GLFW_PRESS) {
-		pivotPostion[2] += rightVector[2] * frametime * moveSpeed;
-		pivotPostion[0] += rightVector[0] * frametime * moveSpeed;
-	}
-
 	// TODO: first person instead of orbit
-	pivotYaw += dx * horizontalSensitivity;
-	pivotPitch += dy * verticalSensitivity;
+	yaw += dx * horizontalSensitivity;
+	pitch += dy * verticalSensitivity;
 		
-	if (pivotPitch >= 90) pivotPitch = 89.95f;
-	else if (pivotPitch <= -90) pivotPitch = -89.95f;
+	if (pitch >= 90) pitch = 89.95f;
+	else if (pitch <= -90) pitch = -89.95f;
 
-	if (pivotYaw > 360) pivotYaw -= 360;
-	else if (pivotYaw < -360) pivotYaw += 360;
+	if (yaw > 360) yaw -= 360;
+	else if (yaw < -360) yaw += 360;
 	//Set Rotation
-	cameraTransform->SetRotationDegrees(pivotPitch, pivotYaw, 0);
-
-	//set Combined Position
-	cameraTransform->SetPostion(pivotPostion);
+	cameraTransform->SetRotationDegrees(pitch, yaw, 0);
 
 	lastX = x;
 	lastY = y;
-}
-
-glm::vec3 CameraController::getPivotPosition() 
-{
-	return this->pivotPostion;
-}
-
-void CameraController::setPivotPosition(glm::vec3 pos)
-{
-	cameraTransform->SetPostion(pos);
-}
-
-
-CameraController::CameraController(Transform* cameraTransform, GLFWwindow* window)
-{
-	this->window = window;
-	this->cameraTransform = cameraTransform;
-
-	pivotPostion = glm::vec3(0, 1.6f, 0);
-	pivotRadius = 6;
-	pivotYaw = 0;
-	pivotPitch = 0;
-	horizontalSensitivity = -0.25;
-	verticalSensitivity = -0.25;
-	scrollSensitivity = -0.25;
-
-	horizontalAngle = 3.14f;
-	verticalAngle = 0.0f;
-
-	strafeSpeed = -2.0f;
-	moveSpeed = -2.0f;
-}
-
-CameraController::~CameraController()
-{
 }
