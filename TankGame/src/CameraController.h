@@ -6,7 +6,7 @@
 class CameraController
 {
 private:
-	float lastX, lastY;
+	float lastX = 0, lastY = 0;
 public:
 	GLFWwindow* window;
 	Transform* cameraTransform;

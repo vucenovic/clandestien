@@ -53,6 +53,10 @@ physx::PxQuat fromEuler(glm::vec3 e) {
 	return physx::PxQuat(q.x,q.y,q.z,q.w);
 }
 
+glm::vec3 PxToGlmVec3(const PxExtendedVec3 v) {
+	return glm::vec3(v.x, v.y, v.z);
+}
+
 int main(int argc, char** argv)
 {
 	INIReader reader("res/settings.ini");
@@ -481,12 +485,7 @@ int main(int argc, char** argv)
 			//Poll
 			glfwPollEvents();
 
-			//Do Physics steps
-			while (physTimeAccumulator > physTimeStep) {
-				gScene->simulate(physTimeStep);
-				gScene->fetchResults(true);
-				physTimeAccumulator -= physTimeStep;
-			}
+			//--------------------------UPDATE--------------------------------
 
 			// Move character and camera
 			{
@@ -554,34 +553,41 @@ int main(int argc, char** argv)
 			}
 
 			// Portal teleportation
-
 			{
-				//Portal 1
-				auto &portalPos = myTestPortal.transform.GetPosition();
-				PxExtendedVec3 portalPosPx = PxExtendedVec3(portalPos.x, portalPos.y, portalPos.z);
-				auto &portalPos2 = myTestPortal2.transform.GetPosition();
-				PxExtendedVec3 portalPos2Px = PxExtendedVec3(portalPos2.x, portalPos2.y - 0.8, portalPos2.z + 0.1); // y wert weil man sonst nicht am boden landet, 0.1z wegen endlessloop
-				if (c->getFootPosition().x < portalPosPx.x) {
-					c->setFootPosition(portalPos2Px);
-					auto newPos = c->getFootPosition();
-					myCameraController.cameraTransform->SetRotationDegrees(0.0, 0.0, 90.0);
-					myCameraController.cameraTransform->SetPostion(glm::vec3(newPos[0], newPos[1] + characterEyeHeight, newPos[2]));
-				}
+				glm::vec3 charPos = PxToGlmVec3(c->getFootPosition());
+				for (const Portal & portal : myScene.renderPortals) {
+					if (glm::distance2(portal.transform.GetPosition(), charPos) < 2) {
+						glm::vec4 portalPlane = glm::vec4(portal.transform.GetForward(), glm::dot(-portal.transform.GetForward(), portal.transform.GetPosition()));
 
-				//Portal 2
-				{
-					auto &portalPos = myTestPortal2.transform.GetPosition();
-					PxExtendedVec3 portalPosPx = PxExtendedVec3(portalPos.x, portalPos.y, portalPos.z);
-					auto &portalPos2 = myTestPortal.transform.GetPosition();
-					PxExtendedVec3 portalPos2Px = PxExtendedVec3(portalPos2.x + 0.1, portalPos2.y - 0.8, portalPos2.z);  // y wert weil man sonst nicht am boden landet, 0.1x wegen endlessloop
-					if (c->getFootPosition().z < portalPosPx.z) {
-						c->setFootPosition(portalPos2Px);
-						auto newPos = c->getFootPosition();
-						myCameraController.cameraTransform->SetRotationDegrees(0.0, 0.0, 90.0);
-						myCameraController.cameraTransform->SetPostion(glm::vec3(newPos[0], newPos[1] + characterEyeHeight, newPos[2]));
+						glm::vec4 pos = glm::vec4(charPos, 1);
+						float dist = glm::dot(portalPlane, pos);
+
+						if (dist > 0) {
+							glm::vec3 newPos = portal.getOffsetMatrix() * pos;
+							camera.GetTransform().GetForward();
+							glm::vec3 newDir = portal.getOffsetMatrix() * glm::vec4(-camera.GetTransform().GetForward(), 0);
+							float pitch = glm::acos(newDir.y);
+							float invPitch = glm::sin(pitch);
+							float yaw = glm::degrees(glm::acos(newDir.z / invPitch) * (newDir.x >= 0 ? 1 : -1));
+							myCameraController.yaw = yaw;
+							camera.GetTransform().SetRotationDegrees(myCameraController.pitch, yaw, 0);
+							camera.GetTransform().SetPostion(newPos + glm::vec3(0, characterEyeHeight, 0));
+							c->setFootPosition(PxExtendedVec3(newPos.x, newPos.y, newPos.z));
+						}
 					}
 				}
 			}
+
+			//--------------------------PHYSICS UPDATE--------------------------------
+
+			//Do Physics steps
+			while (physTimeAccumulator > physTimeStep) {
+				gScene->simulate(physTimeStep);
+				gScene->fetchResults(true);
+				physTimeAccumulator -= physTimeStep;
+			}
+
+			//--------------------------RENDER--------------------------------
 
 			// SHADOW MAPS: render depth 
 			{
