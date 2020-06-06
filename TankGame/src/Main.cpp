@@ -563,13 +563,9 @@ int main(int argc, char** argv)
 
 						if (glm::dot(portalPlane, pos) > 0) {
 							glm::vec3 newPos = portal.getOffsetMatrix() * pos;
-							camera.GetTransform().GetForward();
-							glm::vec3 newDir = portal.getOffsetMatrix() * glm::vec4(-camera.GetTransform().GetForward(), 0);
-							float pitch = glm::acos(newDir.y);
-							float invPitch = glm::sin(pitch);
-							float yaw = glm::degrees(glm::acos(newDir.z / invPitch) * (newDir.x >= 0 ? 1 : -1));
-							myCameraController.yaw = yaw;
-							camera.GetTransform().SetRotationDegrees(myCameraController.pitch, yaw, 0);
+							glm::mat4 m = portal.getOffsetMatrix();
+							myCameraController.yaw += glm::degrees(glm::atan(-m[0].z, m[0].x));
+							camera.GetTransform().SetRotationDegrees(myCameraController.pitch, myCameraController.yaw, 0);
 							camera.GetTransform().SetPostion(newPos + glm::vec3(0, characterEyeHeight, 0));
 							c->setFootPosition(PxExtendedVec3(newPos.x, newPos.y, newPos.z));
 						}
