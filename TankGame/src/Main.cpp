@@ -27,6 +27,8 @@
 #include "Camera.h"
 #include "GameSceneAggregateBuilder.h"
 #include "HUD.h"
+#include "KeyMap.h"
+#include "GameLogic.h"
 
 #include "Main.h"
 
@@ -73,6 +75,13 @@ int main(int argc, char** argv)
 	char left = reader.Get<char>("controls", "left", 'A');
 	char right = reader.Get<char>("controls", "right", 'D');
 	char interaction = reader.Get<char>("controls", "interaction", 'E');
+
+	KeyMap keyMap;
+	keyMap.forward = (int)forward;
+	keyMap.backward = (int)backward;
+	keyMap.left = (int)left;
+	keyMap.right = (int)right;
+	keyMap.interaction = (int)interaction;
 
 	std::string window_title = "Clandestien";
 	float FOV = 60;
@@ -180,6 +189,11 @@ int main(int argc, char** argv)
 			agg.addStaticBox(PxTransform(0, 2.375f, -4.5f), PxBoxGeometry(4.0f, 0.125f, 2.5f));
 			agg.addStaticBox(PxTransform(0, 1.25f, -2.25f), PxBoxGeometry(4.0f, 1.25f, 0.25f));
 			agg.addStaticBox(PxTransform(4.5f, 4.0f, -4.2f), PxBoxGeometry(0.5f, 1.7f, 2.2f));
+			agg.addStaticBox(PxTransform(1.085f, 1.25f, -2.25f), PxBoxGeometry(3.181f, 1.25f, 0.25f));
+			agg.addStaticBox(PxTransform(-3.569f, 1.25f, -2.25f), PxBoxGeometry(0.436f, 1.25f, 0.25f));
+			agg.addStaticBox(PxTransform(0.01f, 3.388f, -2.902f), PxBoxGeometry(0.49f, 0.118f, 0.49f));
+			agg.addStaticBox(PxTransform(0.01f, 2.939f, -2.902f), PxBoxGeometry(0.222f, 0.345f, 0.222f));
+			agg.addStaticBox(PxTransform(0.01f, 2.519f, -2.902f), PxBoxGeometry(0.416f, 0.061f, 0.416f));
 		}
 		gScene->addAggregate(*agg.gameSceneAggregate);
 
@@ -273,6 +287,10 @@ int main(int argc, char** argv)
 		std::shared_ptr<Mesh> gargoyleMesh = OBJLoader::LoadOBJ("res/models/Gargoyle.obj");
 		std::shared_ptr<Mesh> myTestMesh = OBJLoader::LoadOBJ("res/models/monkey.obj");
 		std::shared_ptr<Mesh> myPortalTestMesh = OBJLoader::LoadOBJ("res/models/Portal.obj");
+		std::shared_ptr<Mesh> oldKeyMesh = OBJLoader::LoadOBJ("res/models/old_key.obj");
+		std::shared_ptr<Mesh> table2Mesh = OBJLoader::LoadOBJ("res/models/Table.001.obj");
+		std::shared_ptr<Mesh> riddlePaperMesh = OBJLoader::LoadOBJ("res/models/riddlepaper.obj");
+		std::shared_ptr<Mesh> riddlePaperMesh2 = OBJLoader::LoadOBJ("res/models/riddlepaper2.obj");
 
 		//Materials
 
@@ -332,6 +350,30 @@ int main(int argc, char** argv)
 		gameStage->GetTransform().SetPostion(glm::vec3(0, 0, 0));
 		gameStage->name = "gameStage";
 
+		std::unique_ptr<GameObject> oldKey = std::make_unique<GameObject>();
+		oldKey->mesh = oldKeyMesh.get();
+		oldKey->material = &devMaterial;
+		oldKey->GetTransform().SetPostion(glm::vec3(0, 0, 0));
+		oldKey->name = "oldKey";
+
+		std::unique_ptr<GameObject> table2 = std::make_unique<GameObject>();
+		table2->mesh = table2Mesh.get();
+		table2->material = &devMaterial;
+		table2->GetTransform().SetPostion(glm::vec3(0, 0, 0));
+		table2->name = "Table.001";
+
+		std::unique_ptr<GameObject> riddlePaper = std::make_unique<GameObject>();
+		riddlePaper->mesh = riddlePaperMesh.get();
+		riddlePaper->material = &devMaterial;
+		riddlePaper->GetTransform().SetPostion(glm::vec3(0, 0, 0));
+		riddlePaper->name = "RiddlePaper";
+
+		std::unique_ptr<GameObject> riddlePaper2 = std::make_unique<GameObject>();
+		riddlePaper2->mesh = riddlePaperMesh2.get();
+		riddlePaper2->material = &devMaterial;
+		riddlePaper2->GetTransform().SetPostion(glm::vec3(0, -0.05, 0));
+		riddlePaper2->name = "RiddlePaper2";
+
 		//--------Uniform Buffers
 
 		UniformBuffer viewDataBuffer = UniformBuffer(*standardShader, std::string("viewData"), { "projection","view" }, 2);
@@ -372,6 +414,10 @@ int main(int argc, char** argv)
 
 		myScene.AddObject(gargoyle);
 		myScene.AddObject(gameStage);
+		myScene.AddObject(oldKey);
+		myScene.AddObject(table2);
+		myScene.AddObject(riddlePaper);
+		myScene.AddObject(riddlePaper2);
 
 		// Dynamics
 
@@ -467,6 +513,11 @@ int main(int argc, char** argv)
 		const float physTimeStep = 1.0f / 60.0f;
 		float physTimeAccumulator = 0;
 
+		GameLogic gameLogic = GameLogic(myScene, gScene, c, window, myCameraController, keyMap, 0, gargyoleBox);
+
+		//physx::PxActor** userBuffer;
+		//auto actors = gScene->getActors(PxActorTypeFlag::eRIGID_DYNAMIC,userBuffer,10);
+
 		//Render Loop
 		while (!glfwWindowShouldClose(window))
 		{
@@ -487,91 +538,10 @@ int main(int argc, char** argv)
 
 			//--------------------------UPDATE--------------------------------
 
-			// Move character and camera
-			{
-				myCameraController.HandleInputs();
+			/* GAME LOGIC */
 
-				glm::vec3 forwardVector = camera.GetTransform().GetForward();
-				forwardVector.y = 0; //clamp movement to horizonal plane
-				forwardVector = glm::normalize(forwardVector);
-				glm::vec3 rightVector = glm::cross(forwardVector, glm::vec3(0, 1, 0));
-
-				glm::vec3 moveDir = forwardVector * (float)((glfwGetKey(window, (int)forward) == GLFW_PRESS) - (glfwGetKey(window, (int)backward) == GLFW_PRESS)) +
-					rightVector * (float)((glfwGetKey(window, (int)right) == GLFW_PRESS) - (glfwGetKey(window, (int)left) == GLFW_PRESS));
-				moveDir *= characterMoveSpeed * deltaTime;
-				moveDir.y = -0.01f;
-
-				PxControllerFilters filters(NULL, NULL, NULL);
-				PxControllerCollisionFlags collFlags = c->move(PxVec3(moveDir.x, moveDir.y, moveDir.z), 0.0, deltaTime, filters, NULL);
-
-				PxControllerState state;
-				c->getState(state);
-				PxExtendedVec3 newPos = c->getFootPosition();
-				myCameraController.cameraTransform->SetPostion(glm::vec3(newPos[0], newPos[1] + characterEyeHeight, newPos[2]));
-			}
-
-			/* PHYSX */
-
-			// Gargyole Movement
-			{
-				glm::vec3 camPos = camera.GetTransform().GetPosition();
-				PxVec3 origin = PxVec3(camPos.x, camPos.y, camPos.z);            // [in] Ray origin
-				glm::vec3 viewVector = camera.GetTransform().GetForward();
-				viewVector = glm::normalize(viewVector);
-
-				PxVec3 unitDir = PxVec3(viewVector.x ,viewVector.y, viewVector.z);             // [in] Normalized ray direction
-				PxReal maxDistance = 1.0;            // [in] Raycast max distance
-				PxRaycastBuffer hit;
-				gargyoleBox->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, false); //TODO dont set in loop
-
-				PxQueryFilterData filterData = PxQueryFilterData(); //TODO dont set in loop
-				filterData.data.word0 = GROUP1; //TODO dont set in loop
-				const PxHitFlags outputFlags = PxHitFlag::eDEFAULT | PxHitFlag::ePOSITION | PxHitFlag::eNORMAL;
-
-				//Nutz das "Userdata" attribute von PxActor um eine 1:1 beziehung mit dem Gameobject oder was auch immer zu erzeugen.
-				bool status = gScene->raycast(origin, unitDir, maxDistance, hit, outputFlags, filterData);
-				if (status && (glfwGetKey(window, (int)interaction) == GLFW_PRESS)) {
-					gargyoleBox->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true); //TODO dont set in loop
-					std::cout << hit.block.actor << std::endl;
-					auto &transform = myScene.GetObject("gargoyle")->GetTransform();
-					if (glfwGetKey(window, (int)forward) == GLFW_PRESS) {
-						auto &transform = myScene.GetObject("gargoyle")->GetTransform();
-						gargyoleBox->setGlobalPose(PxTransform(viewVector.x * 2.0 * deltaTime, 0.0, viewVector.z * 2.0 * deltaTime));
-						gargyoleBox->setKinematicTarget(PxTransform(viewVector.x * 2.0 * deltaTime, 0.0, viewVector.z * 2.0 * deltaTime));
-						//gargyoleBox->addForce(PxVec3(0.001, 0.001, 0.001), PxForceMode::eFORCE);
-						transform.SetPostion(glm::vec3(gargyoleBox->getGlobalPose().p[0], gargyoleBox->getGlobalPose().p[1], gargyoleBox->getGlobalPose().p[2]));
-					}
-					else if (glfwGetKey(window, (int)backward) == GLFW_PRESS) {
-						auto &transform = myScene.GetObject("gargoyle")->GetTransform();
-						gargyoleBox->setGlobalPose(PxTransform(viewVector.x * -2.0 * deltaTime, 0.0, viewVector.z * -2.0 * deltaTime)); 
-						gargyoleBox->setKinematicTarget(PxTransform(viewVector.x * -2.0 * deltaTime, 0.0, viewVector.z * -2.0 * deltaTime));
-						//gargyoleBox->addForce(PxVec3(viewVector.x * 2.0 * deltaTime, 0.0, viewVector.z * 2.0 * deltaTime), PxForceMode::eFORCE);
-						transform.SetPostion(glm::vec3(gargyoleBox->getGlobalPose().p[0], gargyoleBox->getGlobalPose().p[1], gargyoleBox->getGlobalPose().p[2]));
-					}
-					
-				}
-			}
-
-			// Portal teleportation
-			{
-				glm::vec3 charPos = PxToGlmVec3(c->getFootPosition());
-				for (const Portal & portal : myScene.renderPortals) {
-					if (glm::distance2(portal.transform.GetPosition(), charPos) < 2) {
-						glm::vec4 portalPlane = glm::vec4(portal.transform.GetForward(), glm::dot(-portal.transform.GetForward(), portal.transform.GetPosition()));
-
-						glm::vec4 pos = glm::vec4(charPos, 1);
-
-						if (glm::dot(portalPlane, pos) > 0) {
-							glm::vec3 newPos = portal.getOffsetMatrix() * pos;
-							glm::mat4 m = portal.getOffsetMatrix();
-							myCameraController.yaw += glm::degrees(glm::atan(-m[0].z, m[0].x));
-							camera.GetTransform().SetRotationDegrees(myCameraController.pitch, myCameraController.yaw, 0);
-							camera.GetTransform().SetPostion(newPos + glm::vec3(0, characterEyeHeight, 0));
-							c->setFootPosition(PxExtendedVec3(newPos.x, newPos.y, newPos.z));
-						}
-					}
-				}
-			}
+			gameLogic.updateDeltaTime(deltaTime);
+			gameLogic.checkGameState();
 
 			//--------------------------PHYSICS UPDATE--------------------------------
 

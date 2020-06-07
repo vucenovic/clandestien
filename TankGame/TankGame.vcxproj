@@ -139,6 +139,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\GameLogic.cpp" />
     <ClCompile Include="src\HUD.cpp" />
     <ClCompile Include="src\GameSceneAggregateBuilder.cpp" />
     <ClCompile Include="src\BSPTree.cpp" />
@@ -165,6 +166,7 @@
     <ClCompile Include="src\UniformBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\GameLogic.h" />
     <ClInclude Include="src\HUD.h" />
     <ClInclude Include="src\GameSceneAggregateBuilder.h" />
     <ClInclude Include="src\BSPTree.h" />
@@ -173,6 +175,7 @@
     <ClInclude Include="src\FileUtils.h" />
     <ClInclude Include="src\FrameBuffer.h" />
     <ClInclude Include="src\GameObject.h" />
+    <ClInclude Include="src\KeyMap.h" />
     <ClInclude Include="src\Particles.h" />
     <ClInclude Include="src\INIReader.h" />
     <ClInclude Include="src\Main.h" />
