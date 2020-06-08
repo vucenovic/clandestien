@@ -41,7 +41,6 @@ void GameLogic::raycastFilter()
 	glm::vec3 camPos = ourScene.activeCamera->GetTransform().GetPosition();
 	PxVec3 origin = PxVec3(camPos.x, camPos.y, camPos.z);            
 	glm::vec3 viewVector = ourScene.activeCamera->GetTransform().GetForward();
-	viewVector = glm::normalize(viewVector);
 
 	PxVec3 unitDir = PxVec3(viewVector.x, viewVector.y, viewVector.z);            
 	PxReal maxDistance = 1.0;            
@@ -71,18 +70,22 @@ void GameLogic::moveDynamic(glm::vec3 viewVector)
 {
 	auto &transform = ourScene.GetObject("gargoyle")->GetTransform();
 	if (glfwGetKey(ourWindow, keyBinds.forward) == GLFW_PRESS) {
-		auto &transform = ourScene.GetObject("gargoyle")->GetTransform();
-		ourGargoyleBox->setGlobalPose(PxTransform(viewVector.x * 2.0 * deltaTime, 0.0, viewVector.z * 2.0 * deltaTime));
+		auto currPos = ourGargoyleBox->getGlobalPose();
+		auto newPos = PxTransform(viewVector.x * 2.0 * deltaTime, 0.0, viewVector.z * 2.0 * deltaTime).transform(currPos);
+		ourGargoyleBox->setGlobalPose(newPos);
 		//gargyoleBox->setKinematicTarget(PxTransform(viewVector.x * 2.0 * deltaTime, 0.0, viewVector.z * 2.0 * deltaTime));
 		//gargyoleBox->addForce(PxVec3(0.001, 0.001, 0.001), PxForceMode::eFORCE);
-		transform.SetPostion(glm::vec3(ourGargoyleBox->getGlobalPose().p[0], ourGargoyleBox->getGlobalPose().p[1], ourGargoyleBox->getGlobalPose().p[2]));
+		transform.SetPostion(PxToGlmVec3(PxExtendedVec3(ourGargoyleBox->getGlobalPose().p[0], ourGargoyleBox->getGlobalPose().p[1], ourGargoyleBox->getGlobalPose().p[2])));
 	}
 	else if (glfwGetKey(ourWindow, keyBinds.backward) == GLFW_PRESS) {
-		auto &transform = ourScene.GetObject("gargoyle")->GetTransform();
-		ourGargoyleBox->setGlobalPose(PxTransform(viewVector.x * -2.0 * deltaTime, 0.0, viewVector.z * -2.0 * deltaTime));
+		auto currPos = ourGargoyleBox->getGlobalPose();
+		auto newPos = PxTransform(viewVector.x * -2.0 * deltaTime, 0.0, viewVector.z * -2.0 * deltaTime).transform(currPos);
+		ourGargoyleBox->setGlobalPose(newPos);
+		//auto debug = ourGargoyleBox->getGlobalPose();
 		//gargyoleBox->setKinematicTarget(PxTransform(viewVector.x * -2.0 * deltaTime, 0.0, viewVector.z * -2.0 * deltaTime));
 		//gargyoleBox->addForce(PxVec3(viewVector.x * 2.0 * deltaTime, 0.0, viewVector.z * 2.0 * deltaTime), PxForceMode::eFORCE);
-		transform.SetPostion(glm::vec3(ourGargoyleBox->getGlobalPose().p[0], ourGargoyleBox->getGlobalPose().p[1], ourGargoyleBox->getGlobalPose().p[2]));
+		//transform.SetPostion(glm::vec3(ourGargoyleBox->getGlobalPose().p[0], ourGargoyleBox->getGlobalPose().p[1], ourGargoyleBox->getGlobalPose().p[2]));
+		transform.SetPostion(PxToGlmVec3(PxExtendedVec3(ourGargoyleBox->getGlobalPose().p[0], ourGargoyleBox->getGlobalPose().p[1], ourGargoyleBox->getGlobalPose().p[2])));
 	}
 }
 

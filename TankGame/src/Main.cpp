@@ -425,11 +425,12 @@ int main(int argc, char** argv)
 		PxMaterial* gargoyleMat = gPhysics->createMaterial(0.5f, 0.5f, 0.6f);
 		auto &transform = myScene.GetObject("gargoyle")->GetTransform();
 		auto &gargPos = transform.GetPosition();
-		PxRigidDynamic* gargyoleBox = gPhysics->createRigidDynamic(PxTransform(gargPos[0] - 0.75, gargPos[1]+0.7,gargPos[2] - 1.2));
-		PxShape* gargoyleBoxShape = PxRigidActorExt::createExclusiveShape(*gargyoleBox, PxBoxGeometry(0.75, 0.7, 0.6), *gargoyleMat);
+		PxRigidDynamic* gargyoleBox = gPhysics->createRigidDynamic(PxTransform(gargPos[0], gargPos[1],gargPos[2]));
+		PxShape* gargoyleBoxShape = PxRigidActorExt::createExclusiveShape(*gargyoleBox, PxBoxGeometry(0.75, 0.6, 0.75), *gargoyleMat);
 		gScene->addActor(*gargyoleBox);
 		PxSetGroup(*gargyoleBox, 2);
 		gargoyleBoxShape->setQueryFilterData(PxFilterData(GROUP1, 0, 0, 0));
+		auto debug = gargyoleBox->getGlobalPose();
 
 		//Particles
 
@@ -536,21 +537,23 @@ int main(int argc, char** argv)
 			//Poll
 			glfwPollEvents();
 
+			//--------------------------PHYSICS UPDATE--------------------------------
+
+		//Do Physics steps
+			while (physTimeAccumulator > physTimeStep) {
+				gScene->simulate(physTimeStep);
+				gScene->fetchResults(true);
+				physTimeAccumulator -= physTimeStep;
+			}
+
+			auto debug2 = gargyoleBox->getGlobalPose();
+
 			//--------------------------UPDATE--------------------------------
 
 			/* GAME LOGIC */
 
 			gameLogic.updateDeltaTime(deltaTime);
 			gameLogic.checkGameState();
-
-			//--------------------------PHYSICS UPDATE--------------------------------
-
-			//Do Physics steps
-			while (physTimeAccumulator > physTimeStep) {
-				gScene->simulate(physTimeStep);
-				gScene->fetchResults(true);
-				physTimeAccumulator -= physTimeStep;
-			}
 
 			//--------------------------RENDER--------------------------------
 
