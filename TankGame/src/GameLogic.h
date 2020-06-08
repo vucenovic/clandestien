@@ -10,13 +10,11 @@
 
 #include <PhysX/PxPhysicsAPI.h>
 
-using namespace physx;
-
-struct ControllerParameters {
-	float characterHeight;
-	float characterRadius;
-	float characterEyeHeight;
-	float characterMoveSpeed;
+struct CharacterDef {
+	float height;
+	float radius;
+	float eyeHeight;
+	float moveSpeed;
 };
 
 enum ActiveGroup
@@ -27,35 +25,40 @@ enum ActiveGroup
 	GROUP4 = (1 << 3),
 };
 
+static physx::PxQuat fromEuler(const glm::vec3 & e) {
+	glm::quat q = glm::quat(e);
+	return physx::PxQuat(q.x, q.y, q.z, q.w);
+}
+
+static glm::vec3 PxToGlmVec3(const physx::PxExtendedVec3 & v) {
+	return glm::vec3(v.x, v.y, v.z);
+}
 
 class GameLogic
 {
-	private:
-		Scene &ourScene;
-		PxScene* ourPxScene;
-		PxController* character;
-		GLFWwindow* ourWindow;
-		CameraController &ourCameraController;
-		KeyMap keyBinds;
-		float deltaTime;
+private:
+	Scene &ourScene;
+	physx::PxScene* ourPxScene;
+	physx::PxController* character;
+	GLFWwindow* ourWindow;
+	physx::PxPhysics* physX;
+	CameraController &ourCameraController;
+	KeyMap keyBinds;
+	float deltaTime = 0;
 
-		ControllerParameters cP = { 1.8f, 0.25f, 1.7f, 2.0f };
-		PxRigidDynamic* ourGargoyleBox; //TODO: Aus szene auslesen
+	CharacterDef cP = { 1.8f, 0.25f, 1.7f, 2.0f };
+	physx::PxRigidDynamic* ourGargoyleBox; //TODO: Aus szene auslesen
 
-	public:
-		GameLogic(Scene &scene, physx::PxScene *pxScene, PxController* c, GLFWwindow *window, CameraController &cameraController, KeyMap keyMap, float deltatime, PxRigidDynamic* gargoyleBox);
-		void checkGameState(); // parent function calling all our logic
-		void moveControllerCamera(); // moves character controller + adjusts camera movement to follow
-		void raycastFilter(); // perfoms a raycast on each filter group and calls appropriate actions
-		void moveDynamic(glm::vec3 viewVector); // moves dynamic objects
-		void movePortal(); // moves the character from one portal to another adjusting the camera
-		void initStaticColliders(); // initializes static colliders
-		void updateDeltaTime(float newDelta);
+public:
+	GameLogic(Scene &scene, physx::PxScene *pxScene, GLFWwindow *window, physx::PxPhysics* physX, CameraController &cameraController, KeyMap keyMap);
+	void Update(const float & newDelta); // parent function calling all our logic
+	void moveControllerCamera(); // moves character controller + adjusts camera movement to follow
+	void raycastFilter(); // perfoms a raycast on each filter group and calls appropriate actions
+	void moveDynamic(glm::vec3 viewVector); // moves dynamic objects
+	void handlePortals(); // moves the character from one portal to another adjusting the camera
 
-		// helper functions
-
-		glm::vec3 PxToGlmVec3(const PxExtendedVec3 v); // converts PxVec3 to glmVec3
-
-
+	void SetupScene();
+private:
+	void initStaticColliders(); // initializes static colliders
 };
 

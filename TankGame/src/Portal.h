@@ -8,7 +8,7 @@ class Portal
 public:
 	Transform transform;
 	Transform targetTransform;
-	std::shared_ptr<Mesh> portalMesh;
+	Mesh * portalMesh;
 
 public:
 	Portal();

@@ -28,8 +28,8 @@ private:
 	
 public:
 	std::vector<Portal> renderPortals;
-	std::shared_ptr<ShaderProgram> portalHoldoutShader;
-	std::shared_ptr<ShaderProgram> depthResetSS;
+	ShaderProgram * portalHoldoutShader;
+	ShaderProgram * depthResetSS;
 	UniformBuffer * viewDataBuffer;
 	GLuint SSrectVAOId;
 

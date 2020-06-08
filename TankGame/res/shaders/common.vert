@@ -11,6 +11,38 @@ layout (binding = 0, std140) uniform viewData
 	mat4 view;
 };
 
+struct PointLight{
+	vec4 position;
+	vec4 color;
+	vec4 falloff;
+};
+
+struct DirectionalLight{
+	vec4 direction;
+	vec4 color;
+};
+
+struct SpotLight{
+	vec4 position;
+	vec4 direction;
+	vec4 color;
+	vec4 falloff;
+};
+
+layout (binding = 1, std140) uniform LightData{
+	vec4 ambientColor;
+	uvec4 lightCounts;
+
+	PointLight[5] pointLights;
+
+	DirectionalLight[5] directionalLights;
+
+	SpotLight[3] spotLights;
+
+	SpotLight shadowLight;
+	mat4 shadowMatrix;
+} lights;
+
 uniform mat4 modelMatrix;
 uniform mat4 modelNormalMatrix;
 
@@ -20,6 +52,7 @@ out VertexData
 	vec3 worldPos;
 	vec2 texCoord;
 	mat3 TBN;
+    vec4 shadowPos;
 } vertex;
 
 //Definitions
@@ -37,5 +70,8 @@ void main()
 	vertex.worldPos = worldPos.xyz;
 
 	gl_Position = projection * view * worldPos;
+	vertex.texCoord = texCoord;
+
+	vertex.shadowPos = lights.shadowMatrix * worldPos;
 	vertex.texCoord = texCoord;
 }

@@ -55,6 +55,7 @@ in VertexData
 	vec3 worldPos;
 	vec2 texCoord;
 	mat3 TBN;
+    vec4 shadowPos;
 } vertex;
 
 vec3 reflectDir;

@@ -49,7 +49,7 @@ in VertexData
 	vec3 worldPos;
 	vec2 texCoord;
 	mat3 TBN;
-    vec4 shadow_Position;
+    vec4 shadowPos;
 } vertex;
 
 vec3 reflectDir;
@@ -77,7 +77,7 @@ void main()
 	lightSpecular = vec3(0);
 
 	doSpotLight(lights.shadowLight);
-	float shadow = texture(shadowMap, vertex.shadow_Position.xyz/vertex.shadow_Position.w / 2 + 0.5);
+	float shadow = texture(shadowMap, vertex.shadowPos.xyz/vertex.shadowPos.w / 2 + 0.5);
 	lightDiffuse *= shadow;
 	lightSpecular *= shadow;
 

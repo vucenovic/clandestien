@@ -3,7 +3,7 @@
 bool Scene::AddObject(std::unique_ptr<GameObject> & obj)
 {
 	if (gameObjects.find(obj->name) == gameObjects.end()) {
-		auto & shaderGroup = renderGroups[obj->material->shader.get()];
+		auto & shaderGroup = renderGroups[obj->material->shader];
 		std::unordered_map<Mesh*, std::vector<GameObject*>> & meshGroups = shaderGroup[obj->material];
 		std::vector<GameObject*> & objects = meshGroups[obj->mesh];
 		objects.push_back(obj.get());
@@ -24,7 +24,7 @@ GameObject * Scene::GetObject(const std::string & name)
 void Scene::RemoveObject(const std::string & name)
 {
 	auto & obj = gameObjects[name];
-	auto & shaderGroup = renderGroups[obj->material->shader.get()];
+	auto & shaderGroup = renderGroups[obj->material->shader];
 	std::unordered_map<Mesh*, std::vector<GameObject*>> & meshGroups = shaderGroup[obj->material];
 	std::vector<GameObject*> & objects = meshGroups[obj->mesh];
 	for (int i = 0; i < objects.size(); i++) {
@@ -34,7 +34,7 @@ void Scene::RemoveObject(const std::string & name)
 	}
 	if (objects.size() == 0) meshGroups.erase(obj->mesh);
 	if (meshGroups.size() == 0) shaderGroup.erase(obj->material);
-	if (shaderGroup.size() == 0) renderGroups.erase(obj->material->shader.get());
+	if (shaderGroup.size() == 0) renderGroups.erase(obj->material->shader);
 	gameObjects.erase(name);
 }
 
@@ -65,12 +65,11 @@ void Scene::DrawOpaqueObjects()
 {
 	for (auto shaderGroup : renderGroups)
 	{
-		shaderGroup.first->UseProgram();
 		GLuint modelMatrixLocation = shaderGroup.first->GetUniformLocation("modelMatrix");
 		GLuint normalMatrixLocation = shaderGroup.first->GetUniformLocation("modelNormalMatrix");
 
 		for (auto meshGroup : shaderGroup.second) {
-			meshGroup.first->ApplyProperties();
+			meshGroup.first->Use();
 
 			for (auto GameObjects : meshGroup.second)
 			{

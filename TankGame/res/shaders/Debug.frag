@@ -14,6 +14,7 @@ in VertexData
 	vec3 worldPos;
 	vec2 texCoord;
 	mat3 TBN;
+    vec4 shadowPos;
 };
 
 uniform int mode;

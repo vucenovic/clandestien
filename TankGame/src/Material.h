@@ -8,7 +8,6 @@
 #include "ShaderProgram.h"
 #include "Texture.h"
 
-
 //The material Property system does not support reading out of property types at the moment
 class MaterialProperty {
 public:
@@ -56,14 +55,14 @@ public:
 class Material
 {
 public:
-	std::shared_ptr<ShaderProgram> shader;
-	std::unordered_map<GLuint, std::shared_ptr<Texture>> textures;
+	ShaderProgram * shader;
+	std::unordered_map<GLuint, Texture *> textures;
 	std::unordered_map<GLuint, std::unique_ptr<MaterialProperty>> properties;
 
-	Material(std::shared_ptr<ShaderProgram> shaderProg);
+	Material(ShaderProgram * shaderProg);
 	~Material();
 
-	void Use() const;
+	virtual void Use() const;
 	void UseShader() const;
 	void ApplyProperties() const;
 
@@ -73,20 +72,22 @@ public:
 	void SetPropertyMatrix4f(const std::string & name, glm::mat4 val);
 	void SetPropertyi(const std::string & name, GLint val);
 
-	void SetTexture(std::shared_ptr<Texture> texture, GLuint textureUnit);
+	void SetTexture(Texture * texture, GLuint textureUnit);
 };
 
-//Needs some work, currently not functional
-class MaterialInstance
+class StandardMaterial : public Material
 {
 private:
-	Material & material;
+	GLuint matLoc, colLoc;
 public:
-	std::unordered_map<GLuint, std::shared_ptr<Texture>> instanceTextures;
-	std::unordered_map<GLuint, std::unique_ptr<MaterialProperty>> instanceProperties;
+	glm::vec4 material = glm::vec4(0.1f, 0.7f, 1, 8);
+	glm::vec4 color = glm::vec4(1, 1, 1, 0);
+	Texture2D * diffuse;
+	Texture2D * specular;
+	Texture2D * normal;
+	//TextureCubemap * cubeMap;
 
-	MaterialInstance(Material & mat) : material(mat) {};
-	~MaterialInstance();
+	StandardMaterial(ShaderProgram * shader);
 
-	virtual void Use();
+	void Use() const override;
 };

@@ -1,3 +1,5 @@
+#include "Main.h"
+
 #include <string>
 #include <sstream>
 #include <memory>
@@ -29,8 +31,7 @@
 #include "HUD.h"
 #include "KeyMap.h"
 #include "GameLogic.h"
-
-#include "Main.h"
+#include "ResourceManager.h"
 
 #include <random>
 
@@ -48,16 +49,6 @@ bool drawDepth = false;
 bool debugDraw = false;
 int debugDrawmode = 0;
 bool actionKey = false;
-
-//TODO move somewhere sane -> group with remaining physX stuff
-physx::PxQuat fromEuler(glm::vec3 e) {
-	glm::quat q = glm::quat(e);
-	return physx::PxQuat(q.x,q.y,q.z,q.w);
-}
-
-glm::vec3 PxToGlmVec3(const PxExtendedVec3 v) {
-	return glm::vec3(v.x, v.y, v.z);
-}
 
 int main(int argc, char** argv)
 {
@@ -164,115 +155,43 @@ int main(int argc, char** argv)
 			pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_SCENEQUERIES, true);
 		}
 
-		// initialize aggregate for gamescene for optimization
+		ResourceManager & resourceManager = ResourceManager::GetInstance();
 
-		//StaticColliders
-		const PxU32 staticColliderCount = 32;
-		GameSceneAggregateBuilder agg = GameSceneAggregateBuilder(staticColliderCount, false, gPhysics);
-		{
-			agg.addStaticBox(PxTransform(0, 1.25f, 2.5f), PxBoxGeometry(4.0f, 1.25f, 0.5f));
-			agg.addStaticBox(PxTransform(4.5f, 2.75f, 0), PxBoxGeometry(0.5f, 2.75f, 2.4f));
-			agg.addStaticBox(PxTransform(-4.5f, 4.0f, -2.0f), PxBoxGeometry(0.5f, 1.5f, 4.4f));
-			agg.addStaticBox(PxTransform(-4.5f, 1.25f, -1.5f), PxBoxGeometry(0.5f, 1.25f, 1.0f));
-			agg.addStaticBox(PxTransform(-4.5f, 1.25f, 1.75f), PxBoxGeometry(0.5f, 1.25f, 1.25f));
-			agg.addStaticBox(PxTransform(0, -0.5f, -5.5f), PxBoxGeometry(8.0f, 0.5f, 8.0f));
-			agg.addStaticBox(PxTransform(-4.5f, 2.25f, 0), PxBoxGeometry(0.5f, 0.25f, 0.5f));
-			agg.addStaticBox(PxTransform(-2.25f, 4.0f, -6.5f), PxBoxGeometry(1.75f, 1.5f, 0.5f));
-			agg.addStaticBox(PxTransform(2.25f, 4.0f, -6.5f), PxBoxGeometry(1.75f, 1.5f, 0.5f));
-			agg.addStaticBox(PxTransform(0, 5.0f, -6.5f), PxBoxGeometry(0.5f, 0.5f, 0.5f));
-			agg.addStaticBox(PxTransform(PxVec3(0, 4.3f, 0.8f), fromEuler(glm::vec3(-0.7854f, 0, 0))), PxBoxGeometry(4.0f, 3.0f, 0.45f));
-			agg.addStaticBox(PxTransform(0, 6.0f, -3.5f), PxBoxGeometry(4.0f, 0.5f, 2.5f));
-			agg.addStaticBox(PxTransform(0, 3.061f, -2.15f), PxBoxGeometry(4.227f, 0.549f, 0.13f));
-			agg.addStaticBox(PxTransform(2.0f, 0.89f, 0), PxBoxGeometry(0.49f, 0.118f, 0.49f));
-			agg.addStaticBox(PxTransform(2.0f, 0.441f, 0), PxBoxGeometry(0.222f, 0.345f, 0.222f));
-			agg.addStaticBox(PxTransform(2.0f, 0.021f, 0), PxBoxGeometry(0.416f, 0.061f, 0.416f));
-			agg.addStaticBox(PxTransform(0, 2.375f, -4.5f), PxBoxGeometry(4.0f, 0.125f, 2.5f));
-			agg.addStaticBox(PxTransform(0, 1.25f, -2.25f), PxBoxGeometry(4.0f, 1.25f, 0.25f));
-			agg.addStaticBox(PxTransform(4.5f, 4.0f, -4.2f), PxBoxGeometry(0.5f, 1.7f, 2.2f));
-			agg.addStaticBox(PxTransform(1.085f, 1.25f, -2.25f), PxBoxGeometry(3.181f, 1.25f, 0.25f));
-			agg.addStaticBox(PxTransform(-3.569f, 1.25f, -2.25f), PxBoxGeometry(0.436f, 1.25f, 0.25f));
-			agg.addStaticBox(PxTransform(0.01f, 3.388f, -2.902f), PxBoxGeometry(0.49f, 0.118f, 0.49f));
-			agg.addStaticBox(PxTransform(0.01f, 2.939f, -2.902f), PxBoxGeometry(0.222f, 0.345f, 0.222f));
-			agg.addStaticBox(PxTransform(0.01f, 2.519f, -2.902f), PxBoxGeometry(0.416f, 0.061f, 0.416f));
-		}
-		gScene->addAggregate(*agg.gameSceneAggregate);
-
-		// add kinematic capsule character controller (experimental parameters)
-
-		float characterHeight = 1.8f;
-		float characterRadius = 0.25f;
-		float characterEyeHeight = 1.7f;
-		float characterMoveSpeed = 2.0f;
-
-		PxControllerManager* manager = PxCreateControllerManager(*gScene);
-		PxCapsuleControllerDesc desc;
-		PxMaterial* controllerMaterial = gPhysics->createMaterial(0.8f, 0.8f, 0.9f);
-		desc.stepOffset = 0.1f;
-		desc.contactOffset = 0.05;
-		desc.material = controllerMaterial;
-		desc.density = 10.0;
-		desc.isValid();
-		desc.scaleCoeff = 0.95;
-		desc.volumeGrowth = 1.5f;
-		desc.position = PxExtendedVec3(1.0, characterHeight / 2, 0.0);
-		desc.radius = characterRadius;
-		desc.height = characterHeight - characterRadius * 2; //height = distance between sphere centers on capsule
-		desc.climbingMode = PxCapsuleClimbingMode::eLAST;
-		PxController* c = manager->createController(desc);
-		manager->setOverlapRecoveryModule(true);
-		//https://docs.nvidia.com/gameworks/content/gameworkslibrary/physx/apireference/files/structPxFilterData.html
-
-		PxSetGroup(*c->getActor(), 1);
-
-		// add debug visualization parameters
-
-		enum ActiveGroup
-		{
-			GROUP1 = (1 << 0),
-			GROUP2 = (1 << 1),
-			GROUP3 = (1 << 2),
-			GROUP4 = (1 << 3),
-		};
-
-		gScene->setVisualizationParameter(PxVisualizationParameter::eSCALE, 1.0f);
-		gScene->setVisualizationParameter(PxVisualizationParameter::eCOLLISION_AABBS, 1.0);
-		gScene->setVisualizationParameter(PxVisualizationParameter::eCOLLISION_SHAPES, 1.0);
-
-		std::shared_ptr<ShaderProgram> standardShader,unifiedPBR, myShaderProgram, debugShader, particleShader, pp_demultAlpha, pp_gammaCorrect, pp_blur, pp_bloom, unlitShader, SSDepthReset, DebugDepthSS, GargoyleShader, DepthShader;
+		std::unique_ptr<ShaderProgram> debugShader, pp_demultAlpha, pp_gammaCorrect, pp_blur, pp_bloom, SSDepthReset, DebugDepthSS;
 		try
 		{
-			myShaderProgram = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/common.vert", "res/shaders/LitPhong.frag"));
-			unifiedPBR = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/common.vert", "res/shaders/unifiedPBR.frag"));
-			particleShader = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/particle.vert", "res/shaders/particle.geom", "res/shaders/particle.frag"));
-			standardShader = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/common.vert", "res/shaders/TexturedLitPhong.frag"));
-			debugShader = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/common.vert", "res/shaders/Debug.frag"));
-			pp_demultAlpha = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/screenspace.vert", "res/shaders/DemultAlpha.frag"));
-			pp_gammaCorrect = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/screenspace.vert", "res/shaders/GammaCorrect.frag"));
-			pp_blur = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/screenspace.vert", "res/shaders/Blur.frag"));
-			pp_bloom = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/screenspace.vert", "res/shaders/Bloom.frag"));
-			unlitShader = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/common.vert", "res/shaders/Unlit.frag"));
-			SSDepthReset = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/screenspace.vert", "res/shaders/DepthReset.frag"));
-			DebugDepthSS = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/screenspace.vert", "res/shaders/depthToColor.frag"));
-			GargoyleShader = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/gargoyle.vert", "res/shaders/gargoyle.frag"));
-			//DepthShader = std::shared_ptr<ShaderProgram>(ShaderProgram::FromFile("res/shaders/depth.vert", "res/shaders/depth.frag"));
+			debugShader =ShaderProgram::FromFile("res/shaders/common.vert", "res/shaders/Debug.frag");
+			pp_demultAlpha = ShaderProgram::FromFile("res/shaders/screenspace.vert", "res/shaders/DemultAlpha.frag");
+			pp_gammaCorrect = ShaderProgram::FromFile("res/shaders/screenspace.vert", "res/shaders/GammaCorrect.frag");
+			pp_blur = ShaderProgram::FromFile("res/shaders/screenspace.vert", "res/shaders/Blur.frag");
+			pp_bloom = ShaderProgram::FromFile("res/shaders/screenspace.vert", "res/shaders/Bloom.frag");
+			SSDepthReset = ShaderProgram::FromFile("res/shaders/screenspace.vert", "res/shaders/DepthReset.frag");
+			DebugDepthSS = ShaderProgram::FromFile("res/shaders/screenspace.vert", "res/shaders/depthToColor.frag");
+
+			resourceManager.AddShader(ShaderProgram::FromFile("res/shaders/particle.vert", "res/shaders/particle.geom", "res/shaders/particle.frag"),"particle");
+			resourceManager.AddShader(ShaderProgram::FromFile("res/shaders/common.vert", "res/shaders/Unlit.frag"),"unlit");
+			resourceManager.AddShader(ShaderProgram::FromFile("res/shaders/common.vert", "res/shaders/standardShader.frag"),"standard");
 		}
 		catch (const std::invalid_argument&)
 		{
 			std::cerr << "Shader failed to compile" << std::endl;
 			goto _shaderCompileError; //jumps to context cleanup section
 		}
-		std::shared_ptr<Texture2D> tilesDiff = std::make_shared<Texture2D>("res/textures/tiles_diffuse");
-		std::shared_ptr<Texture2D> tilesSpec = std::make_shared<Texture2D>("res/textures/tiles_specular");
-		std::shared_ptr<Texture2D> tilesNorm = std::make_shared<Texture2D>("res/textures/tiles_normal");
-		std::shared_ptr<Texture2D> woodDiff = std::make_shared<Texture2D>("res/textures/wood_texture");
-		std::shared_ptr<Texture2D> devDiff = std::make_shared<Texture2D>("res/textures/dev_diffuse");
-		std::shared_ptr<Texture2D> devNorm = std::make_shared<Texture2D>("res/textures/dev_normal");
-		std::shared_ptr<TextureCubemap> cubeMap = std::make_shared<TextureCubemap>("res/textures/cubemap/");
-		std::shared_ptr<Texture2D> whiteTex = std::make_shared<Texture2D>(glm::vec3(1));
-		std::shared_ptr<Texture2D> blackTex = std::make_shared<Texture2D>(glm::vec3(0));
-		std::shared_ptr<Texture2D> purpleTex = std::make_shared<Texture2D>(glm::vec3(0.5f,0.5f,1));
+		std::unique_ptr<TextureCubemap> cubeMap = std::make_unique<TextureCubemap>("res/textures/cubemap/");
 
-		std::shared_ptr<Texture2D> particleTex = std::make_shared<Texture2D>("res/textures/particle");
+		resourceManager.AddTexture(std::make_unique<Texture2D>("res/textures/dev_diffuse"), "dev_diff");
+		resourceManager.AddTexture(std::make_unique<Texture2D>("res/textures/dev_normal"), "dev_norm");
+		resourceManager.AddTexture(std::make_unique<Texture2D>(glm::vec3(1)), "white");
+		resourceManager.AddTexture(std::make_unique<Texture2D>(glm::vec3(0)), "black");
+		resourceManager.AddTexture(std::make_unique<Texture2D>(glm::vec3(0.5f, 0.5f, 1)), "purple");
+
+		Texture2D *whiteTex = (Texture2D*)resourceManager.GetTexture("white");
+		Texture2D *blackTex = (Texture2D*)resourceManager.GetTexture("black");
+		Texture2D *purpleTex = (Texture2D*)resourceManager.GetTexture("purple");
+		Texture2D *devDiff = (Texture2D*)resourceManager.GetTexture("dev_diff");
+		Texture2D *devNorm = (Texture2D*)resourceManager.GetTexture("dev_norm");
+
+		std::unique_ptr<Texture2D> particleTex = std::make_unique<Texture2D>("res/textures/particle");
 
 		//--------Camera
 
@@ -283,93 +202,80 @@ int main(int argc, char** argv)
 
 		//Meshes
 		
-		std::shared_ptr<Mesh> gameStageMesh = OBJLoader::LoadOBJ("res/models/GameScene.obj");
-		std::shared_ptr<Mesh> gargoyleMesh = OBJLoader::LoadOBJ("res/models/Gargoyle.obj");
-		std::shared_ptr<Mesh> myTestMesh = OBJLoader::LoadOBJ("res/models/monkey.obj");
-		std::shared_ptr<Mesh> myPortalTestMesh = OBJLoader::LoadOBJ("res/models/Portal.obj");
-		std::shared_ptr<Mesh> oldKeyMesh = OBJLoader::LoadOBJ("res/models/old_key.obj");
-		std::shared_ptr<Mesh> table2Mesh = OBJLoader::LoadOBJ("res/models/Table.001.obj");
-		std::shared_ptr<Mesh> riddlePaperMesh = OBJLoader::LoadOBJ("res/models/riddlepaper.obj");
-		std::shared_ptr<Mesh> riddlePaperMesh2 = OBJLoader::LoadOBJ("res/models/riddlepaper2.obj");
+		resourceManager.AddMesh(OBJLoader::LoadOBJ("res/models/GameScene.obj"), "gameStage");
+		resourceManager.AddMesh(OBJLoader::LoadOBJ("res/models/Gargoyle.obj"), "gargoyle");
+		resourceManager.AddMesh(OBJLoader::LoadOBJ("res/models/Portal.obj"), "portal");
+		resourceManager.AddMesh(OBJLoader::LoadOBJ("res/models/old_key.obj"), "oldKey");
+		resourceManager.AddMesh(OBJLoader::LoadOBJ("res/models/Table.obj"), "table");
+		resourceManager.AddMesh(OBJLoader::LoadOBJ("res/models/riddlepaper.obj"), "riddlepaper");
+		resourceManager.AddMesh(OBJLoader::LoadOBJ("res/models/riddlepaper2.obj"), "riddlepaper2");
 
 		//Materials
 
-		std::shared_ptr<Material> particlesMaterial = std::make_shared<Material>(particleShader);
-		particlesMaterial->SetTexture(particleTex, 0);
+		std::shared_ptr<Material> particlesMaterial = std::make_shared<Material>(resourceManager.GetShader("particle"));
+		particlesMaterial->SetTexture(particleTex.get(), 0);
 
-		Material debugMaterial = Material(debugShader);
+		Material debugMaterial = Material(debugShader.get());
 		debugMaterial.SetPropertyi("mode",2);
 
-		Material depthMaterial = Material(unlitShader);
+		Material depthMaterial = Material(resourceManager.GetShader("unlit"));
 
-		Material gargoyleMaterial = Material(GargoyleShader);
-		gargoyleMaterial.SetProperty4f("material", glm::vec4(0.1f, 0.7f, 1, 8));
-		gargoyleMaterial.SetProperty4f("flatColor", glm::vec4(1, 1, 1, 0.15f));
-		gargoyleMaterial.SetTexture(devDiff, 0);
-		gargoyleMaterial.SetTexture(whiteTex, 1);
-		gargoyleMaterial.SetTexture(devNorm, 2);
-		gargoyleMaterial.SetTexture(blackTex, 3);
-	
+		ShaderProgram * standardShader = resourceManager.GetShader("standard");
 
-		Material tilesMaterial = Material(GargoyleShader);
-		tilesMaterial.SetProperty4f("material", glm::vec4(0.1f, 0.7f, 1, 8));
-		tilesMaterial.SetProperty4f("flatColor", glm::vec4(1, 1, 1, 0.15f));
-		tilesMaterial.SetTexture(tilesDiff, 0);
-		tilesMaterial.SetTexture(tilesSpec, 1);
-		tilesMaterial.SetTexture(tilesNorm, 2);
-		tilesMaterial.SetTexture(cubeMap, 3);
+		{
+			std::unique_ptr<Material> material = std::make_unique<StandardMaterial>(standardShader);
+			StandardMaterial * mat = (StandardMaterial*)material.get();
+			mat->diffuse = devDiff;
+			mat->normal = devNorm;
+			resourceManager.AddMaterial(material, "gargoyle");
+		}
+		Material & gargoyleMaterial = *resourceManager.GetMaterial("gargoyle");
 
-		Material devMaterial = Material(GargoyleShader);
-		devMaterial.SetProperty4f("material", glm::vec4(0.05f,0.5f,1,8));
-		devMaterial.SetProperty4f("flatColor", glm::vec4(0.7f, 0.7f, 0.7f, 2));
-		devMaterial.SetTexture(devDiff, 0);
-		devMaterial.SetTexture(whiteTex, 1);
-		devMaterial.SetTexture(devNorm, 2);
-		devMaterial.SetTexture(blackTex, 3);
-
-		Material woodMaterial = Material(GargoyleShader);
-		woodMaterial.SetProperty4f("material", glm::vec4(0.1f, 0.7f, 0.1f, 2));
-		woodMaterial.SetProperty4f("flatColor", glm::vec4(1, 1, 1, 0.15f));
-		woodMaterial.SetTexture(woodDiff, 0);
-		woodMaterial.SetTexture(whiteTex, 1);
-		woodMaterial.SetTexture(purpleTex, 2);
-		woodMaterial.SetTexture(blackTex, 3);
+		{
+			std::unique_ptr<Material> material = std::make_unique<StandardMaterial>(standardShader);
+			StandardMaterial * mat = (StandardMaterial*)material.get();
+			mat->material = glm::vec4(0.05f, 0.5f, 1, 8);
+			mat->color = glm::vec4(0.7f, 0.7f, 0.7f, 2);
+			mat->diffuse = devDiff;
+			mat->normal = devNorm;
+			resourceManager.AddMaterial(material, "dev");
+		}
+		Material & devMaterial = *resourceManager.GetMaterial("dev");
 
 		//Objects
 
 		std::unique_ptr<GameObject> gargoyle = std::make_unique<GameObject>();
-		gargoyle->mesh = gargoyleMesh.get();
+		gargoyle->mesh = resourceManager.GetMesh("gargoyle");
 		gargoyle->material = &devMaterial;
 		gargoyle->GetTransform().SetPostion(glm::vec3(0.0, 0.0, 0.0));
 		gargoyle->name = "gargoyle";
 
-
 		std::unique_ptr<GameObject> gameStage = std::make_unique<GameObject>();
-		gameStage->mesh = gameStageMesh.get();
+		gameStage->mesh = resourceManager.GetMesh("gameStage");
 		gameStage->material = &devMaterial;
 		gameStage->GetTransform().SetPostion(glm::vec3(0, 0, 0));
 		gameStage->name = "gameStage";
 
 		std::unique_ptr<GameObject> oldKey = std::make_unique<GameObject>();
-		oldKey->mesh = oldKeyMesh.get();
+		oldKey->mesh = resourceManager.GetMesh("oldKey");
 		oldKey->material = &devMaterial;
 		oldKey->GetTransform().SetPostion(glm::vec3(0, 0, 0));
 		oldKey->name = "oldKey";
 
 		std::unique_ptr<GameObject> table2 = std::make_unique<GameObject>();
-		table2->mesh = table2Mesh.get();
+		table2->mesh = resourceManager.GetMesh("table");
 		table2->material = &devMaterial;
 		table2->GetTransform().SetPostion(glm::vec3(0, 0, 0));
 		table2->name = "Table.001";
 
 		std::unique_ptr<GameObject> riddlePaper = std::make_unique<GameObject>();
-		riddlePaper->mesh = riddlePaperMesh.get();
+		riddlePaper->mesh = resourceManager.GetMesh("riddlepaper");
 		riddlePaper->material = &devMaterial;
 		riddlePaper->GetTransform().SetPostion(glm::vec3(0, 0, 0));
 		riddlePaper->name = "RiddlePaper";
 
 		std::unique_ptr<GameObject> riddlePaper2 = std::make_unique<GameObject>();
-		riddlePaper2->mesh = riddlePaperMesh2.get();
+		riddlePaper2->mesh = resourceManager.GetMesh("riddlepaper2");
 		riddlePaper2->material = &devMaterial;
 		riddlePaper2->GetTransform().SetPostion(glm::vec3(0, -0.05, 0));
 		riddlePaper2->name = "RiddlePaper2";
@@ -418,19 +324,6 @@ int main(int argc, char** argv)
 		myScene.AddObject(table2);
 		myScene.AddObject(riddlePaper);
 		myScene.AddObject(riddlePaper2);
-
-		// Dynamics
-
-		//gargoyle
-		PxMaterial* gargoyleMat = gPhysics->createMaterial(0.5f, 0.5f, 0.6f);
-		auto &transform = myScene.GetObject("gargoyle")->GetTransform();
-		auto &gargPos = transform.GetPosition();
-		PxRigidDynamic* gargyoleBox = gPhysics->createRigidDynamic(PxTransform(gargPos[0], gargPos[1],gargPos[2]));
-		PxShape* gargoyleBoxShape = PxRigidActorExt::createExclusiveShape(*gargyoleBox, PxBoxGeometry(0.75, 0.6, 0.75), *gargoyleMat);
-		gScene->addActor(*gargyoleBox);
-		PxSetGroup(*gargyoleBox, 2);
-		gargoyleBoxShape->setQueryFilterData(PxFilterData(GROUP1, 0, 0, 0));
-		auto debug = gargyoleBox->getGlobalPose();
 
 		//Particles
 
@@ -492,11 +385,11 @@ int main(int argc, char** argv)
 		myScene.activeCamera = &camera;
 		myScene.viewDataBuffer = &viewDataBuffer;
 		myScene.SSrectVAOId = ssplaneVAO;
-		myScene.portalHoldoutShader = unlitShader;
-		myScene.depthResetSS = SSDepthReset;
+		myScene.portalHoldoutShader = resourceManager.GetShader("unlit");
+		myScene.depthResetSS = SSDepthReset.get();
 
 		Portal myTestPortal = Portal();
-		myTestPortal.portalMesh = myPortalTestMesh;
+		myTestPortal.portalMesh = resourceManager.GetMesh("portal");
 		myTestPortal.transform.SetRotationDegrees(0,90,0);
 		myTestPortal.transform.SetPostion(glm::vec3(-3.999f, 1, 0));
 		myTestPortal.targetTransform.SetRotationDegrees(0, 0, 0);
@@ -504,7 +397,7 @@ int main(int argc, char** argv)
 		myScene.renderPortals.push_back(myTestPortal);
 
 		Portal myTestPortal2 = Portal();
-		myTestPortal2.portalMesh = myPortalTestMesh;
+		myTestPortal2.portalMesh = resourceManager.GetMesh("portal");
 		myTestPortal2.transform.SetRotationDegrees(0, 0, 0);
 		myTestPortal2.transform.SetPostion(glm::vec3(0, 3.5f, -5.999f));
 		myTestPortal2.targetTransform.SetRotationDegrees(0, 90, 0);
@@ -514,10 +407,8 @@ int main(int argc, char** argv)
 		const float physTimeStep = 1.0f / 60.0f;
 		float physTimeAccumulator = 0;
 
-		GameLogic gameLogic = GameLogic(myScene, gScene, c, window, myCameraController, keyMap, 0, gargyoleBox);
-
-		//physx::PxActor** userBuffer;
-		//auto actors = gScene->getActors(PxActorTypeFlag::eRIGID_DYNAMIC,userBuffer,10);
+		GameLogic gameLogic = GameLogic(myScene, gScene, window, gPhysics, myCameraController, keyMap);
+		gameLogic.SetupScene();
 
 		//Render Loop
 		while (!glfwWindowShouldClose(window))
@@ -539,21 +430,18 @@ int main(int argc, char** argv)
 
 			//--------------------------PHYSICS UPDATE--------------------------------
 
-		//Do Physics steps
+			//Do Physics steps
 			while (physTimeAccumulator > physTimeStep) {
 				gScene->simulate(physTimeStep);
 				gScene->fetchResults(true);
 				physTimeAccumulator -= physTimeStep;
 			}
 
-			auto debug2 = gargyoleBox->getGlobalPose();
-
 			//--------------------------UPDATE--------------------------------
 
 			/* GAME LOGIC */
 
-			gameLogic.updateDeltaTime(deltaTime);
-			gameLogic.checkGameState();
+			gameLogic.Update(deltaTime);
 
 			//--------------------------RENDER--------------------------------
 
@@ -709,7 +597,8 @@ int main(int argc, char** argv)
 		glDeleteVertexArrays(1, &ssplaneVAO);
 
 	}
-	_shaderCompileError:
+_shaderCompileError:
+	ResourceManager::GetInstance().Clear();
 
 	glfwTerminate(); //Cleanup GLFW
 

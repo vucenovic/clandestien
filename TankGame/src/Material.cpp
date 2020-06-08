@@ -1,7 +1,9 @@
 #include "Material.h"
+#include "ResourceManager.h"
+#include <glm/gtc/type_ptr.hpp>
 
-Material::Material(std::shared_ptr<ShaderProgram> shaderProg) : shader(shaderProg) {
-
+Material::Material(ShaderProgram * shaderProg) : shader(shaderProg)
+{
 }
 
 Material::~Material()
@@ -21,7 +23,7 @@ void Material::UseShader() const
 
 void Material::ApplyProperties() const
 {
-	for (std::pair<GLuint, std::shared_ptr<Texture>> tex : textures) {
+	for (std::pair<GLuint, Texture *> tex : textures) {
 		tex.second->Bind(tex.first);
 	}
 	for (const std::pair<const GLuint, std::unique_ptr<MaterialProperty>>& property : properties) {
@@ -54,7 +56,7 @@ void Material::SetPropertyi(const std::string & name, GLint val)
 	properties[shader->GetUniformLocation(name)] = std::make_unique<MaterialPropertyi>(val);
 }
 
-void Material::SetTexture(std::shared_ptr<Texture> texture, GLuint textureUnit)
+void Material::SetTexture(Texture * texture, GLuint textureUnit)
 {
 	textures[textureUnit] = texture;
 }
@@ -79,18 +81,34 @@ void MaterialPropertyMatrix4f::Set(GLuint location)
 	glUniformMatrix4fv(location, 1, false ,  glm::value_ptr(val));
 }
 
-void MaterialInstance::Use()
-{
-	material.Use();
-	for (std::pair<GLuint, std::shared_ptr<Texture>> tex : instanceTextures) {
-		tex.second->Bind(tex.first);
-	}
-	for (const std::pair<const GLuint, std::unique_ptr<MaterialProperty>>& property : instanceProperties) {
-		property.second.get()->Set(property.first);
-	}
-}
-
 void MaterialPropertyi::Set(GLuint location)
 {
 	glUniform1i(location, val);
+}
+
+StandardMaterial::StandardMaterial(ShaderProgram * shader) : Material(shader)
+{
+	ResourceManager & res = ResourceManager::GetInstance();
+	diffuse = (Texture2D*)res.GetTexture("white");
+	specular = (Texture2D*)res.GetTexture("black");
+	normal = (Texture2D*)res.GetTexture("purple");
+
+	matLoc = shader->GetUniformLocation("material");
+	colLoc = shader->GetUniformLocation("flatColor");
+}
+
+void StandardMaterial::Use() const
+{
+	diffuse->Bind(0);
+	specular->Bind(1);
+	normal->Bind(2);
+
+	glActiveTexture(GL_TEXTURE0 + 3);//TODO replace with actual cubemap loading
+	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+
+	UseShader();
+	glUniform4fv(matLoc, 1, glm::value_ptr(material));
+	glUniform4fv(colLoc, 1, glm::value_ptr(color));
+
+	ApplyProperties();
 }
