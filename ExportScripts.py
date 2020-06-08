@@ -234,8 +234,8 @@ def CheckFolder(file):
     import os
     os.makedirs(os.path.dirname(file), exist_ok=True)
 
-def ExportSelectedObjects(fp):
-    bpy.ops.export_scene.obj(filepath=fp, check_existing = True,use_selection=True,use_edges=False,use_materials=False,use_triangles=True,use_blen_objects=False)
+def ExportSelectedObjects(fp,overwrite = False):
+    bpy.ops.export_scene.obj(filepath=fp, check_existing = not overwrite,use_selection=True,use_edges=False,use_materials=False,use_triangles=True,use_blen_objects=False)
 
 def ExportMeshes(meshes, folder=""):
     if(len(meshes)==0): return
