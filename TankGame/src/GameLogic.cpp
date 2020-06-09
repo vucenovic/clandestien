@@ -62,28 +62,6 @@ void GameLogic::raycastFilter()
 		if (p != nullptr) {
 			((Interactable*) p)->interact((PxRigidBody*) hit.block.actor, (PxRigidBody*) character->getActor(), hit, *this);
 		}
-		//	// TODO: 2 Rätsel Logik
-		//	//checkPrerequisites();
-		//	//disableParticles();
-		//	//removeKeyFromScene();
-		//}
-		//	// TODO: Tür Logik
-		//}
-	}
-}
-
-void GameLogic::moveDynamic(glm::vec3 viewVector)
-{
-	using namespace physx;
-	auto &transform = ourScene.GetObject("gargoyle")->GetTransform();
-	float factor = (float)(glfwGetKey(ourWindow, keyBinds.forward) == GLFW_PRESS) - (glfwGetKey(ourWindow, keyBinds.backward) == GLFW_PRESS);
-	if (factor!=0) {
-		auto currPos = ourGargoyleBox->getGlobalPose();
-		viewVector.y = 0;
-		glm::vec3 moveDir = glm::normalize(viewVector) * factor * 2.0f * deltaTime;
-		auto newPos = PxTransform(moveDir.x,moveDir.y,moveDir.z).transform(currPos);
-		transform.SetPostion(PxToGlmVec3(PxExtendedVec3(ourGargoyleBox->getGlobalPose().p[0], ourGargoyleBox->getGlobalPose().p[1], ourGargoyleBox->getGlobalPose().p[2])));
-		ourGargoyleBox->setGlobalPose(newPos);
 	}
 }
 
