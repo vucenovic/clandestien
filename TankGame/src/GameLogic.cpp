@@ -58,7 +58,10 @@ void GameLogic::raycastFilter()
 	bool status = ourPxScene->raycast(origin, unitDir, maxDistance, hit, outputFlags, filterData);
 	if (status && (glfwGetKey(ourWindow, keyBinds.interaction) == GLFW_PRESS)) {
 		//gargoyle hit
-		moveDynamic(viewVector);
+		void* p = hit.block.actor->userData;
+		if (p != nullptr) {
+			((Interactable*) p)->interact((PxRigidBody*) hit.block.actor, (PxRigidBody*) character->getActor(), hit, *this);
+		}
 		//	// TODO: 2 Rätsel Logik
 		//	//checkPrerequisites();
 		//	//disableParticles();
@@ -166,7 +169,8 @@ void GameLogic::SetupScene()
 
 	PxSetGroup(*character->getActor(), 1);
 
-	//gargoyle
+	//Gargoyle
+
 	PxMaterial* gargoyleMat = physX->createMaterial(0.5f, 0.5f, 0.6f);
 	auto &transform = ourScene.GetObject("gargoyle")->GetTransform();
 	auto &gargPos = transform.GetPosition();
@@ -176,4 +180,5 @@ void GameLogic::SetupScene()
 	PxSetGroup(*ourGargoyleBox, 2);
 	gargoyleBoxShape->setQueryFilterData(PxFilterData(GROUP1, 0, 0, 0));
 	ourGargoyleBox->setRigidDynamicLockFlags(PxRigidDynamicLockFlag::eLOCK_ANGULAR_X | PxRigidDynamicLockFlag::eLOCK_ANGULAR_Y | PxRigidDynamicLockFlag::eLOCK_ANGULAR_Z);
+	ourGargoyleBox->userData = new Gargoyle(*ourScene.GetObject("gargoyle"));
 }

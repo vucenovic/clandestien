@@ -7,6 +7,8 @@
 #include "CameraController.h"
 #include "KeyMap.h"
 #include <iostream>
+#include "Gargoyle.h"
+#include "Interactable.h"
 
 #include <PhysX/PxPhysicsAPI.h>
 
@@ -58,6 +60,12 @@ public:
 	void handlePortals(); // moves the character from one portal to another adjusting the camera
 
 	void SetupScene();
+
+	Scene& getScene() { return ourScene; };
+	physx::PxScene* getPxScene() { return ourPxScene; };
+	GLFWwindow* getWindow() { return ourWindow; };
+	KeyMap getKeyBinds() { return keyBinds;};
+	float getDelta() { return deltaTime; };
 private:
 	void initStaticColliders(); // initializes static colliders
 };
