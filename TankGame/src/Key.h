@@ -1,6 +1,8 @@
 #pragma once
 #include "Interactable.h"
+#include "GameLogic.h"
 
+class GameLogic;
 
 class Key :
 	public Interactable
@@ -9,7 +11,7 @@ class Key :
 		GameObject& gObject;
 
 	public:
-		Key::Key(GameObject& gObject);
-		virtual void interact(PxRigidBody* actor, PxRigidBody* invoker, PxRaycastBuffer& hit, GameLogic& gameLogic) override;
+		Key(GameObject& gObject);
+		virtual void interact(physx::PxRigidBody* actor, physx::PxRigidBody* invoker, physx::PxRaycastBuffer& hit, GameLogic& gameLogic) override;
 };
 

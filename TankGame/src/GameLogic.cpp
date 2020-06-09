@@ -159,4 +159,8 @@ void GameLogic::SetupScene()
 	gargoyleBoxShape->setQueryFilterData(PxFilterData(GROUP1, 0, 0, 0));
 	ourGargoyleBox->setRigidDynamicLockFlags(PxRigidDynamicLockFlag::eLOCK_ANGULAR_X | PxRigidDynamicLockFlag::eLOCK_ANGULAR_Y | PxRigidDynamicLockFlag::eLOCK_ANGULAR_Z);
 	ourGargoyleBox->userData = new Gargoyle(*ourScene.GetObject("gargoyle"));
+
+	//Key
+
+
 }

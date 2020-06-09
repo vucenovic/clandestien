@@ -1,7 +1,6 @@
 #pragma once
 #include <PhysX/PxPhysicsAPI.h>
 #include "GameObject.h"
-#include "GameLogic.h"
 
 class GameLogic;
 

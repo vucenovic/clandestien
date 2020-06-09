@@ -5,7 +5,7 @@ Gargoyle::Gargoyle(GameObject & gObject)
 {
 }
 
-void Gargoyle::interact(PxRigidBody* actor, PxRigidBody* invoker, PxRaycastBuffer& hit, GameLogic& gameLogic)
+void Gargoyle::interact(physx::PxRigidBody* actor, physx::PxRigidBody* invoker, physx::PxRaycastBuffer& hit, GameLogic& gameLogic)
 {
 	using namespace physx;
 	glm::vec3 viewVector = gameLogic.getScene().activeCamera->GetTransform().GetForward();
