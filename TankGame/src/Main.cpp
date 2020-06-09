@@ -205,7 +205,7 @@ int main(int argc, char** argv)
 		resourceManager.AddMesh(OBJLoader::LoadOBJ("res/models/GameScene.obj"), "gameStage");
 		resourceManager.AddMesh(OBJLoader::LoadOBJ("res/models/Gargoyle.obj"), "gargoyle");
 		resourceManager.AddMesh(OBJLoader::LoadOBJ("res/models/Portal.obj"), "portal");
-		resourceManager.AddMesh(OBJLoader::LoadOBJ("res/models/old_key.obj"), "oldKey");
+		resourceManager.AddMesh(OBJLoader::LoadOBJ("res/models/old_key.obj"), "old_key");
 		resourceManager.AddMesh(OBJLoader::LoadOBJ("res/models/Table.obj"), "table");
 		resourceManager.AddMesh(OBJLoader::LoadOBJ("res/models/riddlepaper.obj"), "riddlepaper");
 		resourceManager.AddMesh(OBJLoader::LoadOBJ("res/models/riddlepaper2.obj"), "riddlepaper2");
@@ -247,7 +247,7 @@ int main(int argc, char** argv)
 		std::unique_ptr<GameObject> gargoyle = std::make_unique<GameObject>();
 		gargoyle->mesh = resourceManager.GetMesh("gargoyle");
 		gargoyle->material = &devMaterial;
-		gargoyle->GetTransform().SetPostion(glm::vec3(0.0, 0.0, 0.0));
+		gargoyle->GetTransform().SetPostion(glm::vec3(-1,1,-1.2));
 		gargoyle->name = "gargoyle";
 
 		std::unique_ptr<GameObject> gameStage = std::make_unique<GameObject>();
@@ -257,10 +257,10 @@ int main(int argc, char** argv)
 		gameStage->name = "gameStage";
 
 		std::unique_ptr<GameObject> oldKey = std::make_unique<GameObject>();
-		oldKey->mesh = resourceManager.GetMesh("oldKey");
+		oldKey->mesh = resourceManager.GetMesh("old_key");
 		oldKey->material = &devMaterial;
 		oldKey->GetTransform().SetPostion(glm::vec3(0, 0, 0));
-		oldKey->name = "oldKey";
+		oldKey->name = "old_key";
 
 		std::unique_ptr<GameObject> table2 = std::make_unique<GameObject>();
 		table2->mesh = resourceManager.GetMesh("table");
@@ -442,7 +442,6 @@ int main(int argc, char** argv)
 			/* GAME LOGIC */
 
 			gameLogic.Update(deltaTime);
-
 			//--------------------------RENDER--------------------------------
 
 			// SHADOW MAPS: render depth 

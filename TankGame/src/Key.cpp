@@ -15,5 +15,34 @@ void Key::interact(physx::PxRigidBody * actor, physx:: PxRigidBody * invoker, ph
 	gameLogic.getScene().activeCamera = &camera;
 
 	// unhexing logic
+	bool first = false;
+	bool second = false;
+	bool third = false;
+	bool fourth = false;
+
+	while (!glfwGetKey(gameLogic.getWindow(), GLFW_KEY_SPACE) && GLFW_PRESS) {
+		if (glfwGetKey(gameLogic.getWindow(), GLFW_KEY_Q) && GLFW_PRESS) {
+			first = true;
+		} if (glfwGetKey(gameLogic.getWindow(), GLFW_KEY_M) && GLFW_PRESS && first) {
+			second = true;
+		} if (glfwGetKey(gameLogic.getWindow(), GLFW_KEY_G) && GLFW_PRESS && first && second) {
+			third = true;
+		} if (glfwGetKey(gameLogic.getWindow(), GLFW_KEY_Y) && GLFW_PRESS && first && second && third) {
+			fourth = true;
+		}
+	}
+
+	if (first && second && third && fourth) {
+		actor->detachShape(*shape);
+		gameLogic.getPxScene()->removeActor(*actor);
+		gameLogic.getScene().RemoveObject("old_key");
+		//TODO: add key to character inventory
+	}
+
+	// leave view if failed or succed
+	gameLogic.getScene().activeCamera = oldCamera;
+	
 
 }
+
+

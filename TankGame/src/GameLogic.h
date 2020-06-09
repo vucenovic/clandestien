@@ -50,6 +50,7 @@ private:
 
 	CharacterDef cP = { 1.8f, 0.25f, 1.7f, 2.0f };
 	physx::PxRigidDynamic* ourGargoyleBox; //TODO: Aus szene auslesen
+	physx::PxRigidDynamic* ourKey;
 
 public:
 	GameLogic(Scene &scene, physx::PxScene *pxScene, GLFWwindow *window, physx::PxPhysics* physX, CameraController &cameraController, KeyMap keyMap);
