@@ -11,6 +11,12 @@ class Key :
 		GameObject& gObject;
 		physx::PxShape* shape; // needed for deletion
 
+		//keys
+		bool first = false;
+		bool second = false;
+		bool third = false;
+		bool fourth = false;
+
 	public:
 		Key(GameObject& gObject);
 		virtual void interact(physx::PxRigidBody* actor, physx::PxRigidBody* invoker, physx::PxRaycastBuffer& hit, GameLogic& gameLogic) override;

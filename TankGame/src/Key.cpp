@@ -15,10 +15,6 @@ void Key::interact(physx::PxRigidBody * actor, physx:: PxRigidBody * invoker, ph
 	gameLogic.getScene().activeCamera = &camera;
 
 	// unhexing logic
-	bool first = false;
-	bool second = false;
-	bool third = false;
-	bool fourth = false;
 
 	while (!glfwGetKey(gameLogic.getWindow(), GLFW_KEY_SPACE) && GLFW_PRESS) {
 		if (glfwGetKey(gameLogic.getWindow(), GLFW_KEY_Q) && GLFW_PRESS) {
