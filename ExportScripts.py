@@ -68,7 +68,7 @@ class MaterialDef():
         return ""
     
     def toCGet(self):
-        return "Resources.GetMaterial(" + stc(self.name) + ")"
+        return "resourceManager.GetMaterial(" + stc(self.name) + ")"
     
     def __repr__(self):
         return self.toC()
@@ -90,10 +90,10 @@ class MeshDef():
         self.material = missingMaterial if (len(data.materials) == 0) else (MaterialDef.get(data.materials[0]))
     
     def toC(self):
-        return ""
+        return "resourceManager.AddMesh(OBJLoader::LoadOBJ(\"res/models/" + self.name + ".obj\"), " + stc(self.name) + ");"
     
     def toCGet(self):
-        return "Resources.GetMesh(" + stc(self.name) + ")"
+        return "resourceManager.GetMesh(" + stc(self.name) + ")"
     
     def __repr__(self):
         return self.toC()
@@ -108,9 +108,9 @@ class GameObjectDef():
         return ("scene.AddObject(std::make_unique<GameObject>(" + 
         self.transform.toC() + ", " +
         self.mesh.toCGet() + ", " +
-        self.mesh.material.toCGet() + ", \"" +
+        self.mesh.material.toCGet() + ", " +
         stc(self.name) +
-        "\"));"
+        "));"
         )
     
     def __repr__(self):
@@ -230,6 +230,15 @@ def ExportStaticLights():
 
     return "//StaticLights\n" + ScopeLines(LightDefs)
 
+def ExportMeshDefs():
+    meshes = MeshDef.meshes.values()
+
+    lines = []
+    for mesh in meshes:
+        lines.append(mesh)
+
+    return "//Meshes\n" + ScopeLines(lines)
+
 def CheckFolder(file):
     import os
     os.makedirs(os.path.dirname(file), exist_ok=True)
@@ -264,6 +273,7 @@ def ExportDefs(asFile=False):
         f.write(ExportVisualStaticDefs() + "\n")
         f.write(ExportStaticLights() + "\n")
         f.write(ExportGameObjectDefs() + "\n")
+        f.write(ExportMeshDefs() + "\n")
         f.close()
         print("done")
     else:
@@ -271,6 +281,7 @@ def ExportDefs(asFile=False):
         print(ExportVisualStaticDefs())
         print(ExportStaticLights())
         print(ExportGameObjectDefs())
+        print(ExportMeshDefs())
 
 def Export():
     bpy.ops.object.select_all(action="DESELECT")
