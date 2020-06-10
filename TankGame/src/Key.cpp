@@ -32,7 +32,7 @@ void Key::interact(physx::PxRigidBody * actor, physx:: PxRigidBody * invoker, ph
 		actor->detachShape(*shape);
 		gameLogic.getPxScene()->removeActor(*actor);
 		gameLogic.getScene().RemoveObject("old_key");
-		//TODO: add key to character inventory
+		Inventory::instance().addKey();
 	}
 
 	// leave view if failed or succed

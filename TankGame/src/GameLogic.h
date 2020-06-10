@@ -67,6 +67,7 @@ public:
 	GLFWwindow* getWindow() { return ourWindow; };
 	KeyMap getKeyBinds() { return keyBinds;};
 	float getDelta() { return deltaTime; };
+
 private:
 	void initStaticColliders(); // initializes static colliders
 };

@@ -188,6 +188,9 @@
     <ClInclude Include="src\Key.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Inventory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="glew32.dll" />
