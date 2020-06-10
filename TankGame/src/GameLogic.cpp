@@ -148,31 +148,32 @@ void GameLogic::SetupScene()
 	PxSetGroup(*character->getActor(), 1);
 
 	//Gargoyle
-
 	PxMaterial* gargoyleMat = physX->createMaterial(0.5f, 0.5f, 0.6f);
-	auto &transform = ourScene.GetObject("gargoyle")->GetTransform();
-	transform.SetPostion(glm::vec3(-1, 1, -1.2));
-	auto &gargPos = transform.GetPosition();
-	ourGargoyleBox = physX->createRigidDynamic(PxTransform(gargPos[0], gargPos[1], gargPos[2]));
-	PxShape* gargoyleBoxShape = PxRigidActorExt::createExclusiveShape(*ourGargoyleBox, PxBoxGeometry(0.75, 0.6, 0.75), *gargoyleMat);
-	ourPxScene->addActor(*ourGargoyleBox);
-	PxSetGroup(*ourGargoyleBox, 2);
-	gargoyleBoxShape->setQueryFilterData(PxFilterData(GROUP1, 0, 0, 0));
-	ourGargoyleBox->setRigidDynamicLockFlags(PxRigidDynamicLockFlag::eLOCK_ANGULAR_X | PxRigidDynamicLockFlag::eLOCK_ANGULAR_Y | PxRigidDynamicLockFlag::eLOCK_ANGULAR_Z);
-	ourGargoyleBox->userData = new Gargoyle(*ourScene.GetObject("gargoyle"));
+	{
+		auto &transform = ourScene.GetObject("gargoyle")->GetTransform();
+		transform.SetPostion(glm::vec3(-1, 1, -1.2));
+		auto &gargPos = transform.GetPosition();
+		ourGargoyleBox = physX->createRigidDynamic(PxTransform(gargPos[0], gargPos[1], gargPos[2]));
+		PxShape* gargoyleBoxShape = PxRigidActorExt::createExclusiveShape(*ourGargoyleBox, PxBoxGeometry(0.75, 0.6, 0.75), *gargoyleMat);
+		ourPxScene->addActor(*ourGargoyleBox);
+		PxSetGroup(*ourGargoyleBox, 2);
+		gargoyleBoxShape->setQueryFilterData(PxFilterData(GROUP1, 0, 0, 0));
+		ourGargoyleBox->setRigidDynamicLockFlags(PxRigidDynamicLockFlag::eLOCK_ANGULAR_X | PxRigidDynamicLockFlag::eLOCK_ANGULAR_Y | PxRigidDynamicLockFlag::eLOCK_ANGULAR_Z);
+		ourGargoyleBox->userData = new Gargoyle(*ourScene.GetObject("gargoyle"));
+	}
 
 	//Key
-
-	PxMaterial* keyMat = physX->createMaterial(0.5f, 0.5f, 0.6f);
-	transform = ourScene.GetObject("old_key")->GetTransform();
-	auto &keyPos = transform.GetPosition();
-	ourKey = physX->createRigidDynamic(PxTransform(keyPos[0], keyPos[1], keyPos[2]));
-	PxShape* keyShape = PxRigidActorExt::createExclusiveShape(*ourGargoyleBox, PxBoxGeometry(0.38, 0.45, 0.1), *gargoyleMat);
-	ourPxScene->addActor(*ourKey);
-	PxSetGroup(*ourGargoyleBox, 2);
-	keyShape->setQueryFilterData(PxFilterData(GROUP1, 0, 0, 0));
-	ourKey->setRigidDynamicLockFlags(PxRigidDynamicLockFlag::eLOCK_ANGULAR_X | PxRigidDynamicLockFlag::eLOCK_ANGULAR_Y | PxRigidDynamicLockFlag::eLOCK_ANGULAR_Z);
-	ourKey->userData = new Gargoyle(*ourScene.GetObject("old_key"));
-
+	{
+		PxMaterial* keyMat = physX->createMaterial(0.5f, 0.5f, 0.6f);
+		auto transform = ourScene.GetObject("old_key")->GetTransform();
+		auto &keyPos = transform.GetPosition();
+		ourKey = physX->createRigidDynamic(PxTransform(keyPos[0], keyPos[1], keyPos[2]));
+		PxShape* keyShape = PxRigidActorExt::createExclusiveShape(*ourGargoyleBox, PxBoxGeometry(0.38, 0.45, 0.1), *gargoyleMat);
+		ourPxScene->addActor(*ourKey);
+		PxSetGroup(*ourGargoyleBox, 2);
+		keyShape->setQueryFilterData(PxFilterData(GROUP1, 0, 0, 0));
+		ourKey->setRigidDynamicLockFlags(PxRigidDynamicLockFlag::eLOCK_ANGULAR_X | PxRigidDynamicLockFlag::eLOCK_ANGULAR_Y | PxRigidDynamicLockFlag::eLOCK_ANGULAR_Z);
+		ourKey->userData = new Gargoyle(*ourScene.GetObject("old_key"));
+	}
 
 }
