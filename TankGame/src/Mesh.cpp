@@ -681,6 +681,7 @@ std::unique_ptr<Mesh> OBJLoader::LoadOBJ(const std::string & filePath)
 	std::vector<faceDef> faces;
 
 	std::ifstream file(filePath, std::ios::in | std::ios::ate);
+
 	long long fileLength = file.tellg();
 	file.seekg(0, std::ios::beg);
 	fileLength -= file.tellg();
