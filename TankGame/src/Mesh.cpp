@@ -655,13 +655,13 @@ std::unique_ptr<Mesh> OBJLoader::LoadOBJ(const std::string & filePath)
 	struct VertexManager {
 		std::unordered_map <vertDef, size_t, vertDefHasher> vertexDefs;
 		std::vector<Vertex> vertexData;
-		size_t runningCounter = 0;
+		size_t runningCounter;
 
 		const std::vector<glm::vec3> & positions;
 		const std::vector<glm::vec3> & normals;
 		const std::vector<glm::vec2> & textureCoords;
 
-		VertexManager(const std::vector<glm::vec3> & p, const std::vector<glm::vec3> & n, const std::vector<glm::vec2> & t) : positions(p), normals(n), textureCoords(t) { vertexData.reserve(p.size()); };
+		VertexManager(const std::vector<glm::vec3> & p, const std::vector<glm::vec3> & n, const std::vector<glm::vec2> & t) : positions(p), runningCounter(0), normals(n), textureCoords(t) { vertexData.reserve(p.size()); };
 
 		size_t getIndex(vertDef v) {
 			if (vertexDefs.count(v) == 0) {
@@ -681,8 +681,9 @@ std::unique_ptr<Mesh> OBJLoader::LoadOBJ(const std::string & filePath)
 	std::vector<faceDef> faces;
 
 	std::ifstream file(filePath, std::ios::in | std::ios::ate);
-	size_t fileLength = file.tellg();
+	long fileLength = file.tellg();
 	file.seekg(0, std::ios::beg);
+	fileLength -= file.tellg();
 
 	if (file.is_open()) {
 		lineReader lr = lineReader(2048, file,fileLength);

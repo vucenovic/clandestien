@@ -15,7 +15,7 @@ bool lineReader::getline() {
 	line = lineBuffer + bufferOffset;
 	bool notFound = true;
 
-	size_t nextBreak = bufferOffset;
+	long nextBreak = bufferOffset;
 	for (int i = bufferOffset; i < bufferLength; i++) {
 		if (lineBuffer[i] == '\n') {
 			nextBreak = i;
@@ -33,7 +33,7 @@ bool lineReader::getline() {
 			return false;
 		}
 		else {
-			size_t remLen = bufferLength - bufferOffset;
+			long remLen = bufferLength - bufferOffset;
 			memmove(lineBuffer, line, remLen);
 			file.read(lineBuffer + remLen, bufferOffset);
 			before += bufferOffset;
