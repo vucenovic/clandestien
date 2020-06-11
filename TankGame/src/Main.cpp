@@ -209,6 +209,9 @@ int main(int argc, char** argv)
 		resourceManager.AddMesh(OBJLoader::LoadOBJ("res/models/Table.obj"), "table");
 		resourceManager.AddMesh(OBJLoader::LoadOBJ("res/models/riddlepaper.obj"), "riddlepaper");
 		resourceManager.AddMesh(OBJLoader::LoadOBJ("res/models/riddlepaper2.obj"), "riddlepaper2");
+		resourceManager.AddMesh(OBJLoader::LoadOBJ("res/models/maze.obj"), "maze");
+
+		
 
 		//Materials
 
@@ -280,6 +283,12 @@ int main(int argc, char** argv)
 		riddlePaper2->GetTransform().SetPostion(glm::vec3(0, -0.05, 0));
 		riddlePaper2->name = "RiddlePaper2";
 
+		std::unique_ptr<GameObject> maze = std::make_unique<GameObject>();
+		maze->mesh = resourceManager.GetMesh("maze");
+		maze->material = &devMaterial;
+		maze->GetTransform().SetPostion(glm::vec3(0, -0.05, 0));
+		maze->name = "maze";
+
 		//--------Uniform Buffers
 
 		UniformBuffer viewDataBuffer = UniformBuffer(*standardShader, std::string("viewData"), { "projection","view" }, 2);
@@ -324,6 +333,7 @@ int main(int argc, char** argv)
 		myScene.AddObject(table2);
 		myScene.AddObject(riddlePaper);
 		myScene.AddObject(riddlePaper2);
+		myScene.AddObject(maze);
 
 		//Particles
 

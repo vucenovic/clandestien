@@ -95,7 +95,9 @@ void GameLogic::initStaticColliders()
 	const PxU32 staticColliderCount = 32;
 	GameSceneAggregateBuilder agg = GameSceneAggregateBuilder(staticColliderCount, false, physX);
 	{
-		agg.addStaticBox(PxTransform(0, 1.25f, 2.5f), PxBoxGeometry(4.0f, 1.25f, 0.5f));
+		agg.addStaticBox(PxTransform(0, -0.5f, -5.5f), PxBoxGeometry(8.0f, 0.5f, 8.0f));
+
+		/*agg.addStaticBox(PxTransform(0, 1.25f, 2.5f), PxBoxGeometry(4.0f, 1.25f, 0.5f));
 		agg.addStaticBox(PxTransform(4.5f, 2.75f, 0), PxBoxGeometry(0.5f, 2.75f, 2.4f));
 		agg.addStaticBox(PxTransform(-4.5f, 4.0f, -2.0f), PxBoxGeometry(0.5f, 1.5f, 4.4f));
 		agg.addStaticBox(PxTransform(-4.5f, 1.25f, -1.5f), PxBoxGeometry(0.5f, 1.25f, 1.0f));
@@ -118,7 +120,7 @@ void GameLogic::initStaticColliders()
 		agg.addStaticBox(PxTransform(-3.569f, 1.25f, -2.25f), PxBoxGeometry(0.436f, 1.25f, 0.25f));
 		agg.addStaticBox(PxTransform(0.01f, 3.388f, -2.902f), PxBoxGeometry(0.49f, 0.118f, 0.49f));
 		agg.addStaticBox(PxTransform(0.01f, 2.939f, -2.902f), PxBoxGeometry(0.222f, 0.345f, 0.222f));
-		agg.addStaticBox(PxTransform(0.01f, 2.519f, -2.902f), PxBoxGeometry(0.416f, 0.061f, 0.416f));
+		agg.addStaticBox(PxTransform(0.01f, 2.519f, -2.902f), PxBoxGeometry(0.416f, 0.061f, 0.416f));*/
 	}
 	ourPxScene->addAggregate(*agg.gameSceneAggregate);
 }
