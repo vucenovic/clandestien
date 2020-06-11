@@ -35,10 +35,10 @@ bool lineReader::getline() {
 		else {
 			size_t remLen = bufferLength - bufferOffset;
 			memmove(lineBuffer, line, remLen);
-			size_t before = file.tellg();
 			file.read(lineBuffer + remLen, bufferOffset);
+			before += bufferOffset;
 			if (file.eof()) {
-				bufferLength = fileLength - before + remLen;
+				bufferLength = fileLength + remLen - before;
 			}
 			bufferOffset = 0;
 			return getline(); //easiest way of doing this

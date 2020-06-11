@@ -142,7 +142,6 @@
     <ClCompile Include="src\Key.cpp" />
     <ClCompile Include="src\Gargoyle.cpp" />
     <ClCompile Include="src\GameLogic.cpp" />
-    <ClCompile Include="src\HUD.cpp" />
     <ClCompile Include="src\GameSceneAggregateBuilder.cpp" />
     <ClCompile Include="src\BSPTree.cpp" />
     <ClCompile Include="src\AudioFile.cpp" />
@@ -173,7 +172,6 @@
     <ClInclude Include="src\Gargoyle.h" />
     <ClInclude Include="src\Interactable.h" />
     <ClInclude Include="src\GameLogic.h" />
-    <ClInclude Include="src\HUD.h" />
     <ClInclude Include="src\GameSceneAggregateBuilder.h" />
     <ClInclude Include="src\BSPTree.h" />
     <ClInclude Include="src\AudioFile.h" />

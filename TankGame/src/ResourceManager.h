@@ -9,6 +9,10 @@
 #include "Material.h"
 #include "Texture.h"
 
+static void ass(size_t a) {
+
+}
+
 class ResourceManager
 {
 private:
@@ -25,10 +29,22 @@ public:
 	std::map<std::string, std::unique_ptr<Material>> materials;
 	std::map<std::string, std::unique_ptr<Texture>> textures;
 
-	ShaderProgram * GetShader(const std::string & name) { return shaders[name].get(); };
-	Mesh * GetMesh(const std::string & name) { return meshes[name].get(); };
-	Material * GetMaterial(const std::string & name) { return materials[name].get(); };
-	Texture * GetTexture(const std::string & name) { return textures[name].get(); };
+	ShaderProgram * GetShader(const std::string & name) {
+		ass(shaders.count(name));
+		return shaders[name].get();
+	};
+	Mesh * GetMesh(const std::string & name) {
+		ass(meshes.count(name));
+		return meshes[name].get();
+	};
+	Material * GetMaterial(const std::string & name) {
+		ass(materials.count(name));
+		return materials[name].get();
+	};
+	Texture * GetTexture(const std::string & name) {
+		ass(textures.count(name));
+		return textures[name].get();
+	};
 
 	void AddShader(std::unique_ptr<ShaderProgram> & shader, const std::string & key) { shaders[key] = std::move(shader); };
 	void AddMesh(std::unique_ptr<Mesh> & mesh, const std::string & key) { meshes[key] = std::move(mesh); };

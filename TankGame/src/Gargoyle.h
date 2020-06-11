@@ -9,10 +9,11 @@ class Gargoyle :
 {
 	private:
 		GameObject& gObject;
+		physx::PxRigidBody* actor;
 
 	public:
-		Gargoyle(GameObject& gObject);
+		Gargoyle(GameObject& gObject, physx::PxRigidBody* actor) : gObject(gObject), actor(actor) {};
 		virtual void interact(physx::PxRigidBody* actor, physx::PxRigidBody* invoker, physx::PxRaycastBuffer& hit, GameLogic& gameLogic) override;
 
+		void LateUpdate();
 };
-

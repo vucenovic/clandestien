@@ -19,7 +19,7 @@ class Transform():
         return ("Transform(" +
         vectorToC(self.pos) + ", " +
         eulerToC(self.rot) + ", " + 
-        vectorToC(self.scale,s=1) + ", " + 
+        vectorToC(self.scale,s=1) + 
         ")")
     
     def __repr__(self):
@@ -35,13 +35,13 @@ class ColliderDef:
             self.tpe = "MESH"
             self.meshRef = collider.data.name
     
-    def toC(self):
+    def toC(self,prefix = "agg.addStaticBox("):
         if(self.tpe == "CUBE"):
-            return ("agg.addStaticBox(" +
+            return (prefix +
             (
-                (vectorToC(self.transform.pos,cl="PxTransform"))
+                ("PxTransform(" + vectorToC(self.transform.pos,cl="PxVec3") + ")")
                 if not self.transform.hasRotation() else
-                ("PxTransform(" + vectorToC(self.transform.pos,cl="PxVec3") + ",fromEuler(" + eulerToC(self.transform.rot) + "))")
+                ("PxTransform(" + vectorToC(self.transform.pos,cl="PxVec3") + ",PxConv<PxQuat>(" + eulerToC(self.transform.rot) + "))")
             ) + ", " +
             vectorToC(self.transform.scale,cl="PxBoxGeometry",s=1) + ");"
             )
@@ -166,7 +166,7 @@ def colortoC(color, decim = 2):
 
 def vectorToC(vector, decim = 3, cl = "glm::vec3", s = -1):
     if(vector.length_squared==0):
-        return cl + "()"
+        return cl + "(0)"
     t = vector.to_tuple(decim)
     return cl + "(" + ftc(t[0]) + "," + ftc(t[2]) + "," + ftc(s * t[1]) + ")"
 
@@ -219,7 +219,13 @@ def ExportGameObjectDefs():
         if obj.parent == None:
             ObjDefs.append(GameObjectDef(obj))
 
-    return "//GameObjects\n" + ScopeLines(ObjDefs)
+    ret = "//GameObjects\n" + ScopeLines(ObjDefs) + "\n//GameObject Colliders\n"
+    
+    colliders = bpy.data.collections["ObjectColliders"].objects
+    for col in colliders:
+        ret += ColliderDef(col).toC("addColliderToDynamic(" + stc(col.parent.name) + ", ") + "\n"
+    
+    return ret
 
 def ExportStaticLights():
     lights = bpy.data.collections["StaticLights"].objects
@@ -244,7 +250,7 @@ def CheckFolder(file):
     os.makedirs(os.path.dirname(file), exist_ok=True)
 
 def ExportSelectedObjects(fp,overwrite = False):
-    bpy.ops.export_scene.obj(filepath=fp, check_existing = not overwrite,use_selection=True,use_edges=False,use_materials=False,use_triangles=True,use_blen_objects=False)
+    bpy.ops.export_scene.obj(filepath=fp, check_existing = not overwrite, use_selection=True,use_edges=False,use_materials=False,use_triangles=True,use_blen_objects=False)
 
 def ExportMeshes(meshes, folder=""):
     if(len(meshes)==0): return
@@ -292,5 +298,5 @@ def Export():
 
 basePath = bpy.path.abspath("//exports\\")
 #Export()
-ExportDefs(False)
-#ExportMeshes(MeshDef.meshes, "models\\")
+ExportDefs(True)
+ExportMeshes(MeshDef.meshes, "models\\")

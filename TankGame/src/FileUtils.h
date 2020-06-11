@@ -9,6 +9,8 @@ std::string loadFileAsString(const std::string & filepath);
 	if a line in the file is longer than the buffer length then it will not be fully read //TODO fix this (maybe? it would become slower)
 */
 class lineReader {
+private:
+	size_t before = 0;
 public:
 	char * lineBuffer;
 	char * line;

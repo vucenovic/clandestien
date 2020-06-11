@@ -685,7 +685,7 @@ std::unique_ptr<Mesh> OBJLoader::LoadOBJ(const std::string & filePath)
 	file.seekg(0, std::ios::beg);
 
 	if (file.is_open()) {
-		lineReader lr = lineReader(1024, file,fileLength);
+		lineReader lr = lineReader(2048, file,fileLength);
 		char * mid_ptr;
 		while (lr.getline())
 		{

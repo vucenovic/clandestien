@@ -28,7 +28,6 @@
 #include "Particles.h"
 #include "Camera.h"
 #include "GameSceneAggregateBuilder.h"
-#include "HUD.h"
 #include "KeyMap.h"
 #include "GameLogic.h"
 #include "ResourceManager.h"
@@ -160,7 +159,7 @@ int main(int argc, char** argv)
 		std::unique_ptr<ShaderProgram> debugShader, pp_demultAlpha, pp_gammaCorrect, pp_blur, pp_bloom, SSDepthReset, DebugDepthSS;
 		try
 		{
-			debugShader =ShaderProgram::FromFile("res/shaders/common.vert", "res/shaders/Debug.frag");
+			debugShader = ShaderProgram::FromFile("res/shaders/common.vert", "res/shaders/Debug.frag");
 			pp_demultAlpha = ShaderProgram::FromFile("res/shaders/screenspace.vert", "res/shaders/DemultAlpha.frag");
 			pp_gammaCorrect = ShaderProgram::FromFile("res/shaders/screenspace.vert", "res/shaders/GammaCorrect.frag");
 			pp_blur = ShaderProgram::FromFile("res/shaders/screenspace.vert", "res/shaders/Blur.frag");
@@ -168,9 +167,9 @@ int main(int argc, char** argv)
 			SSDepthReset = ShaderProgram::FromFile("res/shaders/screenspace.vert", "res/shaders/DepthReset.frag");
 			DebugDepthSS = ShaderProgram::FromFile("res/shaders/screenspace.vert", "res/shaders/depthToColor.frag");
 
-			resourceManager.AddShader(ShaderProgram::FromFile("res/shaders/particle.vert", "res/shaders/particle.geom", "res/shaders/particle.frag"),"particle");
-			resourceManager.AddShader(ShaderProgram::FromFile("res/shaders/common.vert", "res/shaders/Unlit.frag"),"unlit");
-			resourceManager.AddShader(ShaderProgram::FromFile("res/shaders/common.vert", "res/shaders/standardShader.frag"),"standard");
+			resourceManager.AddShader(ShaderProgram::FromFile("res/shaders/particle.vert", "res/shaders/particle.geom", "res/shaders/particle.frag"), "particle");
+			resourceManager.AddShader(ShaderProgram::FromFile("res/shaders/common.vert", "res/shaders/Unlit.frag"), "unlit");
+			resourceManager.AddShader(ShaderProgram::FromFile("res/shaders/common.vert", "res/shaders/standardShader.frag"), "standard");
 		}
 		catch (const std::invalid_argument&)
 		{
@@ -179,19 +178,18 @@ int main(int argc, char** argv)
 		}
 		std::unique_ptr<TextureCubemap> cubeMap = std::make_unique<TextureCubemap>("res/textures/cubemap/");
 
-		resourceManager.AddTexture(std::make_unique<Texture2D>("res/textures/dev_diffuse"), "dev_diff");
-		resourceManager.AddTexture(std::make_unique<Texture2D>("res/textures/dev_normal"), "dev_norm");
 		resourceManager.AddTexture(std::make_unique<Texture2D>(glm::vec3(1)), "white");
 		resourceManager.AddTexture(std::make_unique<Texture2D>(glm::vec3(0)), "black");
 		resourceManager.AddTexture(std::make_unique<Texture2D>(glm::vec3(0.5f, 0.5f, 1)), "purple");
+
+		GameLogic::SetupResources(); //Load all resources
 
 		Texture2D *whiteTex = (Texture2D*)resourceManager.GetTexture("white");
 		Texture2D *blackTex = (Texture2D*)resourceManager.GetTexture("black");
 		Texture2D *purpleTex = (Texture2D*)resourceManager.GetTexture("purple");
 		Texture2D *devDiff = (Texture2D*)resourceManager.GetTexture("dev_diff");
 		Texture2D *devNorm = (Texture2D*)resourceManager.GetTexture("dev_norm");
-
-		std::unique_ptr<Texture2D> particleTex = std::make_unique<Texture2D>("res/textures/particle");
+		Texture2D * particleTex = (Texture2D*)resourceManager.GetTexture("particle");
 
 		//--------Camera
 
@@ -200,23 +198,10 @@ int main(int argc, char** argv)
 
 		CameraController myCameraController(&camera.GetTransform(),window);
 
-		//Meshes
-		
-		resourceManager.AddMesh(OBJLoader::LoadOBJ("res/models/GameScene.obj"), "gameStage");
-		resourceManager.AddMesh(OBJLoader::LoadOBJ("res/models/Gargoyle.obj"), "gargoyle");
-		resourceManager.AddMesh(OBJLoader::LoadOBJ("res/models/Portal.obj"), "portal");
-		resourceManager.AddMesh(OBJLoader::LoadOBJ("res/models/old_key.obj"), "old_key");
-		resourceManager.AddMesh(OBJLoader::LoadOBJ("res/models/Table.obj"), "table");
-		resourceManager.AddMesh(OBJLoader::LoadOBJ("res/models/riddlepaper.obj"), "riddlepaper");
-		resourceManager.AddMesh(OBJLoader::LoadOBJ("res/models/riddlepaper2.obj"), "riddlepaper2");
-		resourceManager.AddMesh(OBJLoader::LoadOBJ("res/models/maze.obj"), "maze");
-
-		
-
 		//Materials
 
 		std::shared_ptr<Material> particlesMaterial = std::make_shared<Material>(resourceManager.GetShader("particle"));
-		particlesMaterial->SetTexture(particleTex.get(), 0);
+		particlesMaterial->SetTexture(particleTex, 0);
 
 		Material debugMaterial = Material(debugShader.get());
 		debugMaterial.SetPropertyi("mode",2);
@@ -224,70 +209,6 @@ int main(int argc, char** argv)
 		Material depthMaterial = Material(resourceManager.GetShader("unlit"));
 
 		ShaderProgram * standardShader = resourceManager.GetShader("standard");
-
-		{
-			std::unique_ptr<Material> material = std::make_unique<StandardMaterial>(standardShader);
-			StandardMaterial * mat = (StandardMaterial*)material.get();
-			mat->diffuse = devDiff;
-			mat->normal = devNorm;
-			resourceManager.AddMaterial(material, "gargoyle");
-		}
-		Material & gargoyleMaterial = *resourceManager.GetMaterial("gargoyle");
-
-		{
-			std::unique_ptr<Material> material = std::make_unique<StandardMaterial>(standardShader);
-			StandardMaterial * mat = (StandardMaterial*)material.get();
-			mat->material = glm::vec4(0.05f, 0.5f, 1, 8);
-			mat->color = glm::vec4(0.7f, 0.7f, 0.7f, 2);
-			mat->diffuse = devDiff;
-			mat->normal = devNorm;
-			resourceManager.AddMaterial(material, "dev");
-		}
-		Material & devMaterial = *resourceManager.GetMaterial("dev");
-
-		//Objects
-
-		std::unique_ptr<GameObject> gargoyle = std::make_unique<GameObject>();
-		gargoyle->mesh = resourceManager.GetMesh("gargoyle");
-		gargoyle->material = &devMaterial;
-		gargoyle->GetTransform().SetPostion(glm::vec3(-1,1,-1.2));
-		gargoyle->name = "gargoyle";
-
-		std::unique_ptr<GameObject> gameStage = std::make_unique<GameObject>();
-		gameStage->mesh = resourceManager.GetMesh("gameStage");
-		gameStage->material = &devMaterial;
-		gameStage->GetTransform().SetPostion(glm::vec3(0, 0, 0));
-		gameStage->name = "gameStage";
-
-		std::unique_ptr<GameObject> oldKey = std::make_unique<GameObject>();
-		oldKey->mesh = resourceManager.GetMesh("old_key");
-		oldKey->material = &devMaterial;
-		oldKey->GetTransform().SetPostion(glm::vec3(0, 0, 0));
-		oldKey->name = "old_key";
-
-		std::unique_ptr<GameObject> table2 = std::make_unique<GameObject>();
-		table2->mesh = resourceManager.GetMesh("table");
-		table2->material = &devMaterial;
-		table2->GetTransform().SetPostion(glm::vec3(0, 0, 0));
-		table2->name = "Table.001";
-
-		std::unique_ptr<GameObject> riddlePaper = std::make_unique<GameObject>();
-		riddlePaper->mesh = resourceManager.GetMesh("riddlepaper");
-		riddlePaper->material = &devMaterial;
-		riddlePaper->GetTransform().SetPostion(glm::vec3(0, 0, 0));
-		riddlePaper->name = "RiddlePaper";
-
-		std::unique_ptr<GameObject> riddlePaper2 = std::make_unique<GameObject>();
-		riddlePaper2->mesh = resourceManager.GetMesh("riddlepaper2");
-		riddlePaper2->material = &devMaterial;
-		riddlePaper2->GetTransform().SetPostion(glm::vec3(0, -0.05, 0));
-		riddlePaper2->name = "RiddlePaper2";
-
-		std::unique_ptr<GameObject> maze = std::make_unique<GameObject>();
-		maze->mesh = resourceManager.GetMesh("maze");
-		maze->material = &devMaterial;
-		maze->GetTransform().SetPostion(glm::vec3(0, -0.05, 0));
-		maze->name = "maze";
 
 		//--------Uniform Buffers
 
@@ -305,7 +226,7 @@ int main(int argc, char** argv)
 			myLightManager.pointLights.push_back(PointLight(glm::vec3(-5, 1, 0), glm::vec3(1, 1, 1), glm::vec4(1, 0.4f, 0.3f, 100)));
 			myLightManager.pointLights.push_back(PointLight(glm::vec3(5, 1, 0), glm::vec3(1, 1, 1), glm::vec4(1, 0.4f, 0.3f, 100)));
 
-			myLightManager.directionalLights.push_back(DirectionalLight(glm::vec3(0, -1, 0), glm::vec3(0.1f, 0.1f, 0.1f)));
+			myLightManager.directionalLights.push_back(DirectionalLight(glm::vec3(0, -1, 0), glm::vec3(0.25f, 0.25f, 0.25f)));
 			//myLightManager.directionalLights.push_back(DirectionalLight(glm::vec3(0, -1, 1), glm::vec3(0.1f, 0.1f, 0.1f)));
 
 			myLightManager.shadowLight = SpotLight(
@@ -326,14 +247,6 @@ int main(int argc, char** argv)
 		myLightManager.UpdateBuffer();
 
 		Scene myScene = Scene();
-
-		myScene.AddObject(gargoyle);
-		myScene.AddObject(gameStage);
-		myScene.AddObject(oldKey);
-		myScene.AddObject(table2);
-		myScene.AddObject(riddlePaper);
-		myScene.AddObject(riddlePaper2);
-		myScene.AddObject(maze);
 
 		//Particles
 
@@ -386,10 +299,6 @@ int main(int argc, char** argv)
 
 		DepthFrameBuffer shadowspotFBO = DepthFrameBuffer(256, 256);
 
-		double lastFrameTime = 0;
-		double nextSecond = 1;
-		size_t frameCount = 0;
-
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 		myScene.activeCamera = &camera;
@@ -399,19 +308,19 @@ int main(int argc, char** argv)
 		myScene.depthResetSS = SSDepthReset.get();
 
 		Portal myTestPortal = Portal();
-		myTestPortal.portalMesh = resourceManager.GetMesh("portal");
+		myTestPortal.portalMesh = resourceManager.GetMesh("Portal");
 		myTestPortal.transform.SetRotationDegrees(0,90,0);
-		myTestPortal.transform.SetPostion(glm::vec3(-3.999f, 1, 0));
+		myTestPortal.transform.SetPostion(glm::vec3(-4, 1, 0));
 		myTestPortal.targetTransform.SetRotationDegrees(0, 0, 0);
-		myTestPortal.targetTransform.SetPostion(glm::vec3(0, 3.5f, -5.999f));
+		myTestPortal.targetTransform.SetPostion(glm::vec3(0, 3.5f, -6));
 		myScene.renderPortals.push_back(myTestPortal);
 
 		Portal myTestPortal2 = Portal();
-		myTestPortal2.portalMesh = resourceManager.GetMesh("portal");
+		myTestPortal2.portalMesh = resourceManager.GetMesh("Portal");
 		myTestPortal2.transform.SetRotationDegrees(0, 0, 0);
-		myTestPortal2.transform.SetPostion(glm::vec3(0, 3.5f, -5.999f));
+		myTestPortal2.transform.SetPostion(glm::vec3(0, 3.5f, -6));
 		myTestPortal2.targetTransform.SetRotationDegrees(0, 90, 0);
-		myTestPortal2.targetTransform.SetPostion(glm::vec3(-3.999f, 1, 0));
+		myTestPortal2.targetTransform.SetPostion(glm::vec3(-4, 1, 0));
 		myScene.renderPortals.push_back(myTestPortal2);
 
 		const float physTimeStep = 1.0f / 60.0f;
@@ -419,6 +328,10 @@ int main(int argc, char** argv)
 
 		GameLogic gameLogic = GameLogic(myScene, gScene, window, gPhysics, myCameraController, keyMap);
 		gameLogic.SetupScene();
+
+		double lastFrameTime = glfwGetTime();
+		double nextSecond = lastFrameTime + 1;
+		size_t frameCount = 0;
 
 		//Render Loop
 		while (!glfwWindowShouldClose(window))
@@ -438,6 +351,10 @@ int main(int argc, char** argv)
 			//Poll
 			glfwPollEvents();
 
+			//--------------------------UPDATE--------------------------------
+
+			gameLogic.Update(deltaTime);
+
 			//--------------------------PHYSICS UPDATE--------------------------------
 
 			//Do Physics steps
@@ -446,12 +363,10 @@ int main(int argc, char** argv)
 				gScene->fetchResults(true);
 				physTimeAccumulator -= physTimeStep;
 			}
+			//--------------------------LATE UPDATE--------------------------------
 
-			//--------------------------UPDATE--------------------------------
-
-			/* GAME LOGIC */
-
-			gameLogic.Update(deltaTime);
+			gameLogic.LateUpdate();
+			
 			//--------------------------RENDER--------------------------------
 
 			// SHADOW MAPS: render depth 
