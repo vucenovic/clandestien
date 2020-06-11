@@ -24,8 +24,12 @@ public:
 	inline char * LineEnd() const { return lineBuffer + bufferOffset; };
 
 	//Bufferlength must be sufficient to contain the line
-	lineReader(long bufferLength, std::ifstream & file, long fileLength) : bufferLength(bufferLength), lineBuffer(new char[bufferLength]), file(file), line(nullptr), fileLength(fileLength) {
+	lineReader(long bufferLength, std::ifstream & file, long fileLength) : bufferLength(bufferLength), lineBuffer(new char[bufferLength]), file(file), line(nullptr), fileLength(fileLength)
+	{
 		file.read(lineBuffer, bufferLength);
+		if (bufferLength > fileLength) {
+			this->bufferLength = fileLength;
+		}
 	};
 	~lineReader() { delete[] lineBuffer; };
 

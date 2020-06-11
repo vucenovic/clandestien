@@ -16,7 +16,7 @@ bool lineReader::getline() {
 	bool notFound = true;
 
 	long nextBreak = bufferOffset;
-	for (int i = bufferOffset; i < bufferLength; i++) {
+	for (long i = bufferOffset; i < bufferLength; i++) {
 		if (lineBuffer[i] == '\n') {
 			nextBreak = i;
 			notFound = false;
