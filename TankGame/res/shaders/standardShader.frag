@@ -77,6 +77,7 @@ void main()
 	lightSpecular = vec3(0);
 
 	doSpotLight(lights.shadowLight);
+	float shadow = texture(shadowMap, vertex.shadowPos.xyz/vertex.shadowPos.w);
 	lightDiffuse *= shadow;
 	lightSpecular *= shadow;
 
