@@ -42,7 +42,13 @@ void LightManager::UpdateBuffer()
 	glBufferSubData(GL_UNIFORM_BUFFER, offsets[3], sizeof(DirectionalLight) * counts.directional, (GLfloat *)directionalLights.data());
 	glBufferSubData(GL_UNIFORM_BUFFER, offsets[4], sizeof(SpotLight) * counts.spot, (GLfloat *)spotLights.data());
 	glBufferSubData(GL_UNIFORM_BUFFER, offsets[5], sizeof(SpotLight) * counts.shadow, &shadowLight);
-	glBufferSubData(GL_UNIFORM_BUFFER, offsets[6], sizeof(glm::mat4) * counts.shadow, glm::value_ptr(shadowProjection() * shadowView()));
+	const glm::mat4 biasMatrix(//TODO figure out
+		0.5f, 0.0, 0.0, 0.0,
+		0.0, 0.5f, 0.0, 0.0,
+		0.0, 0.0, 0.5f, 0.0,
+		0.5f, 0.5f, 0.5f, 1.0
+	);
+	glBufferSubData(GL_UNIFORM_BUFFER, offsets[6], sizeof(glm::mat4) * counts.shadow, glm::value_ptr(biasMatrix * shadowProjection() * shadowView()));
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 

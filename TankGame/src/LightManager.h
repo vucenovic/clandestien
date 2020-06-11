@@ -34,13 +34,7 @@ public:
 		return glm::lookAt(shadowLight.position, shadowLight.position + shadowLight.direction, glm::vec3(0, 1, 0));
 	};
 	glm::mat4 shadowProjection() {
-		const glm::mat4 biasMatrix(
-			1, 0.0, 0.0, 0.0,
-			0.0, 1, 0.0, 0.0,
-			0.0, 0.0, 1, 0.0,
-			0.05, 0.05, 0.05, 1.0
-		);
-		return biasMatrix * glm::perspective<float>(glm::radians(45.0f), 1.0f, 2.0f, 50.0f);
+		return glm::perspective<float>(glm::radians(45.0f), 1.0f, 0.1f, 50.0f);
 	};
 	bool shadowLightUsed = false;
 
