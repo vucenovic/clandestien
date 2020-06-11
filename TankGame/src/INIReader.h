@@ -102,8 +102,10 @@ INIReader::INIReader(std::string filePath)
 	std::map<std::string, std::string> * currentSection = &values[""];
 
 	if (file.is_open()) {
-		size_t fileLength = file.tellg();
-		file.seekg(0, std::ios::beg);
+		file.ignore(std::numeric_limits<std::streamsize>::max()); //since read seems to do conversions on crlf line endings the tellg method doesnt work
+		size_t fileLength = file.gcount();
+		file.clear();
+		file.seekg(0, std::ios_base::beg);
 
 		lineReader lr = lineReader(64, file, fileLength);
 		char * mid_ptr, * start_ptr;
