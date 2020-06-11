@@ -682,9 +682,8 @@ std::unique_ptr<Mesh> OBJLoader::LoadOBJ(const std::string & filePath)
 
 	std::ifstream file(filePath, std::ios::in | std::ios::ate);
 
-	long long fileLength = file.tellg();
+	size_t fileLength = file.tellg();
 	file.seekg(0, std::ios::beg);
-	fileLength -= file.tellg();
 
 	if (file.is_open()) {
 		lineReader lr = lineReader(2048, file,fileLength);

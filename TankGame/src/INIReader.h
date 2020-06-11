@@ -102,9 +102,8 @@ INIReader::INIReader(std::string filePath)
 	std::map<std::string, std::string> * currentSection = &values[""];
 
 	if (file.is_open()) {
-		long long fileLength = file.tellg();
+		size_t fileLength = file.tellg();
 		file.seekg(0, std::ios::beg);
-		fileLength -= file.tellg();
 
 		lineReader lr = lineReader(64, file, fileLength);
 		char * mid_ptr, * start_ptr;
