@@ -7,7 +7,7 @@ void Key::interact(physx::PxRigidBody * actor, physx:: PxRigidBody * invoker, ph
 	glm::vec3 world_up(0.0f, 1.0f, 0.0f);
 	glm::vec3 world_north(1.0f, 0.0f, 0.0f);
 	glm::vec3 camPosition = world_up * 10.0f;
-	float height = 10.0f;
+	float height = this->gObject.GetTransform().GetPosition()[1] + 1.5;
 	glm::vec3 camTraget = glm::vec3(actor->getGlobalPose().p[0], actor->getGlobalPose().p[1], actor->getGlobalPose().p[2]);
 	glm::mat4 view = glm::lookAt(camPosition, camTraget, world_north);
 	camera.SetViewParameters(*gameLogic.getScene().viewDataBuffer, view, gameLogic.getScene().activeCamera->getProjectionMatrix());
