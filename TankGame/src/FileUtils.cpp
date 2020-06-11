@@ -38,7 +38,7 @@ bool lineReader::getline() {
 			file.read(lineBuffer + remLen, bufferOffset);
 			before += bufferOffset;
 			if (file.eof()) {
-				bufferLength = fileLength + remLen - before;
+				bufferLength = fileLength - before;
 			}
 			bufferOffset = 0;
 			return getline(); //easiest way of doing this

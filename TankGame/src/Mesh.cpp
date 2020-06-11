@@ -664,7 +664,7 @@ std::unique_ptr<Mesh> OBJLoader::LoadOBJ(const std::string & filePath)
 		VertexManager(const std::vector<glm::vec3> & p, const std::vector<glm::vec3> & n, const std::vector<glm::vec2> & t) : positions(p), normals(n), textureCoords(t) { vertexData.reserve(p.size()); };
 
 		size_t getIndex(vertDef v) {
-			if (vertexDefs.find(v) == vertexDefs.end()) {
+			if (vertexDefs.count(v) == 0) {
 				glm::vec3 pos = positions[v.pos - 1];
 				glm::vec3 nor = normals[v.nor - 1];
 				glm::vec2 tex = textureCoords[v.tex - 1];
