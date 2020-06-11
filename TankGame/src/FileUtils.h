@@ -10,21 +10,21 @@ std::string loadFileAsString(const std::string & filepath);
 */
 class lineReader {
 private:
-	long before = 0;
+	size_t before = 0;
 public:
 	char * lineBuffer;
 	char * line;
-	long bufferLength;
-	long bufferOffset = 0;
+	size_t bufferLength;
+	size_t bufferOffset = 0;
 	std::ifstream & file;
 
-	long fileLength;
+	size_t fileLength;
 	bool last = true;
 
 	inline char * LineEnd() const { return lineBuffer + bufferOffset; };
 
 	//Bufferlength must be sufficient to contain the line
-	lineReader(long bufferLength, std::ifstream & file, long fileLength) : bufferLength(bufferLength), lineBuffer(new char[bufferLength]), file(file), line(nullptr), fileLength(fileLength)
+	lineReader(size_t bufferLength, std::ifstream & file, size_t fileLength) : bufferLength(bufferLength), lineBuffer(new char[bufferLength]), file(file), line(nullptr), fileLength(fileLength)
 	{
 		file.read(lineBuffer, bufferLength);
 		if (bufferLength > fileLength) {
