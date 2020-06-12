@@ -327,10 +327,10 @@ int main(int argc, char** argv)
 		const float physTimeStep = 1.0f / 60.0f;
 		float physTimeAccumulator = 0;
 
-		InputManager inputManager;
-		inputManager.registerCallback(0, MyKeyCallback);
+		
+		InputManager::instance().registerCallback(0, MyKeyCallback);
 
-		GameLogic gameLogic = GameLogic(myScene, gScene, window, gPhysics, myCameraController, keyMap, inputManager);
+		GameLogic gameLogic = GameLogic(myScene, gScene, window, gPhysics, myCameraController, keyMap);
 		gameLogic.SetupScene();
 
 		double lastFrameTime = glfwGetTime();

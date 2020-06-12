@@ -11,13 +11,20 @@
 class InputManager
 {
 private:
-	static std::map<int, std::function<void(GLFWwindow*, int, int, int, int)>> callbacks;
+	std::map<int, std::function<void(GLFWwindow*, int, int, int, int)>> callbacks;
+	InputManager() = default;
+	InputManager(const InputManager&);
+	InputManager & operator = (const InputManager &) = delete;
 
 public:
-	InputManager() {};
+
+	static InputManager& instance() {
+		static InputManager _instance;
+		return _instance;
+	}
 
 	static void triggerCallbacks(GLFWwindow* window, int key, int scancode, int action, int mods) {
-		for (auto& [id, callback] : callbacks) {
+		for (auto& [id, callback] : InputManager::instance().callbacks) {
 			callback(window, key, scancode, action, mods);
 		}
 	}

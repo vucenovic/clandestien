@@ -73,7 +73,6 @@ private:
 	physx::PxPhysics* physX;
 	CameraController &ourCameraController;
 	KeyMap keyBinds;
-	InputManager &inputManager;
 	float deltaTime = 0;
 
 	CharacterDef cP = { 1.8f, 0.25f, 1.7f, 2.0f };
@@ -87,7 +86,7 @@ private:
 	Camera * alternativeCamera = nullptr;
 
 public:
-	GameLogic(Scene &scene, physx::PxScene *pxScene, GLFWwindow *window, physx::PxPhysics* physX, CameraController &cameraController, KeyMap keyMap, InputManager &inputManager);
+	GameLogic(Scene &scene, physx::PxScene *pxScene, GLFWwindow *window, physx::PxPhysics* physX, CameraController &cameraController, KeyMap keyMap);
 	void Update(const float & newDelta); //Called before the physics simulation step
 	void LateUpdate(); //Called after the physics simulation step
 	void moveControllerCamera(); // moves character controller + adjusts camera movement to follow
