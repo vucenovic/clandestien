@@ -13,6 +13,7 @@ void GameLogic::Update(const float & deltaTime)
 	moveControllerCamera();
 	handlePortals();
 	raycastFilter();
+	switchCameraState();
 }
 
 void GameLogic::LateUpdate()
@@ -63,7 +64,6 @@ void GameLogic::raycastFilter()
 	//Nutz das "Userdata" attribute von PxActor um eine 1:1 beziehung mit dem Gameobject oder was auch immer zu erzeugen.
 	bool status = ourPxScene->raycast(origin, unitDir, maxDistance, hit, outputFlags, filterData);
 	if (status && (glfwGetKey(ourWindow, keyBinds.interaction) == GLFW_PRESS)) {
-		//gargoyle hit
 		void* p = hit.block.actor->userData;
 		if (p != nullptr) {
 			((Interactable*) p)->interact((PxRigidBody*) hit.block.actor, (PxRigidBody*) character->getActor(), hit, *this);
@@ -92,6 +92,27 @@ void GameLogic::handlePortals()
 		}
 	}
 	
+}
+
+void GameLogic::switchCameraState()
+{
+	if (this->cameraState == 1) { // only after interaction and while still in state
+		// change camera to bird perspective
+		Camera camera = Camera();
+		glm::vec3 world_up(0.0f, 1.0f, 0.0f);
+		glm::vec3 world_north(1.0f, 0.0f, 0.0f);
+		glm::vec3 camPosition = world_up * 10.0f;
+		float height = scene.GetObject("Key")->GetTransform().GetPosition()[1] + 1.5;	//experimental value
+		glm::vec3 camTraget = glm::vec3(scene.GetObject("Key")->GetTransform().GetPosition()); // set key as target
+		glm::mat4 view = glm::lookAt(camPosition, camTraget, world_north);
+		camera.SetViewParameters(*scene.viewDataBuffer, view, scene.activeCamera->getProjectionMatrix());
+		scene.activeCamera = &camera;
+
+		if (glfwGetKey(ourWindow, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+			cameraState = 0;
+			scene.activeCamera = defaultCamera;
+		}
+	}
 }
 
 void GameLogic::setCollisionGroup(physx::PxRigidActor * actor, const physx::PxU16 grp, const physx::PxFilterData & grpenum)

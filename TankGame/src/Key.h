@@ -11,13 +11,7 @@ class Key :
 	private:
 		GameObject& gObject;
 		physx::PxRigidBody* actor;
-		physx::PxShape* shape; // needed for deletion
-
-		//keys
-		bool first = false;
-		bool second = false;
-		bool third = false;
-		bool fourth = false;
+		physx::PxShape* shape; // needed for deletion TODO: move into gameLogic
 
 	public:
 		Key(GameObject& gObject, physx::PxRigidBody* actor) : gObject(gObject), actor(actor) {};

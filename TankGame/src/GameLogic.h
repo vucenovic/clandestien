@@ -70,6 +70,7 @@ private:
 	GLFWwindow* ourWindow;
 	physx::PxPhysics* physX;
 	CameraController &ourCameraController;
+	Camera* defaultCamera = scene.activeCamera;
 	KeyMap keyBinds;
 	float deltaTime = 0;
 
@@ -79,6 +80,8 @@ private:
 	physx::PxRigidDynamic* ourKey;
 	std::unique_ptr<Key> ourKeyController;
 
+	int cameraState = 0; //0 default state, 1 for key interaction 
+
 public:
 	GameLogic(Scene &scene, physx::PxScene *pxScene, GLFWwindow *window, physx::PxPhysics* physX, CameraController &cameraController, KeyMap keyMap);
 	void Update(const float & newDelta); //Called before the physics simulation step
@@ -87,6 +90,7 @@ public:
 	void raycastFilter(); // perfoms a raycast on each filter group and calls appropriate actions
 	void moveDynamic(glm::vec3 viewVector); // moves dynamic objects
 	void handlePortals(); // moves the character from one portal to another adjusting the camera
+	void switchCameraState(); // checks key interaction state and handles cameras switching
 
 	void SetupScene(); //do setup
 	static void SetupResources(); //Load resources to the resource Manager
@@ -96,6 +100,7 @@ public:
 	GLFWwindow* getWindow() { return ourWindow; };
 	KeyMap getKeyBinds() { return keyBinds;};
 	float getDelta() { return deltaTime; };
+	void setCameraState(int state) { this->cameraState = state; };
 
 private:
 	static void setCollisionGroup(physx::PxRigidActor * actor, const physx::PxU16 grp, const physx::PxFilterData & grpenum);
