@@ -16,22 +16,25 @@ void Key::interact(physx::PxRigidBody * actor, physx:: PxRigidBody * invoker, ph
 
 	// unhexing logic
 
-	while (!glfwGetKey(gameLogic.getWindow(), GLFW_KEY_SPACE) && GLFW_PRESS) {
-		if (glfwGetKey(gameLogic.getWindow(), GLFW_KEY_Q) && GLFW_PRESS) {
+	//TODO: Verändern, keinen Loop benutzen sondern GameState abfragen
+	/*while (!(glfwGetKey(gameLogic.getWindow(), GLFW_KEY_ESCAPE) == GLFW_PRESS)) {
+		if (glfwGetKey(gameLogic.getWindow(), GLFW_KEY_Q) == GLFW_PRESS) {
 			first = true;
-		} if (glfwGetKey(gameLogic.getWindow(), GLFW_KEY_M) && GLFW_PRESS && first) {
+		} if ((glfwGetKey(gameLogic.getWindow(), GLFW_KEY_M) == GLFW_PRESS) && first) {
 			second = true;
-		} if (glfwGetKey(gameLogic.getWindow(), GLFW_KEY_G) && GLFW_PRESS && first && second) {
+		} if ((glfwGetKey(gameLogic.getWindow(), GLFW_KEY_G) == GLFW_PRESS) && first && second) {
 			third = true;
-		} if (glfwGetKey(gameLogic.getWindow(), GLFW_KEY_Y) && GLFW_PRESS && first && second && third) {
+		} if ((glfwGetKey(gameLogic.getWindow(), GLFW_KEY_Y) == GLFW_PRESS) && first && second && third) {
 			fourth = true;
 		}
-	}
+	}*/
+		
+	
 
 	if (first && second && third && fourth) {
 		actor->detachShape(*shape);
 		gameLogic.getPxScene()->removeActor(*actor);
-		gameLogic.getScene().RemoveObject("old_key");
+		gameLogic.getScene().RemoveObject("Key");
 		Inventory::instance().addKey();
 	}
 

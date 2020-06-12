@@ -8,6 +8,8 @@
 #include "KeyMap.h"
 #include <iostream>
 class Gargoyle; //forward declaration
+class Key; //forward declaration
+#include "Key.h"
 #include "Gargoyle.h"
 #include "Interactable.h"
 
@@ -75,6 +77,7 @@ private:
 	physx::PxRigidDynamic* gargoyleRigidbody; //TODO: Aus szene auslesen
 	std::unique_ptr<Gargoyle> gargoyleController;
 	physx::PxRigidDynamic* ourKey;
+	std::unique_ptr<Key> ourKeyController;
 
 public:
 	GameLogic(Scene &scene, physx::PxScene *pxScene, GLFWwindow *window, physx::PxPhysics* physX, CameraController &cameraController, KeyMap keyMap);

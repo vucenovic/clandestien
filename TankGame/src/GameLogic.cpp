@@ -158,7 +158,12 @@ void GameLogic::SetupScene()
 	{
 		ourKey = addColliderToDynamic("Key", PxTransform(PxVec3(2,1,0)), PxBoxGeometry(0.35f, 0.1f, 0.35f));
 		setCollisionGroup(ourKey, 2, PxFilterData(GROUP1, 0, 0, 0));
-		ourKey->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
+		ourKeyController = std::make_unique<Key>(*scene.GetObject("Key"), ourKey);
+		auto debugKey = ourKey->getGlobalPose();
+		auto debugKeyPos = scene.GetObject("Key")->GetTransform().GetPosition();
+		ourKey->userData = ourKeyController.get();
+
+
 	}
 }
 

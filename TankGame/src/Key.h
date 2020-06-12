@@ -10,6 +10,7 @@ class Key :
 {
 	private:
 		GameObject& gObject;
+		physx::PxRigidBody* actor;
 		physx::PxShape* shape; // needed for deletion
 
 		//keys
@@ -19,8 +20,7 @@ class Key :
 		bool fourth = false;
 
 	public:
-		Key(GameObject& gObject);
+		Key(GameObject& gObject, physx::PxRigidBody* actor) : gObject(gObject), actor(actor) {};
 		virtual void interact(physx::PxRigidBody* actor, physx::PxRigidBody* invoker, physx::PxRaycastBuffer& hit, GameLogic& gameLogic) override;
-		void pushKeys(int keyCode);
 };
 
