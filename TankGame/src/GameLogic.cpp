@@ -13,6 +13,7 @@ void GameLogic::Update(const float & deltaTime)
 	moveControllerCamera();
 	handlePortals();
 	raycastFilter();
+	setupKeyCallbacks();
 	switchCameraState();
 	updateKeyRiddleLogic();
 }
