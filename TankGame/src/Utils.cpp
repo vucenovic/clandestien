@@ -26,17 +26,18 @@ const glm::mat4 & Transform::ToMatrix() const
 	return cachedMatrix;
 }
 
-void Transform::LookAt(const glm::vec3 eye, const glm::vec3 pos)
+void Transform::LookAt(const glm::vec3 & eye, const glm::vec3 & pos)
 {
 	SetPostion(eye);
 	LookDir(glm::normalize(pos - eye));
 }
 
-void Transform::LookDir(const glm::vec3 dir)
+void Transform::LookDir(const glm::vec3 & dir)
 {
-	float pitch = glm::acos(dir.y);
-	float invPitch = glm::sin(pitch);
-	float yaw = glm::acos(dir.z / invPitch) * (dir.x >= 0 ? 1 : -1);
+	float pitch = glm::asin(dir.y);
+	float invPitch = glm::cos(pitch);
+	float horizontal = glm::clamp(dir.z / invPitch, -1.0f, 1.0f);
+	float yaw = glm::acos(horizontal) * (dir.x >= 0 ? 1 : -1);
 	SetRotation(glm::vec3(pitch,yaw,0));
 }
 
