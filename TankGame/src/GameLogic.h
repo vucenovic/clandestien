@@ -12,6 +12,8 @@ class Key; //forward declaration
 #include "Key.h"
 #include "Gargoyle.h"
 #include "Interactable.h"
+#include "InputManager.h"
+#include "KeyRiddle.h"
 
 #include <PhysX/PxPhysicsAPI.h>
 
@@ -71,10 +73,12 @@ private:
 	physx::PxPhysics* physX;
 	CameraController &ourCameraController;
 	KeyMap keyBinds;
+	InputManager &inputManager;
 	float deltaTime = 0;
 
 	CharacterDef cP = { 1.8f, 0.25f, 1.7f, 2.0f };
 	physx::PxRigidDynamic* gargoyleRigidbody; //TODO: Aus szene auslesen
+	KeyRiddle keyRiddle = "QMGY";
 	std::unique_ptr<Gargoyle> gargoyleController;
 	physx::PxRigidDynamic* ourKey;
 	std::unique_ptr<Key> ourKeyController;
@@ -83,7 +87,7 @@ private:
 	Camera * alternativeCamera = nullptr;
 
 public:
-	GameLogic(Scene &scene, physx::PxScene *pxScene, GLFWwindow *window, physx::PxPhysics* physX, CameraController &cameraController, KeyMap keyMap);
+	GameLogic(Scene &scene, physx::PxScene *pxScene, GLFWwindow *window, physx::PxPhysics* physX, CameraController &cameraController, KeyMap keyMap, InputManager &inputManager);
 	void Update(const float & newDelta); //Called before the physics simulation step
 	void LateUpdate(); //Called after the physics simulation step
 	void moveControllerCamera(); // moves character controller + adjusts camera movement to follow
@@ -91,6 +95,9 @@ public:
 	void moveDynamic(glm::vec3 viewVector); // moves dynamic objects
 	void handlePortals(); // moves the character from one portal to another adjusting the camera
 	void switchCameraState(); // checks key interaction state and handles cameras switching
+	void characterCallback(GLFWwindow * window, int key, int scancode, int action, int mods); // sets up character movement callback
+	void setupKeyCallbacks(); // sets up various key callbacks 
+	void updateKeyRiddleLogic(); // controls key riddle logic 
 
 	void SetupScene(); //do setup
 	static void SetupResources(); //Load resources to the resource Manager

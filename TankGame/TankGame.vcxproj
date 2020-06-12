@@ -139,6 +139,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\KeyRiddle.cpp" />
+    <ClCompile Include="src\InputManager.cpp" />
+    <ClCompile Include="src\KeyInput.cpp" />
     <ClCompile Include="src\Door.cpp" />
     <ClCompile Include="src\Key.cpp" />
     <ClCompile Include="src\Gargoyle.cpp" />
@@ -168,6 +171,9 @@
     <ClCompile Include="src\UniformBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\KeyRiddle.h" />
+    <ClInclude Include="src\InputManager.h" />
+    <ClInclude Include="src\KeyInput.h" />
     <ClInclude Include="src\Door.h" />
     <ClInclude Include="src\Inventory.h" />
     <ClInclude Include="src\Key.h" />

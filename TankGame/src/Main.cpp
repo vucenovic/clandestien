@@ -31,6 +31,7 @@
 #include "KeyMap.h"
 #include "GameLogic.h"
 #include "ResourceManager.h"
+#include "InputManager.h"
 
 #include <random>
 
@@ -326,7 +327,10 @@ int main(int argc, char** argv)
 		const float physTimeStep = 1.0f / 60.0f;
 		float physTimeAccumulator = 0;
 
-		GameLogic gameLogic = GameLogic(myScene, gScene, window, gPhysics, myCameraController, keyMap);
+		InputManager inputManager;
+		inputManager.registerCallback(0, MyKeyCallback);
+
+		GameLogic gameLogic = GameLogic(myScene, gScene, window, gPhysics, myCameraController, keyMap, inputManager);
 		gameLogic.SetupScene();
 
 		double lastFrameTime = glfwGetTime();

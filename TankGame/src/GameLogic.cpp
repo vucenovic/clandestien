@@ -2,8 +2,8 @@
 #include "GameSceneAggregateBuilder.h"
 #include "ResourceManager.h"
 
-GameLogic::GameLogic(Scene &scene, physx::PxScene* pxScene, GLFWwindow* window, PxPhysics* physX, CameraController &cameraController, KeyMap keyMap)
-	: scene(scene), ourPxScene(pxScene), ourWindow(window), physX(physX), ourCameraController(cameraController), keyBinds(keyMap)
+GameLogic::GameLogic(Scene &scene, physx::PxScene* pxScene, GLFWwindow* window, physx::PxPhysics* physX, CameraController &cameraController, KeyMap keyMap, InputManager &inputManager)
+	: scene(scene), ourPxScene(pxScene), ourWindow(window), physX(physX), ourCameraController(cameraController), keyBinds(keyMap), inputManager(inputManager)
 {
 }
 
@@ -14,6 +14,7 @@ void GameLogic::Update(const float & deltaTime)
 	handlePortals();
 	raycastFilter();
 	switchCameraState();
+	updateKeyRiddleLogic();
 }
 
 void GameLogic::LateUpdate()
@@ -102,6 +103,31 @@ void GameLogic::switchCameraState()
 	}
 }
 
+void GameLogic::characterCallback(GLFWwindow * window, int key, int scancode, int action, int mods)
+{
+	if (action == GLFW_PRESS) {
+		if (keyBinds.forward == key) {
+			//.. TODO:
+		}
+	}
+}
+
+void GameLogic::setupKeyCallbacks()
+{
+	//inputManager.registerCallback(characterCallback);
+	InputManager::setglfwcallback(ourWindow);
+}
+
+void GameLogic::updateKeyRiddleLogic()
+{
+	if (keyRiddle.getSolved()) {
+		//ourKey->detachShape(*ourKey); TODO: lets see if we need this
+		ourPxScene->removeActor(*ourKey);
+		scene.RemoveObject("Key");
+		Inventory::instance().addKey();
+	}
+}
+
 void GameLogic::setCameraState(int state)
 {
 	switch (state)
@@ -115,8 +141,10 @@ void GameLogic::setCameraState(int state)
 			t.SetRotationDegrees(-90, 180, 0);
 		}
 		scene.activeCamera = alternativeCamera;
+		InputManager::registerCallback(1, [this](GLFWwindow * window, int key, int scancode, int action, int mods) { keyRiddle.keyInput(window, key, scancode, action, mods); });
 		break;
 	case 0:
+		InputManager::unregisterCallback(1);
 		scene.activeCamera = &ourCameraController.cameraTransform;
 		break;
 	default:
