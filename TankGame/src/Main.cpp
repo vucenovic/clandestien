@@ -196,7 +196,7 @@ int main(int argc, char** argv)
 		Camera camera = Camera();
 		camera.SetPerspective(FOV, (float)width / (float)height, nearPlane, farPlane);
 
-		CameraController myCameraController(&camera.GetTransform(),window);
+		CameraController myCameraController(camera,window);
 
 		//Materials
 

@@ -93,6 +93,6 @@ public:
 		return glm::cross(glm::vec3(0, 1, 0), GetForward());
 	}
 
-	void LookAt(const glm::vec3 eye, const glm::vec3 pos);
-	void LookDir(const glm::vec3 dir);
+	void LookAt(const glm::vec3 & eye, const glm::vec3 & pos);
+	void LookDir(const glm::vec3 & dir);
 };

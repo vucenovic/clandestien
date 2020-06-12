@@ -26,7 +26,7 @@ void GameLogic::moveControllerCamera()
 	using namespace physx;
 	ourCameraController.HandleInputs();
 
-	glm::vec3 forwardVector = scene.activeCamera->GetTransform().GetForward();
+	glm::vec3 forwardVector = ourCameraController.cameraTransform.GetTransform().GetForward();
 	forwardVector.y = 0; //clamp movement to horizonal plane
 	forwardVector = glm::normalize(forwardVector);
 	glm::vec3 rightVector = glm::cross(forwardVector, glm::vec3(0, 1, 0));
@@ -42,16 +42,15 @@ void GameLogic::moveControllerCamera()
 	PxControllerState state;
 	character->getState(state);
 	PxExtendedVec3 newPos = character->getFootPosition();
-	ourCameraController.cameraTransform->SetPostion(glm::vec3(newPos[0], newPos[1] + cP.eyeHeight, newPos[2])); 
-	
+	ourCameraController.cameraTransform.GetTransform().SetPostion(glm::vec3(newPos[0], newPos[1] + cP.eyeHeight, newPos[2])); 
 }
 
 void GameLogic::raycastFilter()
 {
 	using namespace physx;
-	glm::vec3 camPos = scene.activeCamera->GetTransform().GetPosition();
+	glm::vec3 camPos = ourCameraController.cameraTransform.GetTransform().GetPosition();
 	PxVec3 origin = PxVec3(camPos.x, camPos.y, camPos.z);
-	glm::vec3 viewVector = scene.activeCamera->GetTransform().GetForward();
+	glm::vec3 viewVector = ourCameraController.cameraTransform.GetTransform().GetForward();
 
 	PxVec3 unitDir = PxVec3(viewVector.x, viewVector.y, viewVector.z);
 	PxReal maxDistance = 1.5;
@@ -96,23 +95,34 @@ void GameLogic::handlePortals()
 
 void GameLogic::switchCameraState()
 {
-	if (this->cameraState == 1) { // only after interaction and while still in state
-		// change camera to bird perspective
-		Camera camera = Camera();
-		glm::vec3 world_up(0.0f, 1.0f, 0.0f);
-		glm::vec3 world_north(1.0f, 0.0f, 0.0f);
-		glm::vec3 camPosition = world_up * 10.0f;
-		float height = scene.GetObject("Key")->GetTransform().GetPosition()[1] + 1.5;	//experimental value
-		glm::vec3 camTraget = glm::vec3(scene.GetObject("Key")->GetTransform().GetPosition()); // set key as target
-		glm::mat4 view = glm::lookAt(camPosition, camTraget, world_north);
-		camera.SetViewParameters(*scene.viewDataBuffer, view, scene.activeCamera->getProjectionMatrix());
-		scene.activeCamera = &camera;
-
-		if (glfwGetKey(ourWindow, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-			cameraState = 0;
-			scene.activeCamera = defaultCamera;
+	if (this->cameraState == 1) {
+		if (glfwGetKey(ourWindow, GLFW_KEY_R) == GLFW_PRESS) {
+			setCameraState(0);
 		}
 	}
+}
+
+void GameLogic::setCameraState(int state)
+{
+	switch (state)
+	{
+	case 1:
+		glm::vec3 camTarget = glm::vec3(scene.GetObject("Key")->GetTransform().GetPosition()); // set key as target
+		alternativeCamera->SetProjectionMatrix(scene.activeCamera->getProjectionMatrix());
+		{
+			Transform & t = alternativeCamera->GetTransform();
+			t.SetPostion(camTarget + glm::vec3(0, 1, 0));
+			t.SetRotationDegrees(-90, 180, 0);
+		}
+		scene.activeCamera = alternativeCamera;
+		break;
+	case 0:
+		scene.activeCamera = &ourCameraController.cameraTransform;
+		break;
+	default:
+		break;
+	}
+	cameraState = state;
 }
 
 void GameLogic::setCollisionGroup(physx::PxRigidActor * actor, const physx::PxU16 grp, const physx::PxFilterData & grpenum)
@@ -177,15 +187,13 @@ void GameLogic::SetupScene()
 
 	//Key
 	{
-		ourKey = addColliderToDynamic("Key", PxTransform(PxVec3(2,1,0)), PxBoxGeometry(0.35f, 0.1f, 0.35f));
+		ourKey = addColliderToDynamic("Key", PxTransform(PxVec3(0,0,0)), PxBoxGeometry(0.35f, 0.1f, 0.35f));
+		ourKey->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
 		setCollisionGroup(ourKey, 2, PxFilterData(GROUP1, 0, 0, 0));
 		ourKeyController = std::make_unique<Key>(*scene.GetObject("Key"), ourKey);
-		auto debugKey = ourKey->getGlobalPose();
-		auto debugKeyPos = scene.GetObject("Key")->GetTransform().GetPosition();
 		ourKey->userData = ourKeyController.get();
-
-
 	}
+	alternativeCamera = new Camera();
 }
 
 void GameLogic::SetupResources()

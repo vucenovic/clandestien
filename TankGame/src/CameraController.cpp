@@ -19,7 +19,7 @@ void CameraController::HandleInputs()
 	if (yaw > 360) yaw -= 360;
 	else if (yaw < -360) yaw += 360;
 	//Set Rotation
-	cameraTransform->SetRotationDegrees(pitch, yaw, 0);
+	cameraTransform.GetTransform().SetRotationDegrees(pitch, yaw, 0);
 
 	lastX = x;
 	lastY = y;
