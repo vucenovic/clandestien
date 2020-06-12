@@ -680,14 +680,19 @@ std::unique_ptr<Mesh> OBJLoader::LoadOBJ(const std::string & filePath)
 
 	std::vector<faceDef> faces;
 
-	std::ifstream file(filePath, std::ios::in);
+	std::ifstream file(filePath, std::ios::in | std::ios::binary | std::ios::ate);
+
+	size_t fileLength = file.tellg(); //ifstream must be set to binary mode otherwise buffer reads will silently convert line endings and the fileSize will be wrong
+	file.seekg(0, std::ios_base::beg);
+
+	/*
+	file.ignore(std::numeric_limits<std::streamsize>::max()); //always works but possibly slower(?)
+	size_t fileLength = file.gcount();
+	file.clear();
+	file.seekg(0, std::ios_base::beg);
+	*/
 
 	if (file.is_open()) {
-		file.ignore(std::numeric_limits<std::streamsize>::max()); //since read seems to do conversions on crlf line endings the tellg method doesnt work
-		size_t fileLength = file.gcount();
-		file.clear();
-		file.seekg(0, std::ios_base::beg);
-
 		lineReader lr = lineReader(2048, file,fileLength);
 		char * mid_ptr;
 		while (lr.getline())

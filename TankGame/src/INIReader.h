@@ -97,14 +97,12 @@ char * INIReader::FindFirstNonOccurance(char * ptr, char * end, const char & val
 
 INIReader::INIReader(std::string filePath)
 {
-	std::ifstream file(filePath, std::ios::in | std::ios::ate);
+	std::ifstream file(filePath, std::ios::in | std::ios::binary | std::ios::ate);
 
 	std::map<std::string, std::string> * currentSection = &values[""];
 
 	if (file.is_open()) {
-		file.ignore(std::numeric_limits<std::streamsize>::max()); //since read seems to do conversions on crlf line endings the tellg method doesnt work
-		size_t fileLength = file.gcount();
-		file.clear();
+		size_t fileLength = file.tellg(); //ifstream must be set to binary mode otherwise buffer reads will silently convert line endings and the fileSize will be wrong
 		file.seekg(0, std::ios_base::beg);
 
 		lineReader lr = lineReader(64, file, fileLength);
