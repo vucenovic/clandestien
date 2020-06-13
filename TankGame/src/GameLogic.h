@@ -77,10 +77,11 @@ private:
 
 	CharacterDef cP = { 1.8f, 0.25f, 1.7f, 2.0f };
 	physx::PxRigidDynamic* gargoyleRigidbody; //TODO: Aus szene auslesen
-	KeyRiddle keyRiddle = "QMGY";
+	KeyRiddle keyRiddle = "QMGK";
 	std::unique_ptr<Gargoyle> gargoyleController;
 	physx::PxRigidDynamic* ourKey;
 	std::unique_ptr<Key> ourKeyController;
+	bool checkKey = true;
 
 	int cameraState = 0; //0 default state, 1 for key interaction 
 	Camera * alternativeCamera = nullptr;
@@ -97,6 +98,7 @@ public:
 	void characterCallback(GLFWwindow * window, int key, int scancode, int action, int mods); // sets up character movement callback
 	void setupKeyCallbacks(); // sets up various key callbacks 
 	void updateKeyRiddleLogic(); // controls key riddle logic 
+	void updateGargoyleRiddleLogic(); // controls gargoyle riddle logic
 
 	void SetupScene(); //do setup
 	static void SetupResources(); //Load resources to the resource Manager

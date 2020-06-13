@@ -15,7 +15,10 @@ void GameLogic::Update(const float & deltaTime)
 	raycastFilter();
 	setupKeyCallbacks();
 	switchCameraState();
-	updateKeyRiddleLogic();
+	if (checkKey) {
+		updateKeyRiddleLogic();
+	}
+	
 }
 
 void GameLogic::LateUpdate()
@@ -123,10 +126,15 @@ void GameLogic::updateKeyRiddleLogic()
 {
 	if (keyRiddle.getSolved()) {
 		//ourKey->detachShape(*ourKey); TODO: lets see if we need this
-		ourPxScene->removeActor(*ourKey);
 		scene.RemoveObject("Key");
+		ourPxScene->removeActor(*ourKey);
 		Inventory::instance().addKey();
+		checkKey = false;
 	}
+}
+
+void GameLogic::updateGargoyleRiddleLogic()
+{
 }
 
 void GameLogic::setCameraState(int state)
@@ -352,7 +360,7 @@ void GameLogic::initGameObjects()
 		scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(4.0f, 0, 0), glm::vec3(0, -1.5708f, 0), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("DoorStatic"), resourceManager.GetMaterial("dev"), "Door.003"));
 		scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(0.213f, 0.611f, -1.411f), glm::vec3(), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("gargoyle"), resourceManager.GetMaterial("gargoyle"), "gargoyle"));
 		scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(-2.115f, 0, -2.0f), glm::vec3(), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("Door"), resourceManager.GetMaterial("dev"), "DoorOpenable"));
-		/*Blocks portals from view, must be removed later by gamelogic to open portals*///scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(0), glm::vec3(), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("PortalWallCaps"), resourceManager.GetMaterial("dev"), "PortalWallCaps"));
+		scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(0), glm::vec3(), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("PortalWallCaps"), resourceManager.GetMaterial("dev"), "PortalWallCaps"));
 		scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(0, 3.499f, -2.902f), glm::vec3(0, 0.7854f, 0), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("Key"), resourceManager.GetMaterial("dev"), "Key"));
 	}
 }
