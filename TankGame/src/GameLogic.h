@@ -9,11 +9,15 @@
 #include <iostream>
 class Gargoyle; //forward declaration
 class Key; //forward declaration
+class Projector;
+class Filmreel;
 #include "Key.h"
 #include "Gargoyle.h"
 #include "Interactable.h"
 #include "InputManager.h"
 #include "KeyRiddle.h"
+#include "Projector.h"
+#include "Filmreel.h"
 
 #include <PhysX/PxPhysicsAPI.h>
 
@@ -80,6 +84,11 @@ private:
 	KeyRiddle keyRiddle = "QMGK";
 	std::unique_ptr<Gargoyle> gargoyleController;
 	physx::PxRigidDynamic* ourKey;
+	physx::PxRigidDynamic* projector;
+	physx::PxRigidDynamic* filmReel;
+	physx::PxRigidDynamic* door;
+	std::unique_ptr<Projector> projectorController;
+	std::unique_ptr<Filmreel> filmreelController;
 	std::unique_ptr<Key> ourKeyController;
 	bool checkKey = true;
 

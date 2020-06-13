@@ -235,6 +235,20 @@ void GameLogic::SetupScene()
 		ourKeyController = std::make_unique<Key>(*scene.GetObject("Key"), ourKey);
 		ourKey->userData = ourKeyController.get();
 	}
+	//Projector
+	{
+		projector = addColliderToDynamic("Projector", PxTransform(PxVec3(1.789f, 0.792f, 1.4f)), PxBoxGeometry(0.37f, 0.33f, 0.22f));
+		projector->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
+		setCollisionGroup(projector, 2, PxFilterData(GROUP1, 0, 0, 0));
+		projectorController = std::make_unique<Projector>(*scene.GetObject("projector"), projector);
+	}
+	//Filmreel
+	{
+		filmReel = addColliderToDynamic("FilmReel", PxTransform(PxVec3(3.427f, -0.498f, 2.607f)), PxBoxGeometry(0.15f, 0.11f, 0.13f));
+		filmReel->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
+		setCollisionGroup(filmReel, 2, PxFilterData(GROUP1, 0, 0, 0));
+		filmreelController = std::make_unique<Filmreel>(*scene.GetObject("filmreel"), filmReel);
+	}
 	alternativeCamera = new Camera();
 }
 
@@ -355,7 +369,7 @@ void GameLogic::initGameObjects()
 	scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(-2.615f, 0, -2.0f), glm::vec3(), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("DoorFrame"), resourceManager.GetMaterial("dev"), "DoorFrame"));
 	scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(-0.024f, 2.493f, -2.863f), glm::vec3(), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("Table"), resourceManager.GetMaterial("dev"), "Table.006"));
 	scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(1.995f, 1.0f, -0.009f), glm::vec3(3.12662f, 1.5708f, 0), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("Projector"), resourceManager.GetMaterial("dev"), "Projector"));
-	scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(2.198f, 1.0f, 0.257f), glm::vec3(2.70931f, 0, -1.5708f), glm::vec3(1.131f, 1.131f, 1.131f)), resourceManager.GetMesh("FilmReel"), resourceManager.GetMaterial("dev"), "FilmReel"));
+	scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(3.667f, 0.004f, 1.195f), glm::vec3(2.70931f, 0, -1.5708f), glm::vec3(1.131f, 1.131f, 1.131f)), resourceManager.GetMesh("FilmReel"), resourceManager.GetMaterial("dev"), "FilmReel"));
 	scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(0, 0, 0), glm::vec3(), glm::vec3(1.42f, 1.0f, 1.5f)), resourceManager.GetMesh("Maze"), resourceManager.GetMaterial("dev"), "Maze"));
 
 	//GameObjects
