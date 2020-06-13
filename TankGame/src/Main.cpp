@@ -326,7 +326,7 @@ int main(int argc, char** argv)
 
 		const float physTimeStep = 1.0f / 60.0f;
 		float physTimeAccumulator = 0;
-
+		float maxPhysTimeLag = 0.5f;
 		
 		InputManager::instance().registerCallback(0, MyKeyCallback);
 
@@ -343,6 +343,7 @@ int main(int argc, char** argv)
 			double currentFrametime = glfwGetTime();
 			float deltaTime = (float)(currentFrametime - lastFrameTime);
 			physTimeAccumulator += deltaTime;
+			if (physTimeAccumulator > maxPhysTimeLag) physTimeAccumulator = maxPhysTimeLag; //prevent total lockups if physics cant keep up
 			lastFrameTime = currentFrametime;
 			//DISPLAY FRAMES PER SECOND
 			frameCount++;
@@ -362,10 +363,14 @@ int main(int argc, char** argv)
 			//--------------------------PHYSICS UPDATE--------------------------------
 
 			//Do Physics steps
-			while (physTimeAccumulator > physTimeStep) {
-				gScene->simulate(physTimeStep);
-				gScene->fetchResults(true);
-				physTimeAccumulator -= physTimeStep;
+			{
+				while (physTimeAccumulator > physTimeStep) {
+					gScene->simulate(physTimeStep);
+					gScene->fetchResults(true);
+					physTimeAccumulator -= physTimeStep;
+
+					gameLogic.PhysicsUpdate(physTimeStep);
+				}
 			}
 			//--------------------------LATE UPDATE--------------------------------
 
