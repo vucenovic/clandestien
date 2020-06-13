@@ -20,6 +20,11 @@ void GameLogic::Update(const float & deltaTime)
 
 void GameLogic::LateUpdate()
 {
+	
+}
+
+void GameLogic::PhysicsUpdate(const float & physTimeStep)
+{
 	gargoyleController->LateUpdate();
 }
 

@@ -87,8 +87,9 @@ private:
 
 public:
 	GameLogic(Scene &scene, physx::PxScene *pxScene, GLFWwindow *window, physx::PxPhysics* physX, CameraController &cameraController, KeyMap keyMap);
-	void Update(const float & newDelta); //Called before the physics simulation step
-	void LateUpdate(); //Called after the physics simulation step
+	void Update(const float & newDelta); //Called before the physics simulation step each frame
+	void LateUpdate(); //Called after the physics each frame
+	void PhysicsUpdate(const float & physTimeStep); //Called after each physics simulation step (can be called multiple times or not called on a frame!)
 	void moveControllerCamera(); // moves character controller + adjusts camera movement to follow
 	void raycastFilter(); // perfoms a raycast on each filter group and calls appropriate actions
 	void moveDynamic(glm::vec3 viewVector); // moves dynamic objects
