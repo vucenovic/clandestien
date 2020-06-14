@@ -177,7 +177,6 @@ int main(int argc, char** argv)
 			std::cerr << "Shader failed to compile" << std::endl;
 			goto _shaderCompileError; //jumps to context cleanup section
 		}
-		std::unique_ptr<TextureCubemap> cubeMap = std::make_unique<TextureCubemap>("res/textures/cubemap/");
 
 		resourceManager.AddTexture(std::make_unique<Texture2D>(glm::vec3(1)), "white");
 		resourceManager.AddTexture(std::make_unique<Texture2D>(glm::vec3(0)), "black");
