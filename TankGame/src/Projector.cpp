@@ -6,5 +6,6 @@ void Projector::interact(physx::PxRigidBody * actor, physx::PxRigidBody * invoke
 		auto& lightManager = gameLogic.getScene().getLightManager();
 		lightManager.shadowLightUsed = true;
 		lightManager.UpdateBuffer();
+		Inventory::instance().removeFilmreel();
 	}
 }
