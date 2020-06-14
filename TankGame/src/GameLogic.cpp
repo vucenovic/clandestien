@@ -10,7 +10,9 @@ GameLogic::GameLogic(Scene &scene, physx::PxScene* pxScene, GLFWwindow* window, 
 void GameLogic::Update(const float & deltaTime)
 {
 	this->deltaTime = deltaTime;
-	moveControllerCamera();
+	if (cameraState == 0) {
+		moveControllerCamera();
+	}
 	handlePortals();
 	raycastFilter();
 	setupKeyCallbacks();
@@ -271,6 +273,14 @@ void GameLogic::SetupScene()
 		portalCap = addColliderToDynamic("PortalWallCaps", PxTransform(PxVec3(-4.5f, 1.0f, 0)), PxBoxGeometry(0.5f, 1.0f, 0.5f));
 		portalCap->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
 		setCollisionGroup(portalCap, 2, PxFilterData(GROUP1, 0, 0, 0));
+	}
+	//Door
+	{
+		door = addColliderToDynamic("DoorOpenable", PxTransform(PxVec3(-0.507f, 0.989f, -0.024f)), PxBoxGeometry(0.512f, 1.018f, 0.039f));
+		door->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
+		setCollisionGroup(door, 2, PxFilterData(GROUP1, 0, 0, 0));
+		doorController = std::make_unique<Door>(*scene.GetObject("DoorOpenable"), door);
+		door->userData = doorController.get();
 	}
 	alternativeCamera = new Camera();
 }

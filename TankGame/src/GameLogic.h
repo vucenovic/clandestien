@@ -8,10 +8,12 @@
 #include "KeyMap.h"
 #include <iostream>
 class Gargoyle; //forward declaration
-class Key; //forward declaration
+class Key; 
 class Projector;
 class Filmreel;
+class Door;
 #include "Projector.h"
+#include "Door.h"
 #include "Filmreel.h"
 #include "Key.h"
 #include "Gargoyle.h"
@@ -93,6 +95,7 @@ private:
 	physx::PxRigidDynamic* portalCap;
 	std::unique_ptr<Projector> projectorController;
 	std::unique_ptr<Filmreel> filmreelController;
+	std::unique_ptr<Door> doorController;
 
 	int cameraState = 0; //0 default state, 1 for key interaction 
 	Camera * alternativeCamera = nullptr;
