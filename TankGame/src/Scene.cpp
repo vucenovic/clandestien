@@ -38,6 +38,10 @@ void Scene::RemoveObject(const std::string & name)
 	gameObjects.erase(name);
 }
 
+Scene::Scene(LightManager& lm) : lm(lm)
+{
+}
+
 void Scene::DrawOpaqueObjects(const Material & material)
 {
 	material.Use();

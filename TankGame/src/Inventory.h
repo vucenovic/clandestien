@@ -2,6 +2,7 @@
 
 struct Items {
 	bool key;
+	bool filmreel;
 	//..
 };
 
@@ -15,6 +16,8 @@ class Inventory
 
 		void addKey() { i.key = true; };
 		void removeKey() { i.key = false; };
+		void addFilmreel() { i.filmreel = true; };
+		void removeFilmreel() { i.filmreel = false; };
 		Items getInventory() { return i; };
 
 	private:

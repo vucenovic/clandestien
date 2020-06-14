@@ -236,7 +236,7 @@ int main(int argc, char** argv)
 				glm::vec3(1, 1, 1),
 				glm::vec4(0.2f, 0.01f, 0.05f, 100)
 			);
-			myLightManager.shadowLightUsed = true;
+			myLightManager.shadowLightUsed = false;
 
 			//myLightManager.spotLights[0].SetPosition(glm::vec3(4.6f,-2.4f,-4.3f));
 			//myLightManager.spotLights[0].SetDirection(glm::vec3(-0.7f, 0.15f, 0.62f));
@@ -246,7 +246,7 @@ int main(int argc, char** argv)
 
 		myLightManager.UpdateBuffer();
 
-		Scene myScene = Scene();
+		Scene myScene = Scene(myLightManager);
 
 		//Particles
 

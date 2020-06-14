@@ -9,6 +9,10 @@
 #include <iostream>
 class Gargoyle; //forward declaration
 class Key; //forward declaration
+class Projector;
+class Filmreel;
+#include "Projector.h"
+#include "Filmreel.h"
 #include "Key.h"
 #include "Gargoyle.h"
 #include "Interactable.h"
@@ -82,6 +86,13 @@ private:
 	physx::PxRigidDynamic* ourKey;
 	std::unique_ptr<Key> ourKeyController;
 	bool checkKey = true;
+	bool checkGarg = true;
+	physx::PxRigidDynamic* projector;
+	physx::PxRigidDynamic* filmReel;
+	physx::PxRigidDynamic* door;
+	physx::PxRigidDynamic* portalCap;
+	std::unique_ptr<Projector> projectorController;
+	std::unique_ptr<Filmreel> filmreelController;
 
 	int cameraState = 0; //0 default state, 1 for key interaction 
 	Camera * alternativeCamera = nullptr;

@@ -12,6 +12,7 @@
 #include "GameObject.h"
 #include "Portal.h"
 #include "Camera.h"
+#include "LightManager.h"
 
 //TODO (maybe): Maybe split into "Scene" and "SceneRenderer" classes?
 class Scene
@@ -25,6 +26,7 @@ private:
 
 	//string map for searching objects by name
 	std::map<std::string, std::unique_ptr<GameObject>> gameObjects;
+	LightManager& lm;
 	
 public:
 	std::vector<Portal> renderPortals;
@@ -36,6 +38,7 @@ public:
 	Camera * activeCamera;
 
 public:
+	Scene(LightManager& lm);
 	void DrawOpaqueObjects(const Material & material);
 	void DrawOpaqueObjects();
 	void DrawTransparentObjects();
@@ -43,6 +46,8 @@ public:
 
 public:
 	bool AddObject(std::unique_ptr<GameObject> & gameobject);
+	void addLights(LightManager& lm) { this->lm = lm; };
+	LightManager& getLightManager() { return lm; };
 	GameObject * GetObject(const std::string & name);
 	void RemoveObject(const std::string & name);
 
