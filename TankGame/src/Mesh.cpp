@@ -705,7 +705,7 @@ std::unique_ptr<Mesh> OBJLoader::LoadOBJ(const std::string & filePath)
 				case 't': //texture
 				{
 					GLfloat u = std::strtof(lr.line + 2, &mid_ptr);
-					GLfloat v = std::strtof(mid_ptr, nullptr);
+					GLfloat v = 1.0f - std::strtof(mid_ptr, nullptr); //invert v
 					textureCoords.push_back(glm::vec2(u,v));
 				}
 					break;
