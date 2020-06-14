@@ -148,14 +148,13 @@ void GameLogic::updateGargoyleRiddleLogic()
 {
 	auto debugD = glm::distance2(glm::vec3(gargoyleRigidbody->getGlobalPose().p[0], gargoyleRigidbody->getGlobalPose().p[1], gargoyleRigidbody->getGlobalPose().p[2]), glm::vec3(2.0, 0.0, 0.0));
 	auto gargoylePosDebug = glm::vec3(gargoyleRigidbody->getGlobalPose().p[0], gargoyleRigidbody->getGlobalPose().p[1], gargoyleRigidbody->getGlobalPose().p[2]);
-	//if (scene.getLightManager().shadowLightUsed) {
+	if (scene.getLightManager().shadowLightUsed) {
 		if (glm::distance2(glm::vec3(gargoyleRigidbody->getGlobalPose().p[0], gargoyleRigidbody->getGlobalPose().p[1], gargoyleRigidbody->getGlobalPose().p[2]), glm::vec3(-2.0, 0.5, 0.0)) < 2) {
 			scene.RemoveObject("PortalWallCaps");
 			ourPxScene->removeActor(*portalCap);
 			checkGarg = false;
 		}
-	//}
-		
+	}
 }
 
 void GameLogic::setCameraState(int state)
@@ -253,8 +252,7 @@ void GameLogic::SetupScene()
 	}
 	//Projector
 	{
-		projector = addColliderToDynamic("Projector", PxTransform(PxVec3(1.923f, 1.414f, -0.009f), PxConv<PxQuat>(glm::vec3(-3.14159f, 1.5708f, 0))), PxBoxGeometry(0.135f, 0.424f, 0.417f));
-		projector->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
+		projector = addColliderToDynamic("Projector", PxTransform(PxVec3(-0.094f, 0.397f, 0), PxConv<PxQuat>(glm::vec3(-3.14159f, 1.5708f, 0))), PxBoxGeometry(0.135f, 0.424f, 0.417f));
 		setCollisionGroup(projector, 2, PxFilterData(GROUP1, 0, 0, 0));
 		projectorController = std::make_unique<Projector>(*scene.GetObject("Projector"), projector);
 		projector->userData = projectorController.get();
@@ -417,7 +415,7 @@ void GameLogic::initGameObjects()
 	scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(2.0f, 0, 0), glm::vec3(), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("Table"), resourceManager.GetMaterial("dev"), "Table1"));
 	scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(-2.615f, 0, -2.0f), glm::vec3(), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("DoorFrame"), resourceManager.GetMaterial("Door"), "DoorFrame"));
 	scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(-0.024f, 2.493f, -2.863f), glm::vec3(), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("Table"), resourceManager.GetMaterial("dev"), "Table2"));
-	scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(1.995f, 1.0f, -0.009f), glm::vec3(3.12662f, 1.5708f, 0), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("Projector"), resourceManager.GetMaterial("dev"), "Projector"));
+	scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(1.995f, 1.0f, -0.009f), glm::vec3(), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("Projector"), resourceManager.GetMaterial("dev"), "Projector"));
 	scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(3.371f, 0, 1.245f), glm::vec3(0, 0.73946f, 0), glm::vec3(1.131f, 1.131f, 1.131f)), resourceManager.GetMesh("FilmReel"), resourceManager.GetMaterial("dev"), "FilmReel"));
 	scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(0, 0, 0), glm::vec3(), glm::vec3(1.42f, 1.0f, 1.5f)), resourceManager.GetMesh("Maze"), resourceManager.GetMaterial("Wall"), "Maze"));
 	scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(2.734f, 1.389f, -2.0f), glm::vec3(1.5708f, 0, 0.15863f), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("Poster1"), resourceManager.GetMaterial("Poster1"), "Poster1"));
