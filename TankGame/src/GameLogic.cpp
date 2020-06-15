@@ -69,7 +69,15 @@ void GameLogic::raycastFilter()
 	glm::vec3 viewVector = ourCameraController.cameraTransform.GetTransform().GetForward();
 
 	PxVec3 unitDir = PxVec3(viewVector.x, viewVector.y, viewVector.z);
-	PxReal maxDistance = 2;
+	PxReal maxDistance;
+	auto debugView = viewVector.y;
+	if (viewVector.y < -0.8) {
+		maxDistance = 2;
+	}
+	else {
+		maxDistance = 1.2;
+	}
+	
 	PxRaycastBuffer hit;
 
 	PxQueryFilterData filterData = PxQueryFilterData(); 
@@ -146,16 +154,15 @@ void GameLogic::updateKeyRiddleLogic()
 
 void GameLogic::updateGargoyleRiddleLogic()
 {
-	auto debugD = glm::distance2(glm::vec3(gargoyleRigidbody->getGlobalPose().p[0], gargoyleRigidbody->getGlobalPose().p[1], gargoyleRigidbody->getGlobalPose().p[2]), glm::vec3(2.0, 0.0, 0.0));
+	auto debugD = glm::distance2(glm::vec3(gargoyleRigidbody->getGlobalPose().p[0], gargoyleRigidbody->getGlobalPose().p[1], gargoyleRigidbody->getGlobalPose().p[2]), glm::vec3(2.5, 0.0, 0.0));
 	auto gargoylePosDebug = glm::vec3(gargoyleRigidbody->getGlobalPose().p[0], gargoyleRigidbody->getGlobalPose().p[1], gargoyleRigidbody->getGlobalPose().p[2]);
-	//if (scene.getLightManager().shadowLightUsed) {
-		if (glm::distance2(glm::vec3(gargoyleRigidbody->getGlobalPose().p[0], gargoyleRigidbody->getGlobalPose().p[1], gargoyleRigidbody->getGlobalPose().p[2]), glm::vec3(-2.0, 0.5, 0.0)) < 2) {
+	if (scene.getLightManager().shadowLightUsed) {
+		if (glm::distance2(glm::vec3(gargoyleRigidbody->getGlobalPose().p[0], gargoyleRigidbody->getGlobalPose().p[1], gargoyleRigidbody->getGlobalPose().p[2]), glm::vec3(-3.0, 0.5, 0.0)) < 2) {
 			scene.RemoveObject("PortalWallCaps");
 			ourPxScene->removeActor(*portalCap);
 			checkGarg = false;
 		}
-	//}
-		
+	}
 }
 
 void GameLogic::setCameraState(int state)
@@ -418,8 +425,9 @@ void GameLogic::initGameObjects()
 	scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(2.5f, 5.5f, -4.039f), glm::vec3(), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("Lamp"), resourceManager.GetMaterial("dev"), "Lamp.002"));
 	scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(2.0f, 0, 0), glm::vec3(), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("Table"), resourceManager.GetMaterial("Railing"), "Table1"));
 	scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(-2.615f, 0, -2.0f), glm::vec3(), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("DoorFrame"), resourceManager.GetMaterial("Door"), "DoorFrame"));
-	scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(-0.024f, 2.493f, -2.863f), glm::vec3(), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("Table"), resourceManager.GetMaterial("Railing"), "Table2"));
-	scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(1.995f, 1.0f, -0.009f), glm::vec3(), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("Projector"), resourceManager.GetMaterial("Projector"), "Projector"));
+	scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(-0.024f, 2.493f, -2.863f), glm::vec3(), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("Table"), resourceManager.GetMaterial("dev"), "Table2"));
+	scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(1.995f, 1.0f, -0.009f), glm::vec3(), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("Projector"), resourceManager.GetMaterial("dev"), "Projector"));
+	scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(3.371f, 0, 1.245f), glm::vec3(0, 0.73946f, 0), glm::vec3(1.131f, 1.131f, 1.131f)), resourceManager.GetMesh("FilmReel"), resourceManager.GetMaterial("dev"), "FilmReel"));
 	scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(0, 0, 0), glm::vec3(), glm::vec3(1.42f, 1.0f, 1.5f)), resourceManager.GetMesh("Maze"), resourceManager.GetMaterial("Wall"), "Maze"));
 	scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(2.734f, 1.389f, -2.0f), glm::vec3(1.5708f, 0, 0.15863f), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("Poster1"), resourceManager.GetMaterial("Poster1"), "Poster1"));
 	scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(0.211f, 3.493f, -3.132f), glm::vec3(0, 2.83547f, 0), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("Poster2"), resourceManager.GetMaterial("Poster2"), "Poster1.001"));

@@ -21,7 +21,7 @@ class Inventory
 		Items getInventory() { return i; };
 
 	private:
-		Items i = { false };
+		Items i = { false, false };
 		Inventory() = default;
 		Inventory(const Inventory&);
 		Inventory & operator = (const Inventory &) = delete ;

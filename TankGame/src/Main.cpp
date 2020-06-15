@@ -230,9 +230,9 @@ int main(int argc, char** argv)
 			//myLightManager.directionalLights.push_back(DirectionalLight(glm::vec3(0, -1, 1), glm::vec3(0.1f, 0.1f, 0.1f)));
 
 			myLightManager.shadowLight = SpotLight(
-				glm::vec3(2.0, 1.0, -1.0),
+				glm::vec3(0.0f, 1.0f, -0.009f),
 				glm::vec3(-1.0f, 0.0f, 0.0f),
-				glm::vec2(glm::cos(glm::radians(5.0)), glm::cos(glm::radians(15.0))),
+				glm::vec2(glm::cos(glm::radians(10.0)), glm::cos(glm::radians(20.0))),
 				glm::vec3(1, 1, 1),
 				glm::vec4(0.2f, 0.01f, 0.05f, 100)
 			);

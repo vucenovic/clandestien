@@ -4,5 +4,5 @@ void Filmreel::interact(physx::PxRigidBody * actor, physx::PxRigidBody * invoker
 {
 	gameLogic.getScene().RemoveObject("FilmReel");
 	gameLogic.getPxScene()->removeActor(*actor);
-	Inventory::instance().addKey();
+	Inventory::instance().addFilmreel();
 }
