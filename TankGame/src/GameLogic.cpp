@@ -69,7 +69,15 @@ void GameLogic::raycastFilter()
 	glm::vec3 viewVector = ourCameraController.cameraTransform.GetTransform().GetForward();
 
 	PxVec3 unitDir = PxVec3(viewVector.x, viewVector.y, viewVector.z);
-	PxReal maxDistance = 2;
+	PxReal maxDistance;
+	auto debugView = viewVector.y;
+	if (viewVector.y < -0.8) {
+		maxDistance = 2;
+	}
+	else {
+		maxDistance = 1.2;
+	}
+	
 	PxRaycastBuffer hit;
 
 	PxQueryFilterData filterData = PxQueryFilterData(); 
