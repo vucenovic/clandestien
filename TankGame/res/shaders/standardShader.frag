@@ -26,7 +26,8 @@ uniform vec4 material;
 layout (binding = 0 ) uniform sampler2D albedoTex;
 layout (binding = 1 ) uniform sampler2D materialTex;
 layout (binding = 2 ) uniform sampler2D normalTex;
-layout (binding = 3 ) uniform samplerCube cubemapTex;
+layout (binding = 3 ) uniform sampler2D emissionTex;
+//layout (binding = 3 ) uniform samplerCube cubemapTex;
 layout (binding = 4 ) uniform sampler2DShadow shadowMap;
 
 layout (binding = 1, std140) uniform LightData{
@@ -93,9 +94,8 @@ void main()
 		doSpotLight(lights.spotLights[i]);
 	}
 
-	color = vec4(flatColor.xyz * texture(albedoTex, vertex.texCoord).xyz * (lights.ambientColor.xyz * material.x + lightDiffuse  * material.y) + (lightSpecular  + texture(cubemapTex, -reflectDir).xyz * flatColor.w) * material.z * texture(materialTex,vertex.texCoord).x,1);
+	color = vec4(texture(emissionTex,vertex.texCoord).xyz * flatColor.w + flatColor.xyz * texture(albedoTex, vertex.texCoord).xyz * (lights.ambientColor.xyz * material.x + lightDiffuse  * material.y) + (lightSpecular) * material.z * texture(materialTex,vertex.texCoord).x,1);
 }
-
 
 void doPointLight(PointLight light){
 	vec3 lightDir = light.position.xyz - vertex.worldPos;

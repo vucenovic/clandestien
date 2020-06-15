@@ -340,6 +340,9 @@ void GameLogic::SetupResources()
 	resourceManager.AddTexture(std::make_unique<Texture2D>("res/textures/Railing"), "Railing");
 	resourceManager.AddTexture(std::make_unique<Texture2D>("res/textures/ProjectorSpec"), "ProjectorSpec");
 	resourceManager.AddTexture(std::make_unique<Texture2D>("res/textures/ProjectorDiff"), "ProjectorDiff");
+	resourceManager.AddTexture(std::make_unique<Texture2D>("res/textures/LampDiff"), "LampDiff");
+	resourceManager.AddTexture(std::make_unique<Texture2D>("res/textures/LampEmit"), "LampEmit");
+	resourceManager.AddTexture(std::make_unique<Texture2D>("res/textures/LampSpec"), "LampSpec");
 
 	DefineMaterials();
 }
@@ -410,8 +413,8 @@ void GameLogic::initGameObjects()
 	scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(0), glm::vec3(), glm::vec3(1.26f, 1.0f, 1.0f)), resourceManager.GetMesh("Floors"), resourceManager.GetMaterial("Floor"), "Floor"));
 	scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(0), glm::vec3(), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("Walls"), resourceManager.GetMaterial("Wall"), "Walls"));
 	scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(0), glm::vec3(), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("Ceiling"), resourceManager.GetMaterial("Ceiling"), "Ceiling"));
-	scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(0), glm::vec3(), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("Cliff"), resourceManager.GetMaterial("dev"), "Cliff"));
-	scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(0, -16.874f, 23.398f), glm::vec3(), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("Ocean"), resourceManager.GetMaterial("dev"), "Ocean"));
+	scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(0), glm::vec3(), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("Cliff"), resourceManager.GetMaterial("Cliff"), "Cliff"));
+	scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(0, -16.874f, 23.398f), glm::vec3(), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("Ocean"), resourceManager.GetMaterial("Ocean"), "Ocean"));
 	scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(0, 2.5f, -2.15f), glm::vec3(), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("Railing"), resourceManager.GetMaterial("Railing"), "Railing"));
 	scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(1.135f, 2.5f, 2.0f), glm::vec3(), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("Girder"), resourceManager.GetMaterial("Ceiling"), "Girder"));
 	scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(3.441f, 2.5f, 2.0f), glm::vec3(), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("Girder"), resourceManager.GetMaterial("Ceiling"), "Girder.001"));
@@ -420,20 +423,19 @@ void GameLogic::initGameObjects()
 	scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(0, 0.502f, 2.2f), glm::vec3(), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("Window"), resourceManager.GetMaterial("Railing"), "WindowBank"));
 	scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(-2.286f, 0.502f, 2.2f), glm::vec3(), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("Window"), resourceManager.GetMaterial("Railing"), "WindowBank.001"));
 	scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(2.286f, 0.502f, 2.2f), glm::vec3(), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("Window"), resourceManager.GetMaterial("Railing"), "WindowBank.002"));
-	scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(0, 5.5f, -4.039f), glm::vec3(), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("Lamp"), resourceManager.GetMaterial("dev"), "Lamp"));
-	scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(-2.5f, 5.5f, -4.039f), glm::vec3(), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("Lamp"), resourceManager.GetMaterial("dev"), "Lamp.001"));
-	scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(2.5f, 5.5f, -4.039f), glm::vec3(), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("Lamp"), resourceManager.GetMaterial("dev"), "Lamp.002"));
+	scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(0, 5.5f, -4.039f), glm::vec3(), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("Lamp"), resourceManager.GetMaterial("Lamp"), "Lamp"));
+	scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(-2.5f, 5.5f, -4.039f), glm::vec3(), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("Lamp"), resourceManager.GetMaterial("Lamp"), "Lamp.001"));
+	scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(2.5f, 5.5f, -4.039f), glm::vec3(), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("Lamp"), resourceManager.GetMaterial("Lamp"), "Lamp.002"));
 	scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(2.0f, 0, 0), glm::vec3(), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("Table"), resourceManager.GetMaterial("Railing"), "Table1"));
 	scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(-2.615f, 0, -2.0f), glm::vec3(), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("DoorFrame"), resourceManager.GetMaterial("Door"), "DoorFrame"));
-	scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(-0.024f, 2.493f, -2.863f), glm::vec3(), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("Table"), resourceManager.GetMaterial("dev"), "Table2"));
-	scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(1.995f, 1.0f, -0.009f), glm::vec3(), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("Projector"), resourceManager.GetMaterial("dev"), "Projector"));
-	scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(3.371f, 0, 1.245f), glm::vec3(0, 0.73946f, 0), glm::vec3(1.131f, 1.131f, 1.131f)), resourceManager.GetMesh("FilmReel"), resourceManager.GetMaterial("dev"), "FilmReel"));
+	scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(-0.024f, 2.493f, -2.863f), glm::vec3(), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("Table"), resourceManager.GetMaterial("Railing"), "Table2"));
 	scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(0, 0, 0), glm::vec3(), glm::vec3(1.42f, 1.0f, 1.5f)), resourceManager.GetMesh("Maze"), resourceManager.GetMaterial("Wall"), "Maze"));
 	scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(2.734f, 1.389f, -2.0f), glm::vec3(1.5708f, 0, 0.15863f), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("Poster1"), resourceManager.GetMaterial("Poster1"), "Poster1"));
 	scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(0.211f, 3.493f, -3.132f), glm::vec3(0, 2.83547f, 0), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("Poster2"), resourceManager.GetMaterial("Poster2"), "Poster1.001"));
 
 	//GameObjects
 	{
+		scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(1.995f, 1.0f, -0.009f), glm::vec3(), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("Projector"), resourceManager.GetMaterial("Projector"), "Projector"));
 		scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(3.371f, 0, 1.245f), glm::vec3(0, 0.73946f, 0), glm::vec3(1.131f, 1.131f, 1.131f)), resourceManager.GetMesh("FilmReel"), resourceManager.GetMaterial("Projector"), "FilmReel"));
 		scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(-4.0f, 2.5f, -4.0f), glm::vec3(0, 1.5708f, 0), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("DoorStatic"), resourceManager.GetMaterial("Door"), "Door.001"));
 		scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(4.0f, 2.5f, -4.0f), glm::vec3(0, -1.5708f, 0), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("DoorStatic"), resourceManager.GetMaterial("Door"), "Door.002"));
@@ -454,8 +456,6 @@ void GameLogic::DefineMaterials()
 	{
 		std::unique_ptr<Material> material = std::make_unique<StandardMaterial>(standardShader);
 		StandardMaterial * mat = (StandardMaterial*)material.get();
-		mat->diffuse = (Texture2D*)resourceManager.GetTexture("dev_diff");
-		mat->normal = (Texture2D*)resourceManager.GetTexture("dev_norm");
 		resourceManager.AddMaterial(material, "gargoyle");
 	}
 
@@ -501,7 +501,7 @@ void GameLogic::DefineMaterials()
 	{//Railing
 		std::unique_ptr<Material> material = std::make_unique<StandardMaterial>(standardShader);
 		StandardMaterial * mat = (StandardMaterial*)material.get();
-		mat->material = glm::vec4(0.05f, 0.5f, 0.2f, 8);
+		mat->material = glm::vec4(0.05f, 0.5f, 0.5f, 8);
 		mat->diffuse = (Texture2D*)resourceManager.GetTexture("Railing");
 		resourceManager.AddMaterial(material, "Railing");
 	}
@@ -538,5 +538,29 @@ void GameLogic::DefineMaterials()
 		mat->material = glm::vec4(0.05f, 1, 0, 8);
 		mat->diffuse = (Texture2D*)resourceManager.GetTexture("glyphs_solving");
 		resourceManager.AddMaterial(material, "Poster2");
+	}
+	{//Lamp
+		std::unique_ptr<Material> material = std::make_unique<StandardMaterial>(standardShader);
+		StandardMaterial * mat = (StandardMaterial*)material.get();
+		mat->material = glm::vec4(0.05f, 1, 0.3f, 8);
+		mat->color = glm::vec4(1, 1, 1, 2);
+		mat->diffuse = (Texture2D*)resourceManager.GetTexture("LampDiff");
+		mat->specular = (Texture2D*)resourceManager.GetTexture("LampSpec");
+		mat->emission = (Texture2D*)resourceManager.GetTexture("LampEmit");
+		resourceManager.AddMaterial(material, "Lamp");
+	}
+	{//Ocean
+		std::unique_ptr<Material> material = std::make_unique<StandardMaterial>(standardShader);
+		StandardMaterial * mat = (StandardMaterial*)material.get();
+		mat->material = glm::vec4(0.05f, 0.2f, 1, 8);
+		mat->color = glm::vec4(0.2f, 0.2f, 0.4f, 0);
+		resourceManager.AddMaterial(material, "Ocean");
+	}
+	{//Cliff
+		std::unique_ptr<Material> material = std::make_unique<StandardMaterial>(standardShader);
+		StandardMaterial * mat = (StandardMaterial*)material.get();
+		mat->material = glm::vec4(0.05f, 0.1f, 0, 8);
+		mat->color = glm::vec4(0.2f, 0.4f, 0.2f, 0);
+		resourceManager.AddMaterial(material, "Cliff");
 	}
 }
