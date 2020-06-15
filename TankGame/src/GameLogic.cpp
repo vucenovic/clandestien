@@ -157,7 +157,7 @@ void GameLogic::updateGargoyleRiddleLogic()
 	auto debugD = glm::distance2(glm::vec3(gargoyleRigidbody->getGlobalPose().p[0], gargoyleRigidbody->getGlobalPose().p[1], gargoyleRigidbody->getGlobalPose().p[2]), glm::vec3(2.5, 0.0, 0.0));
 	auto gargoylePosDebug = glm::vec3(gargoyleRigidbody->getGlobalPose().p[0], gargoyleRigidbody->getGlobalPose().p[1], gargoyleRigidbody->getGlobalPose().p[2]);
 	if (scene.getLightManager().shadowLightUsed) {
-		if (glm::distance2(glm::vec3(gargoyleRigidbody->getGlobalPose().p[0], gargoyleRigidbody->getGlobalPose().p[1], gargoyleRigidbody->getGlobalPose().p[2]), glm::vec3(-3.0, 0.5, 0.0)) < 2) {
+		if (glm::distance2(glm::vec3(gargoyleRigidbody->getGlobalPose().p[0], gargoyleRigidbody->getGlobalPose().p[1], gargoyleRigidbody->getGlobalPose().p[2]), glm::vec3(-0.7, 0.5, 0.0)) < 1) {
 			scene.RemoveObject("PortalWallCaps");
 			ourPxScene->removeActor(*portalCap);
 			checkGarg = false;
@@ -438,7 +438,7 @@ void GameLogic::initGameObjects()
 		scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(-4.0f, 2.5f, -4.0f), glm::vec3(0, 1.5708f, 0), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("DoorStatic"), resourceManager.GetMaterial("Door"), "Door.001"));
 		scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(4.0f, 2.5f, -4.0f), glm::vec3(0, -1.5708f, 0), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("DoorStatic"), resourceManager.GetMaterial("Door"), "Door.002"));
 		scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(4.0f, 0, 0), glm::vec3(0, -1.5708f, 0), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("DoorStatic"), resourceManager.GetMaterial("Door"), "Door.003"));
-		scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(0.213f, 0.611f, -1.411f), glm::vec3(), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("Gargoyle"), resourceManager.GetMaterial("gargoyle"), "gargoyle"));
+		scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(-3.376f, 0.611f, 1.173f), glm::vec3(0, 1.5708f, 0), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("Gargoyle"), resourceManager.GetMaterial("gargoyle"), "gargoyle"));
 		scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(-2.115f, 0, -2.0f), glm::vec3(), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("Door"), resourceManager.GetMaterial("Door"), "DoorOpenable"));
 		scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(0), glm::vec3(), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("PortalWallCaps"), resourceManager.GetMaterial("Wall"), "PortalWallCaps"));
 		scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(0, 3.499f, -2.902f), glm::vec3(0, 0.7854f, 0), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("Key"), resourceManager.GetMaterial("Projector"), "Key"));
