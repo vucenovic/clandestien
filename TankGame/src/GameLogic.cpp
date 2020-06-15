@@ -343,6 +343,7 @@ void GameLogic::SetupResources()
 	resourceManager.AddTexture(std::make_unique<Texture2D>("res/textures/LampDiff"), "LampDiff");
 	resourceManager.AddTexture(std::make_unique<Texture2D>("res/textures/LampEmit"), "LampEmit");
 	resourceManager.AddTexture(std::make_unique<Texture2D>("res/textures/LampSpec"), "LampSpec");
+	resourceManager.AddTexture(std::make_unique<Texture2D>("res/textures/Sketch"), "Sketch");
 
 	DefineMaterials();
 }
@@ -432,6 +433,7 @@ void GameLogic::initGameObjects()
 	scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(0, 0, 0), glm::vec3(), glm::vec3(1.42f, 1.0f, 1.5f)), resourceManager.GetMesh("Maze"), resourceManager.GetMaterial("Wall"), "Maze"));
 	scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(2.734f, 1.389f, -2.0f), glm::vec3(1.5708f, 0, 0.15863f), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("Poster1"), resourceManager.GetMaterial("Poster1"), "Poster1"));
 	scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(0.211f, 3.493f, -3.132f), glm::vec3(0, 2.83547f, 0), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("Poster2"), resourceManager.GetMaterial("Poster2"), "Poster1.001"));
+	scene.AddObject(std::make_unique<GameObject>(Transform(glm::vec3(2.218f, 1.0f, 0.328f), glm::vec3(0, 5.36876f, 0), glm::vec3(1.0f, 1.0f, 1.0f)), resourceManager.GetMesh("Poster2"), resourceManager.GetMaterial("Sketch"), "Sketch"));
 
 	//GameObjects
 	{
@@ -468,7 +470,7 @@ void GameLogic::DefineMaterials()
 		mat->normal = (Texture2D*)resourceManager.GetTexture("dev_norm");
 		resourceManager.AddMaterial(material, "dev");
 	}
-
+	
 	{//Wall
 		std::unique_ptr<Material> material = std::make_unique<StandardMaterial>(standardShader);
 		StandardMaterial * mat = (StandardMaterial*)material.get();
@@ -538,6 +540,13 @@ void GameLogic::DefineMaterials()
 		mat->material = glm::vec4(0.05f, 1, 0, 8);
 		mat->diffuse = (Texture2D*)resourceManager.GetTexture("glyphs_solving");
 		resourceManager.AddMaterial(material, "Poster2");
+	}
+	{//Sketch
+		std::unique_ptr<Material> material = std::make_unique<StandardMaterial>(standardShader);
+		StandardMaterial * mat = (StandardMaterial*)material.get();
+		mat->material = glm::vec4(0.05f, 1, 0, 8);
+		mat->diffuse = (Texture2D*)resourceManager.GetTexture("Sketch");
+		resourceManager.AddMaterial(material, "Sketch");
 	}
 	{//Lamp
 		std::unique_ptr<Material> material = std::make_unique<StandardMaterial>(standardShader);
