@@ -85,6 +85,7 @@ public:
 	Texture2D * diffuse;
 	Texture2D * specular;
 	Texture2D * normal;
+	Texture2D * emission;
 	//TextureCubemap * cubeMap;
 
 	StandardMaterial(ShaderProgram * shader);

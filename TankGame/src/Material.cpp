@@ -92,6 +92,7 @@ StandardMaterial::StandardMaterial(ShaderProgram * shader) : Material(shader)
 	diffuse = (Texture2D*)res.GetTexture("white");
 	specular = (Texture2D*)res.GetTexture("black");
 	normal = (Texture2D*)res.GetTexture("purple");
+	emission = (Texture2D*)res.GetTexture("black");
 
 	matLoc = shader->GetUniformLocation("material");
 	colLoc = shader->GetUniformLocation("flatColor");
@@ -102,6 +103,7 @@ void StandardMaterial::Use() const
 	diffuse->Bind(0);
 	specular->Bind(1);
 	normal->Bind(2);
+	emission->Bind(3);
 
 	glActiveTexture(GL_TEXTURE0 + 3);//TODO replace with actual cubemap loading
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
