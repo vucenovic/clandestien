@@ -23,6 +23,7 @@ void GameLogic::Update(const float & deltaTime)
 	if (checkGarg) {
 		updateGargoyleRiddleLogic();
 	}
+	checkWinState();
 	
 	
 }
@@ -126,15 +127,6 @@ void GameLogic::switchCameraState()
 	}
 }
 
-void GameLogic::characterCallback(GLFWwindow * window, int key, int scancode, int action, int mods)
-{
-	if (action == GLFW_PRESS) {
-		if (keyBinds.forward == key) {
-			//.. TODO:
-		}
-	}
-}
-
 void GameLogic::setupKeyCallbacks()
 {
 	//inputManager.registerCallback(characterCallback);
@@ -157,11 +149,19 @@ void GameLogic::updateGargoyleRiddleLogic()
 	auto debugD = glm::distance2(glm::vec3(gargoyleRigidbody->getGlobalPose().p[0], gargoyleRigidbody->getGlobalPose().p[1], gargoyleRigidbody->getGlobalPose().p[2]), glm::vec3(2.5, 0.0, 0.0));
 	auto gargoylePosDebug = glm::vec3(gargoyleRigidbody->getGlobalPose().p[0], gargoyleRigidbody->getGlobalPose().p[1], gargoyleRigidbody->getGlobalPose().p[2]);
 	if (scene.getLightManager().shadowLightUsed) {
-		if (glm::distance2(glm::vec3(gargoyleRigidbody->getGlobalPose().p[0], gargoyleRigidbody->getGlobalPose().p[1], gargoyleRigidbody->getGlobalPose().p[2]), glm::vec3(-0.7, 0.5, 0.0)) < 1) {
+		if (glm::distance2(glm::vec3(gargoyleRigidbody->getGlobalPose().p[0], gargoyleRigidbody->getGlobalPose().p[1], gargoyleRigidbody->getGlobalPose().p[2]), glm::vec3(-1.3, 0.5, 0.0)) < 0.5) {
 			scene.RemoveObject("PortalWallCaps");
 			ourPxScene->removeActor(*portalCap);
 			checkGarg = false;
 		}
+	}
+}
+
+void GameLogic::checkWinState()
+{
+	glm::vec3 charPos = PxConv<glm::vec3>(character->getFootPosition());
+	if (glm::distance2(glm::vec3(-0.548f, 0.611f, -13.538f), charPos) < 1.5) {
+		glfwSetWindowShouldClose(ourWindow, GLFW_TRUE);
 	}
 }
 

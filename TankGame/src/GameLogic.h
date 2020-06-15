@@ -110,10 +110,10 @@ public:
 	void moveDynamic(glm::vec3 viewVector); // moves dynamic objects
 	void handlePortals(); // moves the character from one portal to another adjusting the camera
 	void switchCameraState(); // checks key interaction state and handles cameras switching
-	void characterCallback(GLFWwindow * window, int key, int scancode, int action, int mods); // sets up character movement callback
 	void setupKeyCallbacks(); // sets up various key callbacks 
 	void updateKeyRiddleLogic(); // controls key riddle logic 
 	void updateGargoyleRiddleLogic(); // controls gargoyle riddle logic
+	void checkWinState(); //checks if player won the game
 
 	void SetupScene(); //do setup
 	static void SetupResources(); //Load resources to the resource Manager

@@ -106,7 +106,7 @@ namespace Particles {
 	{
 		for (int i = 0; i < prototype.maxParticles; i++) {
 			Particle & p = particles[i];
-			p.postion = glm::vec3(distr1(gen), distr1(gen), distr1(gen));
+			p.postion = glm::vec3(-0.548f, 0.611f, -13.538f);
 			p.velocity = glm::vec3(distr1(gen), distr1(gen), distr1(gen)) * 0.1f;
 			p.rotation = distr1(gen);
 			p.size = distr2(gen);
@@ -121,7 +121,7 @@ namespace Particles {
 		if (activeParticles < prototype.maxParticles) {
 			particleLifetimes[activeParticles] = 0;
 			Particle & p = particles[activeParticles];
-			p.postion = glm::vec3(distr1(gen), distr1(gen), distr1(gen));
+			p.postion = glm::vec3(-0.548f, 0.611f, -13.538f);
 			p.velocity = glm::vec3(distr1(gen), distr1(gen), distr1(gen)) * 0.1f;
 			p.rotation = distr1(gen);
 			p.size = distr2(gen);
