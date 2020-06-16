@@ -473,7 +473,7 @@ int main(int argc, char** argv)
 					pp_bloom->UseProgram();
 					glBindTexture(GL_TEXTURE_2D, ppFBO.color);
 					glUniform1i(pp_bloom->GetUniformLocation("combine"), 0);
-					glUniform1f(pp_bloom->GetUniformLocation("cutoff"), 1);
+					glUniform1f(pp_bloom->GetUniformLocation("cutoff"), 1.1f);
 					glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 				
 					//Blur Highlights
