@@ -157,7 +157,7 @@ int main(int argc, char** argv)
 
 		ResourceManager & resourceManager = ResourceManager::GetInstance();
 
-		std::unique_ptr<ShaderProgram> debugShader, pp_demultAlpha, pp_gammaCorrect, pp_blur, pp_bloom, SSDepthReset, DebugDepthSS;
+		std::unique_ptr<ShaderProgram> debugShader, pp_demultAlpha, pp_gammaCorrect, pp_blur, pp_bloom, SSDepthReset, DebugDepthSS, Procedural;
 		try
 		{
 			debugShader = ShaderProgram::FromFile("res/shaders/common.vert", "res/shaders/Debug.frag");

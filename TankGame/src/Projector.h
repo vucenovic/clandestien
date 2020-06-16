@@ -1,6 +1,7 @@
 #pragma once
 #include "Interactable.h"
 #include "GameLogic.h"
+#include "ResourceManager.h"
 
 class GameLogic;
 
