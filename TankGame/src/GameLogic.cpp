@@ -149,7 +149,7 @@ void GameLogic::updateGargoyleRiddleLogic()
 	auto debugD = glm::distance2(glm::vec3(gargoyleRigidbody->getGlobalPose().p[0], gargoyleRigidbody->getGlobalPose().p[1], gargoyleRigidbody->getGlobalPose().p[2]), glm::vec3(2.5, 0.0, 0.0));
 	auto gargoylePosDebug = glm::vec3(gargoyleRigidbody->getGlobalPose().p[0], gargoyleRigidbody->getGlobalPose().p[1], gargoyleRigidbody->getGlobalPose().p[2]);
 	if (scene.getLightManager().shadowLightUsed) {
-		if (glm::distance2(glm::vec3(gargoyleRigidbody->getGlobalPose().p[0], gargoyleRigidbody->getGlobalPose().p[1], gargoyleRigidbody->getGlobalPose().p[2]), glm::vec3(-1.3, 0.5, 0.0)) < 0.5) {
+		if (glm::distance2(glm::vec3(gargoyleRigidbody->getGlobalPose().p[0], gargoyleRigidbody->getGlobalPose().p[1], gargoyleRigidbody->getGlobalPose().p[2]), glm::vec3(-1.3, 0.5, 0.0)) < 0.25) {
 			scene.RemoveObject("PortalWallCaps");
 			ourPxScene->removeActor(*portalCap);
 			checkGarg = false;
