@@ -221,11 +221,16 @@ int main(int argc, char** argv)
 		{
 			myLightManager.ambientLight = glm::vec3(1, 1, 1);
 
-			myLightManager.pointLights.push_back(PointLight(glm::vec3(), glm::vec3(1, 1, 1), glm::vec4(1, 0.4f, 0.1f, 100)));
+			/*myLightManager.pointLights.push_back(PointLight(glm::vec3(), glm::vec3(1, 1, 1), glm::vec4(1, 0.4f, 0.1f, 100)));
 			myLightManager.pointLights.push_back(PointLight(glm::vec3(2.2f, 1, 0), glm::vec3(50, 0, 0), glm::vec4(1, 1, 1, 100)));
 			myLightManager.pointLights.push_back(PointLight(glm::vec3(-5, 1, 0), glm::vec3(1, 1, 1), glm::vec4(1, 0.4f, 0.3f, 100)));
 			myLightManager.pointLights.push_back(PointLight(glm::vec3(5, 1, 0), glm::vec3(1, 1, 1), glm::vec4(1, 0.4f, 0.3f, 100)));
+			*/
 
+			myLightManager.pointLights.push_back(PointLight(glm::vec3(2.5f, 4.879f, -4.039f), glm::vec3(5.0f, 2.85f, 0.12f)));
+			myLightManager.pointLights.push_back(PointLight(glm::vec3(0, 4.879f, -4.039f), glm::vec3(5.0f, 2.85f, 0.12f)));
+			myLightManager.pointLights.push_back(PointLight(glm::vec3(-2.5f, 4.879f, -4.039f), glm::vec3(5.0f, 2.85f, 0.12f)));
+			
 			myLightManager.directionalLights.push_back(DirectionalLight(glm::vec3(0, -1, 0), glm::vec3(0.25f, 0.25f, 0.25f)));
 			//myLightManager.directionalLights.push_back(DirectionalLight(glm::vec3(0, -1, 1), glm::vec3(0.1f, 0.1f, 0.1f)));
 
